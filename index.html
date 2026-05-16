@@ -5987,6 +5987,24 @@ function closeMobileSidebar(){
     document.getElementById('gist-settings-modal')?.remove();
     const loaded=await pull();
     if(loaded){
+      // Apply data directly to app without reload
+      try{
+        const raw=localStorage.getItem(DATA_KEY);
+        if(raw&&window.data){
+          const fresh=JSON.parse(raw);
+          Object.assign(window.data,fresh);
+          if(typeof window.render==='function')window.render();
+          if(typeof window.save==='function'){
+            // save without re-pushing to Gist
+            const orig=window.save;
+            window.save=function(){try{localStorage.setItem(DATA_KEY,JSON.stringify(window.data));}catch(e){}if(typeof window.render==='function')window.render();};
+            window.save();
+            window.save=orig;
+          }
+          setStatus('ok','✓ '+fresh.tasks.length+' tasks loaded');
+          return;
+        }
+      }catch(e){}
       location.reload();
     }
   }
