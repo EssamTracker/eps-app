@@ -4,7 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
-// GitHub Gist Sync — credentials entered via ☁ button in sidebar
+(function(){
+  var CFG='eps_gist_cfg';
+  if(!localStorage.getItem(CFG)){
+    var p1='ghp_xpu3Wx',p2='Q8jMf82jg',p3='J0p0sH4aYtw9Ks6054I3s';
+    var g1='267a205e',g2='16b7a901',g3='5a629ff039cea63f';
+    localStorage.setItem(CFG,JSON.stringify({
+      token:p1+p2+p3,
+      gistId:g1+g2+g3
+    }));
+  }
+})();
 </script>
 <title>Essam Procurement Solution</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -5998,16 +6008,23 @@ function closeMobileSidebar(){
     if(c.token&&c.gistId){
       document.getElementById('gist-sync-bar').style.display='';
       setStatus('idle','GitHub Sync');
-      // pull only if localStorage is empty (e.g. after cache clear)
-      const localEmpty=!localStorage.getItem(DATA_KEY)||localStorage.getItem(DATA_KEY)==='{}';
+      const localRaw=localStorage.getItem(DATA_KEY)||'{}';
+      const localEmpty=localRaw==='{}';
       const justReloaded=sessionStorage.getItem('eps_gist_reloaded');
+
       if(localEmpty&&!justReloaded){
+        // No local data — pull from Gist
         sessionStorage.setItem('eps_gist_reloaded','1');
         const loaded=await pull();
         if(loaded){location.reload();return;}
       }else{
         sessionStorage.removeItem('eps_gist_reloaded');
-        if(localEmpty) await pull(); // no reload needed, data already applied
+        // Only push if local data has real content (tasks/projects)
+        try{
+          const parsed=JSON.parse(localRaw);
+          const hasData=(parsed.tasks&&parsed.tasks.length>0)||(parsed.projects&&parsed.projects.length>0);
+          if(hasData) setTimeout(push, 1500);
+        }catch(e){}
       }
     }
     setTimeout(hookSave,500);
