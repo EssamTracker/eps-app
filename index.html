@@ -6019,12 +6019,15 @@ function closeMobileSidebar(){
         if(loaded){location.reload();return;}
       }else{
         sessionStorage.removeItem('eps_gist_reloaded');
-        // Only push if local data has real content (tasks/projects)
-        try{
-          const parsed=JSON.parse(localRaw);
-          const hasData=(parsed.tasks&&parsed.tasks.length>0)||(parsed.projects&&parsed.projects.length>0);
-          if(hasData) setTimeout(push, 1500);
-        }catch(e){}
+        // Only push on startup if running locally (not GitHub Pages)
+        const isLocal = location.hostname === 'localhost' || location.protocol === 'file:';
+        if(isLocal){
+          try{
+            const parsed=JSON.parse(localRaw);
+            const hasData=(parsed.tasks&&parsed.tasks.length>0)||(parsed.projects&&parsed.projects.length>0);
+            if(hasData) setTimeout(push, 1500);
+          }catch(e){}
+        }
       }
     }
     setTimeout(hookSave,500);
