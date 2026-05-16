@@ -741,6 +741,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   border-radius:10px;
 }
 
+/* touch-action: manipulation — removes 300ms tap delay on all interactive elements */
+button,a,.nav-item,.filter-btn,.task-card,.contact-card,.lpo-card,.today-task,.icon-btn,.detail-close,.sidebar-overlay{
+  touch-action:manipulation;
+}
+
 /* ===== MOBILE HAMBURGER BUTTON ===== */
 .mobile-menu-btn{
   display:none;
@@ -753,6 +758,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   align-items:center;justify-content:center;
   flex-shrink:0;
   font-size:18px;
+  touch-action:manipulation;
   line-height:1;
 }
 
@@ -5272,7 +5278,7 @@ function closeMobileSidebar(){
     });
   });
 
-  // Wire up the hamburger button with touchstart (no delay, no double-fire)
+  // Wire up the hamburger button — touchstart only, preventDefault stops the ghost click
   var menuBtn=document.querySelector('.mobile-menu-btn');
   if(menuBtn){
     menuBtn.removeAttribute('onclick');
@@ -5281,23 +5287,14 @@ function closeMobileSidebar(){
       e.stopPropagation();
       toggleMobileSidebar();
     },{passive:false});
+    // fallback for desktop mouse click
     menuBtn.addEventListener('click',function(e){
+      var now=Date.now();
+      if(now-_sidebarLastToggle<600)return; // skip if already handled by touchstart
       e.preventDefault();
       e.stopPropagation();
       toggleMobileSidebar();
     });
-  }
-
-  // iOS Safari general fix — exclude the hamburger button to avoid double-fire
-  if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
-    document.body.style.cursor='pointer';
-    document.addEventListener('touchend',function(e){
-      var el=e.target.closest('button,a,[onclick],.nav-item,.filter-btn,.task-card,.contact-card,.lpo-card,.today-task,.icon-btn');
-      if(el && el.onclick && !el.classList.contains('mobile-menu-btn')){
-        e.preventDefault();
-        el.click();
-      }
-    },{passive:false});
   }
 })();
 </script>
