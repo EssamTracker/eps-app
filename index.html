@@ -5249,7 +5249,12 @@ Essam Procurement Solution`);
 
 <script>
 /* ===== MOBILE SIDEBAR TOGGLE ===== */
-function toggleMobileSidebar(){
+var _sidebarLock=false;
+function toggleMobileSidebar(e){
+  if(e){e.preventDefault();e.stopPropagation();}
+  if(_sidebarLock)return;
+  _sidebarLock=true;
+  setTimeout(function(){_sidebarLock=false;},400);
   const sidebar=document.querySelector('.sidebar');
   const overlay=document.getElementById('sidebar-overlay');
   sidebar.classList.toggle('mobile-open');
