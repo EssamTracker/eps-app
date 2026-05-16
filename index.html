@@ -5249,14 +5249,14 @@ Essam Procurement Solution`);
 
 <script>
 /* ===== MOBILE SIDEBAR TOGGLE ===== */
-var _sidebarLock=false;
+var _sidebarLastToggle=0;
 function toggleMobileSidebar(e){
   if(e){e.preventDefault();e.stopPropagation();}
-  if(_sidebarLock)return;
-  _sidebarLock=true;
-  setTimeout(function(){_sidebarLock=false;},400);
-  const sidebar=document.querySelector('.sidebar');
-  const overlay=document.getElementById('sidebar-overlay');
+  var now=Date.now();
+  if(now-_sidebarLastToggle<500)return;
+  _sidebarLastToggle=now;
+  var sidebar=document.querySelector('.sidebar');
+  var overlay=document.getElementById('sidebar-overlay');
   sidebar.classList.toggle('mobile-open');
   overlay.classList.toggle('show');
 }
@@ -5264,27 +5264,36 @@ function closeMobileSidebar(){
   document.querySelector('.sidebar').classList.remove('mobile-open');
   document.getElementById('sidebar-overlay').classList.remove('show');
 }
-// Close sidebar when a nav item is clicked on mobile
 (function(){
+  // Close sidebar when a nav item is tapped on mobile
   document.querySelectorAll('.nav-item').forEach(function(btn){
     btn.addEventListener('click',function(){
       if(window.innerWidth<=768) closeMobileSidebar();
     });
   });
-  const nav=document.querySelector('.nav');
-  if(nav){
-    nav.addEventListener('click',function(e){
-      if(window.innerWidth<=768 && e.target.closest('.nav-item')) closeMobileSidebar();
+
+  // Wire up the hamburger button with touchstart (no delay, no double-fire)
+  var menuBtn=document.querySelector('.mobile-menu-btn');
+  if(menuBtn){
+    menuBtn.removeAttribute('onclick');
+    menuBtn.addEventListener('touchstart',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      toggleMobileSidebar();
+    },{passive:false});
+    menuBtn.addEventListener('click',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      toggleMobileSidebar();
     });
   }
 
-  // Fix iOS Safari: buttons inside overflow:hidden containers need this
-  if(/iPhone|iPad|iPod/.test(navigator.userAgent)){
+  // iOS Safari general fix — exclude the hamburger button to avoid double-fire
+  if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
     document.body.style.cursor='pointer';
-    // Force click on elements that might not respond on iOS
     document.addEventListener('touchend',function(e){
-      const el=e.target.closest('button,a,[onclick],.nav-item,.filter-btn,.task-card,.contact-card,.lpo-card,.today-task,.icon-btn');
-      if(el && el.onclick){
+      var el=e.target.closest('button,a,[onclick],.nav-item,.filter-btn,.task-card,.contact-card,.lpo-card,.today-task,.icon-btn');
+      if(el && el.onclick && !el.classList.contains('mobile-menu-btn')){
         e.preventDefault();
         el.click();
       }
