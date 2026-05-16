@@ -6039,27 +6039,29 @@ function closeMobileSidebar(){
     const c=cfg();
     if(c.token&&c.gistId){
       document.getElementById('gist-sync-bar').style.display='';
-      setStatus('idle','GitHub Sync');
-      const localRaw=localStorage.getItem(DATA_KEY)||'{}';
-      const localEmpty=localRaw==='{}';
+      setStatus('syncing','جاري التزامن…');
       const justReloaded=sessionStorage.getItem('eps_gist_reloaded');
-
-      if(localEmpty&&!justReloaded){
-        // No local data — pull from Gist
+      if(!justReloaded){
+        // Always pull from Gist on startup to get the latest data
         sessionStorage.setItem('eps_gist_reloaded','1');
         const loaded=await pull();
-        if(loaded){location.reload();return;}
+        if(loaded){
+          try{
+            const raw=localStorage.getItem(DATA_KEY);
+            if(raw&&window.data){
+              const fresh=JSON.parse(raw);
+              Object.assign(window.data,fresh);
+              if(typeof window.render==='function')window.render();
+              setStatus('ok','✓ متزامن');
+              setTimeout(()=>setStatus('idle','GitHub Sync'),3000);
+            }else{location.reload();return;}
+          }catch(e){location.reload();return;}
+        }else{
+          setStatus('idle','GitHub Sync');
+        }
       }else{
         sessionStorage.removeItem('eps_gist_reloaded');
-        // Only push on startup if running locally (not GitHub Pages)
-        const isLocal = location.hostname === 'localhost' || location.protocol === 'file:';
-        if(isLocal){
-          try{
-            const parsed=JSON.parse(localRaw);
-            const hasData=(parsed.tasks&&parsed.tasks.length>0)||(parsed.projects&&parsed.projects.length>0);
-            if(hasData) setTimeout(push, 1500);
-          }catch(e){}
-        }
+        setStatus('idle','GitHub Sync');
       }
     }
     setTimeout(hookSave,500);
