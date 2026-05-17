@@ -5418,10 +5418,16 @@ function renderFreeBoard(){
   if(!canvas||_taskView!=='board')return;
   var meta=fbMeta();
   var list=typeof getFiltered==='function'?getFiltered():data.tasks.slice();
-  // auto-place cards that have no position yet
+  // auto-place cards that have no position yet — fit within container width
+  var boardW=canvas.parentElement?canvas.parentElement.clientWidth:800;
+  var cardW=210,cardH=155,gap=12,padX=12,padY=12;
+  var cols=Math.max(1,Math.floor((boardW-padX*2+gap)/(cardW+gap)));
   var col=0,row=0;
   list.forEach(function(t){
-    if(!meta[t.id]){meta[t.id]={x:30+col*220,y:30+row*160,color:'none'};col++;if(col>9){col=0;row++;}}
+    if(!meta[t.id]){
+      meta[t.id]={x:padX+col*(cardW+gap),y:padY+row*(cardH+gap),color:'none'};
+      col++;if(col>=cols){col=0;row++;}
+    }
   });
   canvas.innerHTML=list.map(function(t){
     var m=meta[t.id]||{x:30,y:30,color:'#6c63ff'};
