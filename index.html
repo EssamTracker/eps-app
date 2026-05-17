@@ -2067,18 +2067,17 @@ function setMemberFilter(id,el){memberFilter=id;document.querySelectorAll('.memb
 function filterTasks(){renderTasks();}
 function filterByProject(projectId){
   activeProjectFilter=String(projectId);
-  showView('dashboard',null);
   document.getElementById('search-input').value='';
   document.getElementById('page-title').textContent='Project: '+getActiveProjectName();
-  renderProjects();
-  if(typeof _taskView!=='undefined'){if(_taskView==='kanban')renderKanban();else if(_taskView==='board')renderFreeBoard();}
-  if(typeof _notesView!=='undefined'){if(_notesView==='kanban')renderNotesKanban();else if(_notesView==='grid')renderNotesGrid();}
-  if(typeof _mtgView!=='undefined'){if(_mtgView==='kanban')renderMtgKanban();else if(_mtgView==='grid')renderMtgGrid();}
-  renderTasks();
-  renderNotes();
-  renderMeetings();
-  renderToday();
   const exportBtn=document.getElementById('project-export-btn');if(exportBtn)exportBtn.style.display='inline-flex';
+  renderProjects();
+  renderTasks();
+  if(typeof _taskView!=='undefined'){if(_taskView==='kanban')renderKanban();else if(_taskView==='board')renderFreeBoard();}
+  renderNotes();
+  if(typeof _notesView!=='undefined'){if(_notesView==='kanban')renderNotesKanban();else if(_notesView==='grid')renderNotesGrid();}
+  renderMeetings();
+  if(typeof _mtgView!=='undefined'){if(_mtgView==='kanban')renderMtgKanban();else if(_mtgView==='grid')renderMtgGrid();}
+  renderToday();
 }
 function clearProjectFilter(){
   activeProjectFilter=null;
