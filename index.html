@@ -1143,7 +1143,7 @@ button,a,.nav-item,.filter-btn,.task-card,.contact-card,.lpo-card,.today-task,.i
 
     <!-- NOTES -->
     <div id="view-notes" style="display:none">
-      <div class="section-header"><span class="section-title">My Notes</span><button class="btn btn-primary" onclick="openModal('note-modal')">+ Add Note</button></div>
+      <div class="section-header"><span class="section-title">My Notes</span><button class="btn btn-primary" onclick="openNoteModal()">+ Add Note</button></div>
       <div id="notes-list" class="tasks-grid"></div>
     </div>
 
@@ -1860,16 +1860,46 @@ function saveMember(){
   resetMemberForm();closeModal('member-modal');save();
 }
 function deleteMember(id){data.members=data.members.filter(m=>m.id!==id);data.tasks.forEach(t=>{if(t.assignee===id)t.assignee=null;});save();}
+var _editNoteId=null;
+function openNoteModal(id){
+  _editNoteId=id||null;
+  const modal=document.getElementById('note-modal');
+  modal.querySelector('.modal-title').textContent=id?'Edit Note':'New Note';
+  modal.querySelector('#member-save-btn-note')?null:null;
+  const saveBtn=modal.querySelector('button.btn-primary');
+  if(saveBtn)saveBtn.textContent=id?'Save Changes':'Save Note';
+  if(id){
+    const n=data.notes.find(x=>x.id===id);if(!n)return;
+    document.getElementById('note-title').value=n.title||'';
+    document.getElementById('note-content').value=n.content||'';
+    document.getElementById('note-link').value=n.link||'';
+    const pid=document.getElementById('note-project');if(pid)pid.value=n.projectId||'';
+    const hd=document.getElementById('note-has-due');if(hd){hd.checked=!!n.hasDue;document.getElementById('note-due-wrap').style.display=n.hasDue?'block':'none';}
+    const nd=document.getElementById('note-due');if(nd)nd.value=n.due||'';
+  }else{
+    ['note-title','note-content','note-link','note-due'].forEach(i=>{const e=document.getElementById(i);if(e)e.value='';});
+    const hd=document.getElementById('note-has-due');if(hd)hd.checked=false;
+    const dw=document.getElementById('note-due-wrap');if(dw)dw.style.display='none';
+  }
+  openModal('note-modal');
+}
+function linkify(text){
+  if(!text)return '';
+  const escaped=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return escaped.replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:underline;word-break:break-all">$1</a>');
+}
 function saveNote(){
   const title=document.getElementById('note-title').value.trim();if(!title)return;
   const pid=document.getElementById('note-project')?.value||'';
   const p=data.projects.find(x=>String(x.id)===String(pid));
   const hasDue=!!document.getElementById('note-has-due')?.checked;
-  data.notes.unshift({id:Date.now(),title,content:document.getElementById('note-content').value,link:document.getElementById('note-link').value,projectId:pid,project:p?p.name:'',hasDue:hasDue,due:hasDue?(document.getElementById('note-due')?.value||''):'',created:new Date().toISOString()});
-  ['note-title','note-content','note-link','note-due'].forEach(i=>{const e=document.getElementById(i);if(e)e.value='';});
-  const np=document.getElementById('note-project');if(np)np.value='';
-  const hd=document.getElementById('note-has-due');if(hd)hd.checked=false;
-  const dw=document.getElementById('note-due-wrap');if(dw)dw.style.display='none';
+  if(_editNoteId){
+    const n=data.notes.find(x=>x.id===_editNoteId);
+    if(n){n.title=title;n.content=document.getElementById('note-content').value;n.link=document.getElementById('note-link').value;n.projectId=pid;n.project=p?p.name:'';n.hasDue=hasDue;n.due=hasDue?(document.getElementById('note-due')?.value||''):'';n.updated=new Date().toISOString();}
+  }else{
+    data.notes.unshift({id:Date.now(),title,content:document.getElementById('note-content').value,link:document.getElementById('note-link').value,projectId:pid,project:p?p.name:'',hasDue:hasDue,due:hasDue?(document.getElementById('note-due')?.value||''):'',created:new Date().toISOString()});
+  }
+  _editNoteId=null;
   closeModal('note-modal');save();
 }
 function deleteNote(id){data.notes=data.notes.filter(n=>n.id!==id);save();}
@@ -2162,7 +2192,7 @@ function renderNotes(){
     list=list.filter(n=>itemMatchesActiveProject(n));
   }
   if(!list.length){el.innerHTML='<div class="empty-state">No notes yet.</div>';if(prev)prev.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:10px">No notes yet</div>';return;}
-  el.innerHTML=list.map(n=>`<div class="task-card" style="cursor:default"><div class="task-body"><div class="task-title">${n.title}</div><div class="task-meta">${itemProjectName(n)?`<span class="tag tag-project">📁 ${itemProjectName(n)}</span>`:''}${n.hasDue&&n.due?`<span class="task-due due-soon">🕒 ${new Date(n.due).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>`:''}</div>${n.content?`<div style="font-size:12px;color:var(--text2);margin-top:4px;line-height:1.5">${n.content}</div>`:''}</div><div class="task-actions" style="opacity:1">${n.link?`<a href="${n.link}" target="_blank" class="icon-btn" style="text-decoration:none;color:var(--blue)">↗</a>`:''}<button class="icon-btn" onclick="deleteNote(${n.id})">✕</button></div></div>`).join('');
+  el.innerHTML=list.map(n=>`<div class="task-card" style="cursor:default"><div class="task-body"><div class="task-title">${n.title}</div><div class="task-meta">${itemProjectName(n)?`<span class="tag tag-project">📁 ${itemProjectName(n)}</span>`:''}${n.hasDue&&n.due?`<span class="task-due due-soon">🕒 ${new Date(n.due).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>`:''}</div>${n.content?`<div style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.6;white-space:pre-wrap">${linkify(n.content)}</div>`:''} ${n.link?`<div style="margin-top:6px"><a href="${n.link}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent2);text-decoration:underline;word-break:break-all">${n.link}</a></div>`:''}</div><div class="task-actions" style="opacity:1"><button class="icon-btn" title="Edit" onclick="openNoteModal(${n.id})">✏️</button><button class="icon-btn" onclick="deleteNote(${n.id})">✕</button></div></div>`).join('');
   if(prev)prev.innerHTML=list.slice(0,3).map(n=>`<div class="note-item"><div class="note-title">${n.title}</div>${n.content?`<div class="note-preview">${n.content.substring(0,55)}${n.content.length>55?'...':''}</div>`:''}</div>`).join('');
 }
 function renderMeetings(){
