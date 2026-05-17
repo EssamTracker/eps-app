@@ -2233,6 +2233,21 @@ function renderTasks(){
 var _dnd={active:false,id:null,overId:null,overTop:true};
 
 function dndMoveTask(fromId,toId,insertBefore){
+  // Snapshot positions before re-render (FLIP technique)
+  var container=_taskView==='kanban'?document.getElementById('kanban-board')
+    :_taskView==='board'?document.getElementById('free-board-canvas')
+    :document.getElementById('tasks-list');
+  var snap={};
+  if(container){
+    var sel=_taskView==='kanban'?'.kb-card[data-id]'
+      :_taskView==='board'?'.fb-card[data-id]'
+      :'.task-card[data-task-id]';
+    Array.from(container.querySelectorAll(sel)).forEach(function(el){
+      var key=el.dataset.taskId||el.dataset.id;
+      snap[key]=el.getBoundingClientRect();
+    });
+  }
+
   var fi=data.tasks.findIndex(function(t){return t.id===fromId;});
   if(fi===-1)return;
   var task=data.tasks.splice(fi,1)[0];
@@ -2240,9 +2255,38 @@ function dndMoveTask(fromId,toId,insertBefore){
   if(ti===-1)data.tasks.push(task);
   else data.tasks.splice(insertBefore?ti:ti+1,0,task);
   save();
+
   if(_taskView==='kanban')renderKanban();
   else if(_taskView==='board')renderFreeBoard();
   else renderTasks();
+
+  // Play: animate each card from old position to new
+  if(container&&Object.keys(snap).length){
+    var newSel=_taskView==='kanban'?'.kb-card[data-id]'
+      :_taskView==='board'?'.fb-card[data-id]'
+      :'.task-card[data-task-id]';
+    Array.from(container.querySelectorAll(newSel)).forEach(function(el){
+      var key=el.dataset.taskId||el.dataset.id;
+      var old=snap[key];
+      if(!old)return;
+      var now=el.getBoundingClientRect();
+      var dx=old.left-now.left, dy=old.top-now.top;
+      if(Math.abs(dy)<1&&Math.abs(dx)<1)return;
+      el.style.transition='none';
+      el.style.transform='translate('+dx+'px,'+dy+'px)';
+      el.getBoundingClientRect(); // force reflow
+      el.style.transition='transform 0.28s cubic-bezier(0.25,0.46,0.45,0.94)';
+      el.style.transform='';
+      setTimeout(function(){el.style.transition='';el.style.transform='';},300);
+    });
+    // Highlight the dropped card
+    var movedEl=container.querySelector('[data-task-id="'+fromId+'"],[data-id="'+fromId+'"]');
+    if(movedEl){
+      movedEl.style.transition='box-shadow 0.15s';
+      movedEl.style.boxShadow='0 0 0 2px var(--accent)';
+      setTimeout(function(){movedEl.style.boxShadow='';setTimeout(function(){movedEl.style.transition='';},300);},500);
+    }
+  }
 }
 
 function _attachDndToCards(cards,cardSelector,handleSel,onDrop){
