@@ -5398,7 +5398,7 @@ function kbMoveTask(id){
 /* ════════════════════════════════════════
    FREE BOARD VIEW
 ════════════════════════════════════════ */
-var FB_COLORS=['#6c63ff','#e74c8b','#f5a623','#22c88a','#3b82f6','#ef4444','#8b5cf6','#06b6d4','#f59e0b','#64748b'];
+var FB_COLORS=['none','#6c63ff','#e74c8b','#f5a623','#22c88a','#3b82f6','#ef4444','#8b5cf6','#06b6d4','#f59e0b','#64748b'];
 
 function fbMeta(){if(!data.kanbanMeta)data.kanbanMeta={};return data.kanbanMeta;}
 
@@ -5414,17 +5414,21 @@ function renderFreeBoard(){
   });
   canvas.innerHTML=list.map(function(t){
     var m=meta[t.id]||{x:30,y:30,color:'#6c63ff'};
+    var noColor=!m.color||m.color==='none';
+    var cardBg=noColor?'var(--bg2)':m.color;
+    var textColor=noColor?'var(--text)':'#fff';
+    var subColor=noColor?'var(--text3)':'rgba(255,255,255,.8)';
     var assignee=data.members.find(function(mb){return mb.id===t.assignee;});
-    var av=assignee?'<span style="font-size:10px;opacity:.8">👤 '+assignee.name.split(' ')[0]+'</span>':'';
-    var due=t.due?'<span style="font-size:10px;opacity:.8">🕒 '+new Date(t.due).toLocaleDateString([],{month:'short',day:'numeric'})+'</span>':'';
+    var av=assignee?'<span style="font-size:10px;color:'+subColor+'">👤 '+assignee.name.split(' ')[0]+'</span>':'';
+    var due=t.due?'<span style="font-size:10px;color:'+subColor+'">🕒 '+new Date(t.due).toLocaleDateString([],{month:'short',day:'numeric'})+'</span>':'';
     var statusLabel={'not-started':'●','in-progress':'◐','done':'✓'}[t.status||'not-started']||'●';
-    return '<div class="fb-card" id="fbc-'+t.id+'" data-id="'+t.id+'" style="left:'+m.x+'px;top:'+m.y+'px;background:'+m.color+'">'
-      +'<div class="fb-card-title">'+t.desc+'</div>'
+    return '<div class="fb-card" id="fbc-'+t.id+'" data-id="'+t.id+'" style="left:'+m.x+'px;top:'+m.y+'px;background:'+cardBg+';border:1px solid '+(noColor?'var(--border)':'transparent')+'">'
+      +'<div class="fb-card-title" style="color:'+textColor+'">'+t.desc+'</div>'
       +'<div class="fb-card-meta">'+av+due+'</div>'
       +'<div class="fb-card-actions">'
-      +'<span style="font-size:11px;opacity:.8;flex:1">'+statusLabel+' '+({'not-started':'Todo','in-progress':'Doing','done':'Done'}[t.status||'not-started'])+'</span>'
-      +'<button class="fb-btn" onclick="event.stopPropagation();fbOpenDetail('+t.id+')" title="Open">↗</button>'
-      +'<div class="fb-color-dot" style="background:'+m.color+'" onclick="event.stopPropagation();fbColorPicker('+t.id+',this)" title="Color"></div>'
+      +'<span style="font-size:11px;color:'+subColor+';flex:1">'+statusLabel+' '+({'not-started':'Todo','in-progress':'Doing','done':'Done'}[t.status||'not-started'])+'</span>'
+      +'<button class="fb-btn" style="background:'+(noColor?'var(--bg4)':'rgba(0,0,0,.25)')+';color:'+(noColor?'var(--text)':'#fff')+'" onclick="event.stopPropagation();fbOpenDetail('+t.id+')" title="Open">↗</button>'
+      +'<div class="fb-color-dot" style="background:'+(noColor?'var(--bg4)':m.color)+';border-color:'+(noColor?'var(--border)':'rgba(255,255,255,.6)')+'" onclick="event.stopPropagation();fbColorPicker('+t.id+',this)" title="Color"></div>'
       +'</div>'
       +'</div>';
   }).join('');
@@ -5442,7 +5446,9 @@ function fbColorPicker(id,dotEl){
   picker.className='fb-color-picker';
   FB_COLORS.forEach(function(c){
     var swatch=document.createElement('div');
-    swatch.style.cssText='width:22px;height:22px;border-radius:50%;background:'+c+';cursor:pointer;border:2px solid rgba(255,255,255,.3)';
+    var isNone=c==='none';
+    swatch.style.cssText='width:22px;height:22px;border-radius:50%;background:'+(isNone?'var(--bg2)':c)+';cursor:pointer;border:2px solid '+(isNone?'var(--border)':'rgba(255,255,255,.3)')+';display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3)';
+    if(isNone)swatch.textContent='✕';
     swatch.onclick=function(e){
       e.stopPropagation();
       fbMeta()[id]=fbMeta()[id]||{};
