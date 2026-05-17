@@ -108,7 +108,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .task-check.done{background:var(--green);border-color:var(--green)}
 .task-check.done::after{content:'✓';font-size:10px;color:#fff;font-weight:700}
 .task-body{flex:1;min-width:0}
-.drag-handle{cursor:grab;color:var(--text3);font-size:20px;width:32px;min-height:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0;user-select:none;touch-action:none;opacity:0.45;border-right:1px solid var(--border);margin-right:6px;margin-left:-4px;border-radius:var(--radius) 0 0 var(--radius)}
+.drag-handle{cursor:grab;color:var(--text3);font-size:20px;width:32px;min-height:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-touch-callout:none;opacity:0.45;border-right:1px solid var(--border);margin-right:6px;margin-left:-4px;border-radius:var(--radius) 0 0 var(--radius)}
 .task-card:hover .drag-handle{opacity:1;background:var(--bg3)}
 .task-card.dnd-dragging{opacity:0.35}
 .task-card.dnd-dragging .drag-handle{cursor:grabbing}
@@ -118,7 +118,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .kb-order-btn{background:none;border:1px solid var(--border);border-radius:4px;color:var(--text3);font-size:12px;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
 .kb-order-btn:hover{color:var(--text);border-color:var(--text3)}
 .fb-card[data-dnd-over]{outline:2px solid var(--accent)!important;outline-offset:2px}
-.fb-drag-handle{cursor:grab;font-size:16px;line-height:1;padding:0 4px;user-select:none;touch-action:none;opacity:0.6}
+.fb-drag-handle{cursor:grab;font-size:16px;line-height:1;padding:0 6px;min-height:36px;display:flex;align-items:center;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-touch-callout:none;opacity:0.6}
 .task-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:5px}
 .task-title.done{text-decoration:line-through;color:var(--text3)}
 .task-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -2135,7 +2135,7 @@ function taskCard(t){
   const last=t.comments&&t.comments.length?t.comments[t.comments.length-1]:null;
   let cls='task-card';if(isT)cls+=' is-today';else if(ds==='overdue'&&t.status!=='done')cls+=' overdue-card';else if(ds==='soon'&&t.status!=='done')cls+=' due-soon';
   return`<div class="${cls}" data-task-id="${t.id}" onclick="openDetail(${t.id})" ondblclick="event.stopPropagation();openTaskModal(${t.id})">
-    ${currentSort==='manual'?`<div class="drag-handle" title="Drag to reorder">⠿</div>`:''}
+    ${currentSort==='manual'?`<div class="drag-handle" title="Drag to reorder" oncontextmenu="return false">⠿</div>`:''}
     <div class="task-check${t.status==='done'?' done':''}" onclick="toggleTask(${t.id},event)"></div>
     <div class="task-body">
       <div class="task-title${t.status==='done'?' done':''}">${t.desc}</div>
@@ -2283,6 +2283,7 @@ function _attachDndToCards(cards,cardSelector,handleSel){
     });
 
     /* ── Mobile touch: starts from handle, immediate (no delay) ── */
+    dragEl.addEventListener('contextmenu',function(e){e.preventDefault();});
     dragEl.addEventListener('touchstart',function(e){
       e.preventDefault();  // handle has touch-action:none so this works immediately
       _dnd.id=id;_dnd.active=true;
@@ -5638,7 +5639,7 @@ function renderFreeBoard(){
     var statusDotColors={'not-started':'var(--text3)','in-progress':'var(--accent2)','done':'var(--green)'};
     var statusDotColor=noColor?(statusDotColors[t.status||'not-started']||'var(--text3)'):'rgba(255,255,255,.9)';
     var statusLabel={'not-started':'●','in-progress':'◐','done':'✓'}[t.status||'not-started']||'●';
-    var handleHtml=currentSort==='manual'?'<span class="fb-drag-handle visible" style="color:'+(noColor?'var(--text3)':'rgba(255,255,255,.5)')+'">⠿</span>':'';
+    var handleHtml=currentSort==='manual'?'<span class="fb-drag-handle" oncontextmenu="return false" style="color:'+(noColor?'var(--text3)':'rgba(255,255,255,.5)')+'">⠿</span>':'';
     return '<div class="fb-card" id="fbc-'+t.id+'" data-id="'+t.id+'" style="background:'+cardBg+';border:1px solid '+(noColor?'var(--border)':'transparent')+'">'
       +'<div class="fb-card-title" style="color:'+textColor+'">'+t.desc+'</div>'
       +'<div class="fb-card-meta">'+av+due+'</div>'
