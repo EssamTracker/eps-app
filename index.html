@@ -108,7 +108,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .task-check.done{background:var(--green);border-color:var(--green)}
 .task-check.done::after{content:'✓';font-size:10px;color:#fff;font-weight:700}
 .task-body{flex:1;min-width:0}
-.drag-handle{cursor:grab;color:var(--text2);font-size:22px;width:30px;min-height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-touch-callout:none;border-right:1px solid var(--border);margin-right:4px}
+.drag-handle{cursor:grab;color:var(--accent);font-size:22px;width:34px;min-height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-touch-callout:none;border-right:1px solid var(--border);margin-right:6px;opacity:0.7}
 .task-card.dnd-dragging{opacity:0.35}
 .task-card.dnd-dragging .drag-handle{cursor:grabbing}
 .task-card[data-dnd-over="top"]{box-shadow:0 -2px 0 0 var(--accent)!important}
@@ -5441,7 +5441,9 @@ setTimeout(() => { injectTodayHeader(); }, 300);
     const last=(t.comments||[]).length?t.comments[t.comments.length-1]:null;
     let cls='task-card';if(isT)cls+=' is-today';else if(ds==='overdue'&&t.status!=='done')cls+=' overdue-card';else if(ds==='soon'&&t.status!=='done')cls+=' due-soon';
     const pn=taskProjectName(t);
-    return`<div class="${cls}" onclick="openDetail(${Number(t.id)})">
+    const manualMode=typeof currentSort!=='undefined'&&currentSort==='manual';
+    return`<div class="${cls}" data-task-id="${Number(t.id)}" onclick="openDetail(${Number(t.id)})" ondblclick="event.stopPropagation();openTaskModal(${Number(t.id)})" ${manualMode?'style="padding-left:0"':''}>
+      ${manualMode?`<div class="drag-handle" oncontextmenu="return false">⠿</div>`:''}
       <div class="task-check${t.status==='done'?' done':''}" onclick="toggleTask(${Number(t.id)},event)"></div>
       <div class="task-body">
         <div class="task-title${t.status==='done'?' done':''}">${H(t.desc)}</div>
