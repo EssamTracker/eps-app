@@ -108,9 +108,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .task-check.done{background:var(--green);border-color:var(--green)}
 .task-check.done::after{content:'✓';font-size:10px;color:#fff;font-weight:700}
 .task-body{flex:1;min-width:0}
-.drag-handle{cursor:grab;color:var(--text3);font-size:20px;line-height:1;display:flex;align-items:center;padding-right:4px;flex-shrink:0;user-select:none;touch-action:none;opacity:0;transition:opacity 0.15s}
-.task-card:hover .drag-handle,.task-card.dnd-dragging .drag-handle{opacity:1}
+.drag-handle{cursor:grab;color:var(--text3);font-size:20px;line-height:1;display:flex;align-items:center;padding-right:4px;flex-shrink:0;user-select:none;touch-action:none;opacity:0.3;transition:opacity 0.15s}
+.task-card:hover .drag-handle{opacity:0.7}
 .task-card.dnd-dragging{opacity:0.35}
+.task-card.dnd-holding{transform:scale(1.01);box-shadow:0 0 0 2px var(--accent);border-color:var(--accent)!important;transition:all 0.15s}
 .task-card[data-dnd-over="top"]{box-shadow:0 -2px 0 0 var(--accent)!important}
 .task-card[data-dnd-over="bot"]{box-shadow:0 2px 0 0 var(--accent)!important}
 .kb-order-btns{display:flex;gap:3px;justify-content:flex-end;margin-top:6px}
@@ -2242,99 +2243,96 @@ function dndMoveTask(fromId,toId,insertBefore){
   else renderTasks();
 }
 
-function attachListDrag(){
-  var list=document.getElementById('tasks-list');
-  if(!list)return;
-  var cards=Array.from(list.querySelectorAll('.task-card[data-task-id]'));
+function _attachDndToCards(cards,cardSelector){
+  function clearInd(){cards.forEach(function(c){c.removeAttribute('data-dnd-over');});}
+  function finish(card){
+    card.classList.remove('dnd-dragging','dnd-holding');
+    clearInd();
+    if(_dnd.active&&_dnd.id&&_dnd.overId&&_dnd.id!==_dnd.overId)
+      dndMoveTask(_dnd.id,_dnd.overId,_dnd.overTop);
+    _dnd.active=false;_dnd.id=null;_dnd.overId=null;
+  }
+  function setOver(card,id,clientY){
+    var r=card.getBoundingClientRect(),top=clientY<r.top+r.height/2;
+    _dnd.overId=id;_dnd.overTop=top;
+    clearInd();
+    card.setAttribute('data-dnd-over',top?'top':'bot');
+  }
   cards.forEach(function(card){
-    var id=parseInt(card.dataset.taskId);
-    var handle=card.querySelector('.drag-handle');
-    if(!handle)return;
-    function startDrag(){_dnd.id=id;_dnd.active=true;card.classList.add('dnd-dragging');}
-    function endDrag(){
-      card.classList.remove('dnd-dragging');
-      card.draggable=false;
-      cards.forEach(function(c){c.removeAttribute('data-dnd-over');});
-      if(_dnd.active&&_dnd.id&&_dnd.overId&&_dnd.id!==_dnd.overId)
-        dndMoveTask(_dnd.id,_dnd.overId,_dnd.overTop);
-      _dnd.active=false;_dnd.id=null;_dnd.overId=null;
-    }
-    handle.addEventListener('mousedown',function(){card.draggable=true;});
-    card.addEventListener('dragstart',function(e){startDrag();e.dataTransfer.effectAllowed='move';});
-    card.addEventListener('dragend',endDrag);
+    var idAttr=card.dataset.taskId||card.dataset.id;
+    var id=parseInt(idAttr);
+    var lpTimer=null,touching=false,sx=0,sy=0;
+
+    /* ── Desktop: whole card draggable ── */
+    card.draggable=true;
+    card.addEventListener('dragstart',function(e){
+      _dnd.id=id;_dnd.active=true;
+      setTimeout(function(){card.classList.add('dnd-dragging');},0);
+      e.dataTransfer.effectAllowed='move';
+    });
+    card.addEventListener('dragend',function(){finish(card);});
     card.addEventListener('dragover',function(e){
       e.preventDefault();
       if(!_dnd.active||_dnd.id===id)return;
-      var r=card.getBoundingClientRect(),top=e.clientY<r.top+r.height/2;
-      _dnd.overId=id;_dnd.overTop=top;
-      cards.forEach(function(c){c.removeAttribute('data-dnd-over');});
-      card.setAttribute('data-dnd-over',top?'top':'bot');
+      setOver(card,id,e.clientY);
     });
     card.addEventListener('dragleave',function(e){
       if(!card.contains(e.relatedTarget))card.removeAttribute('data-dnd-over');
     });
-    handle.addEventListener('touchstart',function(e){e.preventDefault();startDrag();},{passive:false});
-    handle.addEventListener('touchmove',function(e){
+
+    /* ── Mobile: hold anywhere to drag ── */
+    card.addEventListener('touchstart',function(e){
+      sx=e.touches[0].clientX;sy=e.touches[0].clientY;
+      touching=false;
+      lpTimer=setTimeout(function(){
+        touching=true;
+        _dnd.id=id;_dnd.active=true;
+        card.classList.add('dnd-holding');
+        if(navigator.vibrate)navigator.vibrate(40);
+      },380);
+    },{passive:true});
+
+    card.addEventListener('touchmove',function(e){
+      if(!touching){
+        if(Math.abs(e.touches[0].clientX-sx)>8||Math.abs(e.touches[0].clientY-sy)>8){
+          clearTimeout(lpTimer);lpTimer=null;
+        }
+        return;
+      }
       e.preventDefault();
+      card.classList.replace('dnd-holding','dnd-dragging');
       var t=e.touches[0];
       var el=document.elementFromPoint(t.clientX,t.clientY);
-      var target=el?el.closest('.task-card[data-task-id]'):null;
-      cards.forEach(function(c){c.removeAttribute('data-dnd-over');});
-      if(target&&target!==card){
-        var tid=parseInt(target.dataset.taskId);
-        var r=target.getBoundingClientRect(),top=t.clientY<r.top+r.height/2;
-        _dnd.overId=tid;_dnd.overTop=top;
-        target.setAttribute('data-dnd-over',top?'top':'bot');
-      }
+      var target=el?el.closest(cardSelector):null;
+      clearInd();
+      if(target&&target!==card)setOver(target,parseInt(target.dataset.taskId||target.dataset.id),t.clientY);
     },{passive:false});
-    handle.addEventListener('touchend',endDrag);
+
+    card.addEventListener('touchend',function(e){
+      clearTimeout(lpTimer);
+      if(touching){e.preventDefault();finish(card);}
+      else{card.classList.remove('dnd-holding','dnd-dragging');}
+      touching=false;
+    },{passive:false});
+
+    card.addEventListener('touchcancel',function(){
+      clearTimeout(lpTimer);touching=false;
+      card.classList.remove('dnd-holding','dnd-dragging');
+      clearInd();_dnd.active=false;_dnd.id=null;_dnd.overId=null;
+    });
   });
+}
+
+function attachListDrag(){
+  var list=document.getElementById('tasks-list');
+  if(!list)return;
+  _attachDndToCards(Array.from(list.querySelectorAll('.task-card[data-task-id]')),'.task-card[data-task-id]');
 }
 
 function attachBoardDrag(){
   var canvas=document.getElementById('free-board-canvas');
   if(!canvas)return;
-  var cards=Array.from(canvas.querySelectorAll('.fb-card[data-id]'));
-  cards.forEach(function(card){
-    var id=parseInt(card.dataset.id);
-    var handle=card.querySelector('.fb-drag-handle');
-    if(!handle)return;
-    function startDrag(){_dnd.id=id;_dnd.active=true;card.classList.add('dnd-dragging');}
-    function endDrag(){
-      card.classList.remove('dnd-dragging');
-      card.draggable=false;
-      cards.forEach(function(c){c.removeAttribute('data-dnd-over');});
-      if(_dnd.active&&_dnd.id&&_dnd.overId&&_dnd.id!==_dnd.overId)
-        dndMoveTask(_dnd.id,_dnd.overId,_dnd.overTop);
-      _dnd.active=false;_dnd.id=null;_dnd.overId=null;
-    }
-    handle.addEventListener('mousedown',function(){card.draggable=true;});
-    card.addEventListener('dragstart',function(e){startDrag();e.dataTransfer.effectAllowed='move';});
-    card.addEventListener('dragend',endDrag);
-    card.addEventListener('dragover',function(e){
-      e.preventDefault();
-      if(!_dnd.active||_dnd.id===id)return;
-      var r=card.getBoundingClientRect(),top=e.clientY<r.top+r.height/2;
-      _dnd.overId=id;_dnd.overTop=top;
-      cards.forEach(function(c){c.removeAttribute('data-dnd-over');});
-      card.setAttribute('data-dnd-over','on');
-    });
-    handle.addEventListener('touchstart',function(e){e.preventDefault();startDrag();},{passive:false});
-    handle.addEventListener('touchmove',function(e){
-      e.preventDefault();
-      var t=e.touches[0];
-      var el=document.elementFromPoint(t.clientX,t.clientY);
-      var target=el?el.closest('.fb-card[data-id]'):null;
-      cards.forEach(function(c){c.removeAttribute('data-dnd-over');});
-      if(target&&target!==card){
-        var tid=parseInt(target.dataset.id);
-        var r=target.getBoundingClientRect(),top=t.clientY<r.top+r.height/2;
-        _dnd.overId=tid;_dnd.overTop=top;
-        target.setAttribute('data-dnd-over','on');
-      }
-    },{passive:false});
-    handle.addEventListener('touchend',endDrag);
-  });
+  _attachDndToCards(Array.from(canvas.querySelectorAll('.fb-card[data-id]')),'.fb-card[data-id]');
 }
 function renderTeam(){
   document.getElementById('team-badge').textContent=data.members.length;
