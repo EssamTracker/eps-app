@@ -2035,7 +2035,9 @@ function setFilter(type,val,el){
   if(type==='status'){filters.status=val;document.querySelectorAll('#status-filters .filter-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
   else if(type==='priority'){if(filters.priority===val){filters.priority=null;el.classList.remove('active');}else{filters.priority=val;document.querySelectorAll('#priority-filters .filter-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');}}
   else if(type==='assignee'){if(filters.assignee===val){filters.assignee=null;el.classList.remove('active');}else{filters.assignee=val;document.querySelectorAll('#assignee-filters-main .filter-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');}}
-  renderTasks();
+  if(typeof _taskView!=='undefined'&&_taskView==='kanban')renderKanban();
+  else if(typeof _taskView!=='undefined'&&_taskView==='board')renderFreeBoard();
+  else renderTasks();
 }
 function setMemberFilter(id,el){memberFilter=id;document.querySelectorAll('.member-filter-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderTeamTasks();}
 function filterTasks(){renderTasks();}
