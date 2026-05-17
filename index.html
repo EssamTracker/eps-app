@@ -5483,14 +5483,16 @@ function renderFreeBoard(){
     var assignee=data.members.find(function(mb){return mb.id===t.assignee;});
     var av=assignee?'<span style="font-size:10px;color:'+subColor+'">👤 '+assignee.name.split(' ')[0]+'</span>':'';
     var due=t.due?'<span style="font-size:10px;color:'+subColor+'">🕒 '+new Date(t.due).toLocaleDateString([],{month:'short',day:'numeric'})+'</span>':'';
+    var statusDotColors={'not-started':'var(--text3)','in-progress':'var(--accent2)','done':'var(--green)'};
+    var statusDotColor=noColor?(statusDotColors[t.status||'not-started']||'var(--text3)'):'rgba(255,255,255,.9)';
     var statusLabel={'not-started':'●','in-progress':'◐','done':'✓'}[t.status||'not-started']||'●';
     return '<div class="fb-card" id="fbc-'+t.id+'" data-id="'+t.id+'" style="background:'+cardBg+';border:1px solid '+(noColor?'var(--border)':'transparent')+'">'
       +'<div class="fb-card-title" style="color:'+textColor+'">'+t.desc+'</div>'
       +'<div class="fb-card-meta">'+av+due+'</div>'
       +'<div class="fb-card-actions">'
-      +'<span style="font-size:11px;color:'+subColor+';flex:1">'+statusLabel+' '+({'not-started':'Todo','in-progress':'Doing','done':'Done'}[t.status||'not-started'])+'</span>'
+      +'<span style="font-size:11px;flex:1"><span style="color:'+statusDotColor+'">'+statusLabel+'</span> <span style="color:'+subColor+'">'+({'not-started':'Todo','in-progress':'Doing','done':'Done'}[t.status||'not-started'])+'</span></span>'
       +'<button class="fb-btn" style="background:'+(noColor?'var(--bg4)':'rgba(0,0,0,.25)')+';color:'+(noColor?'var(--text)':'#fff')+'" onclick="event.stopPropagation();fbOpenDetail('+t.id+')" title="Open">↗</button>'
-      +'<div class="fb-color-dot" style="background:'+(noColor?'var(--bg4)':m.color)+';border-color:'+(noColor?'var(--border)':'rgba(255,255,255,.6)')+'" onclick="event.stopPropagation();fbColorPicker('+t.id+',this)" title="Color"></div>'
+      +'<div class="fb-color-dot" style="background:'+(noColor?'var(--bg3)':m.color)+';border-color:'+(noColor?'var(--text3)':'rgba(255,255,255,.6)')+'" onclick="event.stopPropagation();fbColorPicker('+t.id+',this)" title="Color"></div>'
       +'</div>'
       +'</div>';
   }).join('');
@@ -5566,7 +5568,7 @@ function renderNotesGrid(){
       +(n.content?'<div style="font-size:11px;color:'+sc+';margin-bottom:8px;line-height:1.4">'+n.content.substring(0,80)+(n.content.length>80?'…':'')+'</div>':'')
       +'<div class="fb-card-actions">'
       +(n.project?'<span style="font-size:10px;color:'+sc+';flex:1">📁 '+n.project+'</span>':'<span style="flex:1"></span>')
-      +'<div class="fb-color-dot" style="background:'+(noColor?'var(--bg4)':m.color)+';border-color:'+(noColor?'var(--border)':'rgba(255,255,255,.6)')+'" onclick="event.stopPropagation();fbColorPickerFor('+n.id+',\'note\',this)"></div>'
+      +'<div class="fb-color-dot" style="background:'+(noColor?'var(--bg3)':m.color)+';border-color:'+(noColor?'var(--text3)':'rgba(255,255,255,.6)')+'" onclick="event.stopPropagation();fbColorPickerFor('+n.id+',\'note\',this)"></div>'
       +'</div></div>';
   }).join('');
 }
@@ -5629,7 +5631,7 @@ function renderMtgGrid(){
       +(dt?'<div style="font-size:11px;color:'+sc+';margin-bottom:8px">🕒 '+dt+'</div>':'')
       +'<div class="fb-card-actions">'
       +(m.with?'<span style="font-size:10px;color:'+sc+';flex:1">👤 '+m.with+'</span>':'<span style="flex:1"></span>')
-      +'<div class="fb-color-dot" style="background:'+(noColor?'var(--bg4)':meta.color)+';border-color:'+(noColor?'var(--border)':'rgba(255,255,255,.6)')+'" onclick="event.stopPropagation();fbColorPickerFor('+m.id+',\'meeting\',this)"></div>'
+      +'<div class="fb-color-dot" style="background:'+(noColor?'var(--bg3)':meta.color)+';border-color:'+(noColor?'var(--text3)':'rgba(255,255,255,.6)')+'" onclick="event.stopPropagation();fbColorPickerFor('+m.id+',\'meeting\',this)"></div>'
       +'</div></div>';
   }).join('');
 }
