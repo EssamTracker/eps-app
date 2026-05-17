@@ -5381,8 +5381,9 @@ function setTaskView(v){
 
 /* ── project filter helper ── */
 function fbProjectFilter(t){
-  if(!window.activeProjectFilter)return true;
-  var pid=String(window.activeProjectFilter);
+  var apf=typeof activeProjectFilter!=='undefined'?activeProjectFilter:null;
+  if(!apf)return true;
+  var pid=String(apf);
   var p=data.projects.find(function(x){return String(x.id)===pid;});
   if(!p)return true;
   return t.project===p.name || String(t.projectId||'')===pid;
