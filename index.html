@@ -2089,7 +2089,7 @@ function taskCard(t){
   const cc=t.comments?t.comments.length:0,ac=t.attachments?t.attachments.length:0;
   const last=t.comments&&t.comments.length?t.comments[t.comments.length-1]:null;
   let cls='task-card';if(isT)cls+=' is-today';else if(ds==='overdue'&&t.status!=='done')cls+=' overdue-card';else if(ds==='soon'&&t.status!=='done')cls+=' due-soon';
-  return`<div class="${cls}" onclick="openDetail(${t.id})">
+  return`<div class="${cls}" onclick="openDetail(${t.id})" ondblclick="event.stopPropagation();openTaskModal(${t.id})">
     <div class="task-check${t.status==='done'?' done':''}" onclick="toggleTask(${t.id},event)"></div>
     <div class="task-body">
       <div class="task-title${t.status==='done'?' done':''}">${t.desc}</div>
@@ -5410,7 +5410,7 @@ function renderFreeBoard(){
   // auto-place cards that have no position yet
   var col=0,row=0;
   list.forEach(function(t){
-    if(!meta[t.id]){meta[t.id]={x:30+col*220,y:30+row*160,color:FB_COLORS[t.id%FB_COLORS.length]};col++;if(col>9){col=0;row++;}}
+    if(!meta[t.id]){meta[t.id]={x:30+col*220,y:30+row*160,color:'none'};col++;if(col>9){col=0;row++;}}
   });
   canvas.innerHTML=list.map(function(t){
     var m=meta[t.id]||{x:30,y:30,color:'#6c63ff'};
