@@ -797,8 +797,11 @@ button,a,.nav-item,.filter-btn,.task-card,.contact-card,.lpo-card,.today-task,.i
 .kb-col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .kb-col-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
 .kb-col-count{font-size:11px;background:var(--bg4);padding:2px 7px;border-radius:10px;color:var(--text2)}
-.kb-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:grab;transition:all .15s;user-select:none}
+.kb-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:grab;transition:all .15s;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .kb-card:hover{border-color:var(--text3);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.kb-card[data-dnd-over="top"]{box-shadow:0 -2px 0 0 var(--accent)!important}
+.kb-card[data-dnd-over="bot"]{box-shadow:0 2px 0 0 var(--accent)!important}
+.kb-drag-handle{width:26px;align-self:stretch;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--border);border-radius:8px 0 0 8px;font-size:15px;color:var(--text2);cursor:grab;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;opacity:0.55;flex-shrink:0}
 .kb-card.dragging{opacity:.4;cursor:grabbing}
 .kb-col.drag-over{border-color:var(--accent);background:var(--bg3)}
 .kb-card-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px;line-height:1.4}
@@ -2243,7 +2246,7 @@ function dndMoveTask(fromId,toId,insertBefore){
   else renderTasks();
 }
 
-function _attachDndToCards(cards,cardSelector,handleSel){
+function _attachDndToCards(cards,cardSelector,handleSel,onDrop){
   function clearInd(){cards.forEach(function(c){c.removeAttribute('data-dnd-over');});}
   function setOver(target,clientY){
     var id=parseInt(target.dataset.taskId||target.dataset.id);
@@ -2255,8 +2258,10 @@ function _attachDndToCards(cards,cardSelector,handleSel){
   function drop(card){
     card.classList.remove('dnd-dragging');
     clearInd();
-    if(_dnd.active&&_dnd.id&&_dnd.overId&&_dnd.id!==_dnd.overId)
-      dndMoveTask(_dnd.id,_dnd.overId,_dnd.overTop);
+    if(_dnd.active&&_dnd.id&&_dnd.overId&&_dnd.id!==_dnd.overId){
+      if(onDrop)onDrop(_dnd.id,_dnd.overId,_dnd.overTop);
+      else dndMoveTask(_dnd.id,_dnd.overId,_dnd.overTop);
+    }
     _dnd.active=false;_dnd.id=null;_dnd.overId=null;
   }
 
@@ -2333,6 +2338,19 @@ function attachBoardDrag(){
     '.fb-card[data-id]',
     '.fb-drag-handle'
   );
+}
+
+function attachKanbanDrag(){
+  var board=document.getElementById('kanban-board');
+  if(!board)return;
+  var cards=Array.from(board.querySelectorAll('.kb-card[data-id]'));
+  _attachDndToCards(cards,'.kb-card[data-id]','.kb-drag-handle',function(fromId,toId,insertBefore){
+    var toEl=board.querySelector('.kb-card[data-id="'+toId+'"]');
+    var newStatus=toEl?toEl.dataset.col:null;
+    var fromTask=data.tasks.find(function(t){return t.id===fromId;});
+    if(fromTask&&newStatus)fromTask.status=newStatus;
+    dndMoveTask(fromId,toId,insertBefore);
+  });
 }
 function renderTeam(){
   document.getElementById('team-badge').textContent=data.members.length;
@@ -5554,18 +5572,23 @@ function renderKanban(){
       var pri='<span class="tag tag-'+t.priority+'">'+t.priority+'</span>';
       var av=assignee?'<span style="font-size:10px;color:var(--text3)">👤 '+assignee.name.split(' ')[0]+'</span>':'';
       var moveBtn='<button class="kb-move-btn" onclick="event.stopPropagation();kbMoveTask('+t.id+')">Move to…</button>';
-      var orderBtns=currentSort==='manual'?'<div class="kb-order-btns">'
-        +(ti>0?'<button class="kb-order-btn" onclick="event.stopPropagation();kbReorder('+t.id+','+tasks[ti-1].id+')">↑</button>':'')
-        +(ti<tasks.length-1?'<button class="kb-order-btn" onclick="event.stopPropagation();kbReorder('+tasks[ti+1].id+','+t.id+')">↓</button>':'')
-        +'</div>':'';
+      if(currentSort==='manual'){
+        var handle='<div class="kb-drag-handle" oncontextmenu="return false">⠿</div>';
+        return '<div class="kb-card" data-id="'+t.id+'" data-col="'+col.id+'" style="display:flex;align-items:stretch;padding:0" onclick="openDetail('+t.id+')">'
+          +handle+'<div style="flex:1;padding:10px 12px;min-width:0">'
+          +'<div class="kb-card-title">'+t.desc+'</div>'
+          +'<div class="kb-card-meta">'+pri+due+av+'</div>'+moveBtn
+          +'</div></div>';
+      }
       return '<div class="kb-card" draggable="true" data-id="'+t.id+'" ondragstart="kbDragStart(event)" onclick="openDetail('+t.id+')">'
         +'<div class="kb-card-title">'+t.desc+'</div>'
-        +'<div class="kb-card-meta">'+pri+due+av+'</div>'+moveBtn+orderBtns+'</div>';
+        +'<div class="kb-card-meta">'+pri+due+av+'</div>'+moveBtn+'</div>';
     }).join('');
     return '<div class="kb-col" data-status="'+col.id+'" ondragover="kbDragOver(event)" ondrop="kbDrop(event)" ondragleave="kbDragLeave(event)">'
       +'<div class="kb-col-header"><span class="kb-col-title" style="color:'+col.color+'">'+col.label+'</span><span class="kb-col-count">'+tasks.length+'</span></div>'
       +cards+'</div>';
   }).join('');
+  if(currentSort==='manual')attachKanbanDrag();
 }
 function kbDragStart(e){_dragId=parseInt(e.currentTarget.dataset.id);e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
 function kbDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
