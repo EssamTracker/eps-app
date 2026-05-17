@@ -768,6 +768,18 @@ button,a,.nav-item,.filter-btn,.task-card,.contact-card,.lpo-card,.today-task,.i
   line-height:1;
 }
 
+/* ===== FREE BOARD ===== */
+.fb-card{position:absolute;width:200px;background:#6c63ff;border-radius:10px;padding:12px;box-shadow:0 4px 16px rgba(0,0,0,.4);cursor:move;user-select:none;transition:box-shadow .15s}
+.fb-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.6)}
+.fb-card.fb-dragging{box-shadow:0 12px 32px rgba(0,0,0,.7);z-index:999;opacity:.9}
+.fb-card-title{font-size:13px;font-weight:600;color:#fff;line-height:1.4;margin-bottom:8px;word-break:break-word}
+.fb-card-meta{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.fb-card-actions{display:flex;gap:6px;align-items:center}
+.fb-btn{background:rgba(0,0,0,.25);border:none;border-radius:6px;color:#fff;font-size:11px;padding:3px 8px;cursor:pointer}
+.fb-btn:hover{background:rgba(0,0,0,.4)}
+.fb-color-dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.6);cursor:pointer;flex-shrink:0}
+.fb-color-picker{position:fixed;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px;display:flex;flex-wrap:wrap;gap:7px;z-index:2000;width:148px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+
 /* ===== KANBAN BOARD ===== */
 #kanban-board{display:flex;gap:14px;overflow-x:auto;padding-bottom:16px;align-items:flex-start}
 .kb-col{flex:0 0 260px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;min-height:200px}
@@ -1086,8 +1098,9 @@ button,a,.nav-item,.filter-btn,.task-card,.contact-card,.lpo-card,.today-task,.i
         <span class="section-title">All Tasks</span>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <div style="display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden">
-            <button id="view-list-btn" class="btn btn-sm" style="border-radius:0;border:none;background:var(--accent);color:#fff;padding:5px 10px" onclick="setTaskView('list')" title="List View">☰</button>
+            <button id="view-list-btn"   class="btn btn-sm" style="border-radius:0;border:none;background:var(--accent);color:#fff;padding:5px 10px" onclick="setTaskView('list')"   title="List View">☰</button>
             <button id="view-kanban-btn" class="btn btn-sm" style="border-radius:0;border:none;background:none;color:var(--text2);padding:5px 10px" onclick="setTaskView('kanban')" title="Kanban View">⊞</button>
+            <button id="view-board-btn"  class="btn btn-sm" style="border-radius:0;border:none;background:none;color:var(--text2);padding:5px 10px" onclick="setTaskView('board')"  title="Free Board">🎨</button>
           </div>
           <button class="btn btn-ghost btn-sm" onclick="printSection('tasks')">🖨 Print</button>
           <select class="sort-select" onchange="currentSort=this.value;renderTasks()"><option value="created">Newest</option><option value="priority">Priority</option><option value="due">Due Date</option><option value="status">Status</option></select>
@@ -1108,6 +1121,7 @@ button,a,.nav-item,.filter-btn,.task-card,.contact-card,.lpo-card,.today-task,.i
       </div>
       <div class="tasks-grid" id="tasks-list"><div class="empty-state">No tasks yet.</div></div>
       <div id="kanban-board" style="display:none"></div>
+      <div id="free-board" style="display:none;position:relative;width:100%;height:700px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:auto"><div id="free-board-canvas" style="position:relative;width:2400px;height:1600px"></div></div>
       <div class="two-col">
         <div class="panel"><div class="panel-title">Recent Notes</div><div id="notes-preview"></div><button class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:11px" onclick="showView('notes',null)">View all</button></div>
         <div class="panel"><div class="panel-title">Today's Meetings</div><div id="meetings-preview"></div><button class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:11px" onclick="showView('meetings',null)">View all</button></div>
@@ -5310,96 +5324,194 @@ Essam Procurement Solution`);
 </script>
 
 <script>
-/* ===== KANBAN BOARD ===== */
+/* ===== TASK VIEWS: List / Kanban / Free Board ===== */
 var _taskView='list';
 var _dragId=null;
+var _fbDrag={active:false,id:null,startX:0,startY:0,origX:0,origY:0};
 
+/* ── view switcher ── */
 function setTaskView(v){
   _taskView=v;
-  var listBtn=document.getElementById('view-list-btn');
-  var kanbanBtn=document.getElementById('view-kanban-btn');
-  var listEl=document.getElementById('tasks-list');
-  var kanbanEl=document.getElementById('kanban-board');
-  var statusFilters=document.getElementById('status-filters');
-  if(v==='kanban'){
-    listEl.style.display='none';
-    kanbanEl.style.display='flex';
-    if(statusFilters)statusFilters.style.display='none';
-    listBtn.style.background='none';listBtn.style.color='var(--text2)';
-    kanbanBtn.style.background='var(--accent)';kanbanBtn.style.color='#fff';
-    renderKanban();
-  }else{
-    listEl.style.display='';
-    kanbanEl.style.display='none';
-    if(statusFilters)statusFilters.style.display='';
-    listBtn.style.background='var(--accent)';listBtn.style.color='#fff';
-    kanbanBtn.style.background='none';kanbanBtn.style.color='var(--text2)';
-    renderTasks();
-  }
+  var btns={list:'view-list-btn',kanban:'view-kanban-btn',board:'view-board-btn'};
+  Object.keys(btns).forEach(function(k){
+    var b=document.getElementById(btns[k]);if(!b)return;
+    b.style.background=k===v?'var(--accent)':'none';
+    b.style.color=k===v?'#fff':'var(--text2)';
+  });
+  document.getElementById('tasks-list').style.display=v==='list'?'':'none';
+  document.getElementById('kanban-board').style.display=v==='kanban'?'flex':'none';
+  document.getElementById('free-board').style.display=v==='board'?'block':'none';
+  var sf=document.getElementById('status-filters');if(sf)sf.style.display=v==='list'?'':'none';
+  if(v==='kanban')renderKanban();
+  else if(v==='board')renderFreeBoard();
+  else renderTasks();
 }
 
+/* ════════════════════════════════════════
+   KANBAN VIEW
+════════════════════════════════════════ */
 function renderKanban(){
   var el=document.getElementById('kanban-board');
   if(!el||_taskView!=='kanban')return;
   var cols=[
-    {id:'not-started', label:'Not Started', color:'var(--text3)'},
-    {id:'in-progress',  label:'In Progress', color:'var(--accent2)'},
-    {id:'done',         label:'Done',        color:'var(--green)'}
+    {id:'not-started',label:'Not Started',color:'var(--text3)'},
+    {id:'in-progress',label:'In Progress',color:'var(--accent2)'},
+    {id:'done',       label:'Done',       color:'var(--green)'}
   ];
-  var list=getFiltered?getFiltered():data.tasks.slice();
+  var list=typeof getFiltered==='function'?getFiltered():data.tasks.slice();
   el.innerHTML=cols.map(function(col){
-    var tasks=list.filter(function(t){return (t.status||'not-started')===col.id;});
+    var tasks=list.filter(function(t){return(t.status||'not-started')===col.id;});
     var cards=tasks.map(function(t){
       var assignee=data.members.find(function(m){return m.id===t.assignee;});
       var due=t.due?'<span class="task-due" style="font-size:10px">🕒 '+new Date(t.due).toLocaleDateString([],{month:'short',day:'numeric'})+'</span>':'';
       var pri='<span class="tag tag-'+t.priority+'">'+t.priority+'</span>';
       var av=assignee?'<span style="font-size:10px;color:var(--text3)">👤 '+assignee.name.split(' ')[0]+'</span>':'';
-      var moveBtn='<button class="kb-move-btn" onclick="kbMoveTask('+t.id+')">Move to…</button>';
+      var moveBtn='<button class="kb-move-btn" onclick="event.stopPropagation();kbMoveTask('+t.id+')">Move to…</button>';
       return '<div class="kb-card" draggable="true" data-id="'+t.id+'" ondragstart="kbDragStart(event)" onclick="openDetail('+t.id+')">'
         +'<div class="kb-card-title">'+t.desc+'</div>'
-        +'<div class="kb-card-meta">'+pri+due+av+'</div>'
-        +moveBtn
-        +'</div>';
+        +'<div class="kb-card-meta">'+pri+due+av+'</div>'+moveBtn+'</div>';
     }).join('');
     return '<div class="kb-col" data-status="'+col.id+'" ondragover="kbDragOver(event)" ondrop="kbDrop(event)" ondragleave="kbDragLeave(event)">'
-      +'<div class="kb-col-header">'
-      +'<span class="kb-col-title" style="color:'+col.color+'">'+col.label+'</span>'
-      +'<span class="kb-col-count">'+tasks.length+'</span>'
-      +'</div>'
-      +cards
-      +'</div>';
+      +'<div class="kb-col-header"><span class="kb-col-title" style="color:'+col.color+'">'+col.label+'</span><span class="kb-col-count">'+tasks.length+'</span></div>'
+      +cards+'</div>';
   }).join('');
 }
-
-function kbDragStart(e){
-  _dragId=parseInt(e.currentTarget.dataset.id);
-  e.currentTarget.classList.add('dragging');
-  e.dataTransfer.effectAllowed='move';
-}
-function kbDragOver(e){
-  e.preventDefault();
-  e.currentTarget.classList.add('drag-over');
-}
+function kbDragStart(e){_dragId=parseInt(e.currentTarget.dataset.id);e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
+function kbDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
 function kbDragLeave(e){e.currentTarget.classList.remove('drag-over');}
 function kbDrop(e){
-  e.preventDefault();
-  var col=e.currentTarget;
-  col.classList.remove('drag-over');
-  var newStatus=col.dataset.status;
-  if(!_dragId||!newStatus)return;
+  e.preventDefault();var col=e.currentTarget;col.classList.remove('drag-over');
+  var newStatus=col.dataset.status;if(!_dragId||!newStatus)return;
   var t=data.tasks.find(function(x){return x.id===_dragId;});
-  if(t&&t.status!==newStatus){t.status=newStatus;save();renderKanban();}
-  _dragId=null;
+  if(t&&t.status!==newStatus){t.status=newStatus;save();}
+  _dragId=null;renderKanban();
 }
 function kbMoveTask(id){
   var t=data.tasks.find(function(x){return x.id===id;});if(!t)return;
-  var statuses=['not-started','in-progress','done'];
+  var opts=['not-started','in-progress','done'].filter(function(s){return s!==t.status;});
   var labels={'not-started':'Not Started','in-progress':'In Progress','done':'Done'};
-  var opts=statuses.filter(function(s){return s!==t.status;});
-  var chosen=opts.length===2
-    ? (confirm('Move to "In Progress"? (Cancel = Done)') ? 'in-progress' : 'done')
-    : opts[0];
-  t.status=chosen;save();renderKanban();
+  var msg='Move to:\n1. '+labels[opts[0]]+'\n'+(opts[1]?'2. '+labels[opts[1]]:'');
+  var choice=opts.length===2?(prompt(msg+'\n\nType 1 or 2:')==='2'?opts[1]:opts[0]):opts[0];
+  t.status=choice;save();renderKanban();
+}
+
+/* ════════════════════════════════════════
+   FREE BOARD VIEW
+════════════════════════════════════════ */
+var FB_COLORS=['#6c63ff','#e74c8b','#f5a623','#22c88a','#3b82f6','#ef4444','#8b5cf6','#06b6d4','#f59e0b','#64748b'];
+
+function fbMeta(){if(!data.kanbanMeta)data.kanbanMeta={};return data.kanbanMeta;}
+
+function renderFreeBoard(){
+  var canvas=document.getElementById('free-board-canvas');
+  if(!canvas||_taskView!=='board')return;
+  var meta=fbMeta();
+  var list=typeof getFiltered==='function'?getFiltered():data.tasks.slice();
+  // auto-place cards that have no position yet
+  var col=0,row=0;
+  list.forEach(function(t){
+    if(!meta[t.id]){meta[t.id]={x:30+col*220,y:30+row*160,color:FB_COLORS[t.id%FB_COLORS.length]};col++;if(col>9){col=0;row++;}}
+  });
+  canvas.innerHTML=list.map(function(t){
+    var m=meta[t.id]||{x:30,y:30,color:'#6c63ff'};
+    var assignee=data.members.find(function(mb){return mb.id===t.assignee;});
+    var av=assignee?'<span style="font-size:10px;opacity:.8">👤 '+assignee.name.split(' ')[0]+'</span>':'';
+    var due=t.due?'<span style="font-size:10px;opacity:.8">🕒 '+new Date(t.due).toLocaleDateString([],{month:'short',day:'numeric'})+'</span>':'';
+    var statusLabel={'not-started':'●','in-progress':'◐','done':'✓'}[t.status||'not-started']||'●';
+    return '<div class="fb-card" id="fbc-'+t.id+'" data-id="'+t.id+'" style="left:'+m.x+'px;top:'+m.y+'px;background:'+m.color+'">'
+      +'<div class="fb-card-title">'+t.desc+'</div>'
+      +'<div class="fb-card-meta">'+av+due+'</div>'
+      +'<div class="fb-card-actions">'
+      +'<span style="font-size:11px;opacity:.8;flex:1">'+statusLabel+' '+({'not-started':'Todo','in-progress':'Doing','done':'Done'}[t.status||'not-started'])+'</span>'
+      +'<button class="fb-btn" onclick="event.stopPropagation();fbOpenDetail('+t.id+')" title="Open">↗</button>'
+      +'<div class="fb-color-dot" style="background:'+m.color+'" onclick="event.stopPropagation();fbColorPicker('+t.id+',this)" title="Color"></div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+  // attach drag events
+  canvas.querySelectorAll('.fb-card').forEach(function(card){
+    fbAttachDrag(card);
+  });
+}
+
+function fbOpenDetail(id){openDetail(id);}
+
+function fbColorPicker(id,dotEl){
+  document.querySelectorAll('.fb-color-picker').forEach(function(p){p.remove();});
+  var picker=document.createElement('div');
+  picker.className='fb-color-picker';
+  FB_COLORS.forEach(function(c){
+    var swatch=document.createElement('div');
+    swatch.style.cssText='width:22px;height:22px;border-radius:50%;background:'+c+';cursor:pointer;border:2px solid rgba(255,255,255,.3)';
+    swatch.onclick=function(e){
+      e.stopPropagation();
+      fbMeta()[id]=fbMeta()[id]||{};
+      fbMeta()[id].color=c;
+      save();renderFreeBoard();
+      picker.remove();
+    };
+    picker.appendChild(swatch);
+  });
+  var r=dotEl.getBoundingClientRect();
+  picker.style.top=(r.bottom+6)+'px';
+  picker.style.left=r.left+'px';
+  document.body.appendChild(picker);
+  setTimeout(function(){document.addEventListener('click',function h(){picker.remove();document.removeEventListener('click',h);},{once:true});},10);
+}
+
+function fbAttachDrag(card){
+  var id=parseInt(card.dataset.id);
+  // Mouse drag
+  card.addEventListener('mousedown',function(e){
+    if(e.target.classList.contains('fb-color-dot')||e.target.classList.contains('fb-btn'))return;
+    e.preventDefault();
+    var meta=fbMeta()[id]||{x:0,y:0};
+    var startX=e.clientX,startY=e.clientY,origX=meta.x,origY=meta.y;
+    card.classList.add('fb-dragging');
+    function onMove(e){
+      var nx=origX+(e.clientX-startX);
+      var ny=origY+(e.clientY-startY);
+      card.style.left=nx+'px';card.style.top=ny+'px';
+    }
+    function onUp(e){
+      card.classList.remove('fb-dragging');
+      var nx=origX+(e.clientX-startX);
+      var ny=origY+(e.clientY-startY);
+      fbMeta()[id]=fbMeta()[id]||{};
+      fbMeta()[id].x=Math.max(0,nx);fbMeta()[id].y=Math.max(0,ny);
+      save();
+      document.removeEventListener('mousemove',onMove);
+      document.removeEventListener('mouseup',onUp);
+    }
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onUp);
+  });
+  // Touch drag
+  card.addEventListener('touchstart',function(e){
+    if(e.target.classList.contains('fb-color-dot')||e.target.classList.contains('fb-btn'))return;
+    var touch=e.touches[0];
+    var meta=fbMeta()[id]||{x:0,y:0};
+    var startX=touch.clientX,startY=touch.clientY,origX=meta.x,origY=meta.y;
+    card.classList.add('fb-dragging');
+    function onMove(e){
+      e.preventDefault();
+      var t=e.touches[0];
+      card.style.left=(origX+(t.clientX-startX))+'px';
+      card.style.top=(origY+(t.clientY-startY))+'px';
+    }
+    function onEnd(e){
+      card.classList.remove('fb-dragging');
+      var t=e.changedTouches[0];
+      fbMeta()[id]=fbMeta()[id]||{};
+      fbMeta()[id].x=Math.max(0,origX+(t.clientX-startX));
+      fbMeta()[id].y=Math.max(0,origY+(t.clientY-startY));
+      save();
+      card.removeEventListener('touchmove',onMove);
+      card.removeEventListener('touchend',onEnd);
+    }
+    card.addEventListener('touchmove',onMove,{passive:false});
+    card.addEventListener('touchend',onEnd);
+  },{passive:true});
 }
 </script>
 
