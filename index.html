@@ -5379,6 +5379,15 @@ function setTaskView(v){
   else renderTasks();
 }
 
+/* ── project filter helper ── */
+function fbProjectFilter(t){
+  if(!window.activeProjectFilter)return true;
+  var pid=String(window.activeProjectFilter);
+  var p=data.projects.find(function(x){return String(x.id)===pid;});
+  if(!p)return true;
+  return t.project===p.name || String(t.projectId||'')===pid;
+}
+
 /* ════════════════════════════════════════
    KANBAN VIEW
 ════════════════════════════════════════ */
@@ -5390,7 +5399,7 @@ function renderKanban(){
     {id:'in-progress',label:'In Progress',color:'var(--accent2)'},
     {id:'done',       label:'Done',       color:'var(--green)'}
   ];
-  var list=typeof getFiltered==='function'?getFiltered():data.tasks.slice();
+  var list=(typeof getFiltered==='function'?getFiltered():data.tasks.slice()).filter(fbProjectFilter);
   el.innerHTML=cols.map(function(col){
     var tasks=list.filter(function(t){return(t.status||'not-started')===col.id;});
     var cards=tasks.map(function(t){
@@ -5447,7 +5456,7 @@ function renderFreeBoard(){
   var canvas=document.getElementById('free-board-canvas');
   if(!canvas||_taskView!=='board')return;
   var meta=fbMeta();
-  var list=typeof getFiltered==='function'?getFiltered():data.tasks.slice();
+  var list=(typeof getFiltered==='function'?getFiltered():data.tasks.slice()).filter(fbProjectFilter);
   // auto-place cards that have no position yet — fit within container width
   var boardW=canvas.parentElement?canvas.parentElement.clientWidth:800;
   var cardW=210,cardH=155,gap=12,padX=12,padY=12;
