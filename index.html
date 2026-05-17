@@ -108,6 +108,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .task-check.done{background:var(--green);border-color:var(--green)}
 .task-check.done::after{content:'✓';font-size:10px;color:#fff;font-weight:700}
 .task-body{flex:1;min-width:0}
+.drag-handle{cursor:grab;color:var(--text3);font-size:20px;line-height:1;display:flex;align-items:center;padding-right:4px;flex-shrink:0;user-select:none;touch-action:none;opacity:0;transition:opacity 0.15s}
+.task-card:hover .drag-handle,.task-card.dnd-dragging .drag-handle{opacity:1}
+.task-card.dnd-dragging{opacity:0.35}
+.task-card[data-dnd-over="top"]{box-shadow:0 -2px 0 0 var(--accent)!important}
+.task-card[data-dnd-over="bot"]{box-shadow:0 2px 0 0 var(--accent)!important}
+.kb-order-btns{display:flex;gap:3px;justify-content:flex-end;margin-top:6px}
+.kb-order-btn{background:none;border:1px solid var(--border);border-radius:4px;color:var(--text3);font-size:12px;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.kb-order-btn:hover{color:var(--text);border-color:var(--text3)}
+.fb-card[data-dnd-over]{outline:2px solid var(--accent)!important;outline-offset:2px}
+.fb-drag-handle{cursor:grab;color:rgba(255,255,255,.5);font-size:16px;line-height:1;padding-right:4px;user-select:none;touch-action:none;display:none}
+.fb-drag-handle.visible{display:block}
 .task-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:5px}
 .task-title.done{text-decoration:line-through;color:var(--text3)}
 .task-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -1103,7 +1114,7 @@ button,a,.nav-item,.filter-btn,.task-card,.contact-card,.lpo-card,.today-task,.i
             <button id="view-board-btn"  class="btn btn-sm" style="border-radius:0;border:none;background:none;color:var(--text2);padding:5px 10px" onclick="setTaskView('board')"  title="Free Board">🎨</button>
           </div>
           <button class="btn btn-ghost btn-sm" onclick="printSection('tasks')">🖨 Print</button>
-          <select class="sort-select" onchange="currentSort=this.value;renderTasks()"><option value="created">Newest</option><option value="priority">Priority</option><option value="due">Due Date</option><option value="status">Status</option></select>
+          <select class="sort-select" onchange="currentSort=this.value;if(_taskView==='kanban')renderKanban();else if(_taskView==='board')renderFreeBoard();else renderTasks()"><option value="created">Newest</option><option value="priority">Priority</option><option value="due">Due Date</option><option value="status">Status</option><option value="manual">Manual ✦</option></select>
           <div class="filter-row" id="status-filters">
             <button class="filter-btn active" onclick="setFilter('status','all',this)">All</button>
             <button class="filter-btn" onclick="setFilter('status','not-started',this)">Not Started</button>
@@ -2105,6 +2116,7 @@ function getFiltered(){
   });
 }
 function sortTasks(tasks){
+  if(currentSort==='manual')return[...tasks];
   return[...tasks].sort((a,b)=>{
     if(currentSort==='priority')return(PRIORITY_ORDER[a.priority]||2)-(PRIORITY_ORDER[b.priority]||2);
     if(currentSort==='due'){if(!a.due&&!b.due)return 0;if(!a.due)return 1;if(!b.due)return-1;return new Date(a.due)-new Date(b.due);}
@@ -2121,7 +2133,8 @@ function taskCard(t){
   const cc=t.comments?t.comments.length:0,ac=t.attachments?t.attachments.length:0;
   const last=t.comments&&t.comments.length?t.comments[t.comments.length-1]:null;
   let cls='task-card';if(isT)cls+=' is-today';else if(ds==='overdue'&&t.status!=='done')cls+=' overdue-card';else if(ds==='soon'&&t.status!=='done')cls+=' due-soon';
-  return`<div class="${cls}" onclick="openDetail(${t.id})" ondblclick="event.stopPropagation();openTaskModal(${t.id})">
+  return`<div class="${cls}" data-task-id="${t.id}" onclick="openDetail(${t.id})" ondblclick="event.stopPropagation();openTaskModal(${t.id})">
+    ${currentSort==='manual'?`<div class="drag-handle" title="Drag to reorder">⠿</div>`:''}
     <div class="task-check${t.status==='done'?' done':''}" onclick="toggleTask(${t.id},event)"></div>
     <div class="task-body">
       <div class="task-title${t.status==='done'?' done':''}">${t.desc}</div>
@@ -2211,6 +2224,117 @@ function renderTasks(){
   const tasks=sortTasks(getFiltered()),el=document.getElementById('tasks-list');
   if(!tasks.length){el.innerHTML='<div class="empty-state">No tasks match the filters.</div>';return;}
   el.innerHTML=tasks.map(t=>taskCard(t)).join('');
+  if(currentSort==='manual')attachListDrag();
+}
+
+var _dnd={active:false,id:null,overId:null,overTop:true};
+
+function dndMoveTask(fromId,toId,insertBefore){
+  var fi=data.tasks.findIndex(function(t){return t.id===fromId;});
+  if(fi===-1)return;
+  var task=data.tasks.splice(fi,1)[0];
+  var ti=data.tasks.findIndex(function(t){return t.id===toId;});
+  if(ti===-1)data.tasks.push(task);
+  else data.tasks.splice(insertBefore?ti:ti+1,0,task);
+  save();
+  if(_taskView==='kanban')renderKanban();
+  else if(_taskView==='board')renderFreeBoard();
+  else renderTasks();
+}
+
+function attachListDrag(){
+  var list=document.getElementById('tasks-list');
+  if(!list)return;
+  var cards=Array.from(list.querySelectorAll('.task-card[data-task-id]'));
+  cards.forEach(function(card){
+    var id=parseInt(card.dataset.taskId);
+    var handle=card.querySelector('.drag-handle');
+    if(!handle)return;
+    function startDrag(){_dnd.id=id;_dnd.active=true;card.classList.add('dnd-dragging');}
+    function endDrag(){
+      card.classList.remove('dnd-dragging');
+      card.draggable=false;
+      cards.forEach(function(c){c.removeAttribute('data-dnd-over');});
+      if(_dnd.active&&_dnd.id&&_dnd.overId&&_dnd.id!==_dnd.overId)
+        dndMoveTask(_dnd.id,_dnd.overId,_dnd.overTop);
+      _dnd.active=false;_dnd.id=null;_dnd.overId=null;
+    }
+    handle.addEventListener('mousedown',function(){card.draggable=true;});
+    card.addEventListener('dragstart',function(e){startDrag();e.dataTransfer.effectAllowed='move';});
+    card.addEventListener('dragend',endDrag);
+    card.addEventListener('dragover',function(e){
+      e.preventDefault();
+      if(!_dnd.active||_dnd.id===id)return;
+      var r=card.getBoundingClientRect(),top=e.clientY<r.top+r.height/2;
+      _dnd.overId=id;_dnd.overTop=top;
+      cards.forEach(function(c){c.removeAttribute('data-dnd-over');});
+      card.setAttribute('data-dnd-over',top?'top':'bot');
+    });
+    card.addEventListener('dragleave',function(e){
+      if(!card.contains(e.relatedTarget))card.removeAttribute('data-dnd-over');
+    });
+    handle.addEventListener('touchstart',function(e){e.preventDefault();startDrag();},{passive:false});
+    handle.addEventListener('touchmove',function(e){
+      e.preventDefault();
+      var t=e.touches[0];
+      var el=document.elementFromPoint(t.clientX,t.clientY);
+      var target=el?el.closest('.task-card[data-task-id]'):null;
+      cards.forEach(function(c){c.removeAttribute('data-dnd-over');});
+      if(target&&target!==card){
+        var tid=parseInt(target.dataset.taskId);
+        var r=target.getBoundingClientRect(),top=t.clientY<r.top+r.height/2;
+        _dnd.overId=tid;_dnd.overTop=top;
+        target.setAttribute('data-dnd-over',top?'top':'bot');
+      }
+    },{passive:false});
+    handle.addEventListener('touchend',endDrag);
+  });
+}
+
+function attachBoardDrag(){
+  var canvas=document.getElementById('free-board-canvas');
+  if(!canvas)return;
+  var cards=Array.from(canvas.querySelectorAll('.fb-card[data-id]'));
+  cards.forEach(function(card){
+    var id=parseInt(card.dataset.id);
+    var handle=card.querySelector('.fb-drag-handle');
+    if(!handle)return;
+    function startDrag(){_dnd.id=id;_dnd.active=true;card.classList.add('dnd-dragging');}
+    function endDrag(){
+      card.classList.remove('dnd-dragging');
+      card.draggable=false;
+      cards.forEach(function(c){c.removeAttribute('data-dnd-over');});
+      if(_dnd.active&&_dnd.id&&_dnd.overId&&_dnd.id!==_dnd.overId)
+        dndMoveTask(_dnd.id,_dnd.overId,_dnd.overTop);
+      _dnd.active=false;_dnd.id=null;_dnd.overId=null;
+    }
+    handle.addEventListener('mousedown',function(){card.draggable=true;});
+    card.addEventListener('dragstart',function(e){startDrag();e.dataTransfer.effectAllowed='move';});
+    card.addEventListener('dragend',endDrag);
+    card.addEventListener('dragover',function(e){
+      e.preventDefault();
+      if(!_dnd.active||_dnd.id===id)return;
+      var r=card.getBoundingClientRect(),top=e.clientY<r.top+r.height/2;
+      _dnd.overId=id;_dnd.overTop=top;
+      cards.forEach(function(c){c.removeAttribute('data-dnd-over');});
+      card.setAttribute('data-dnd-over','on');
+    });
+    handle.addEventListener('touchstart',function(e){e.preventDefault();startDrag();},{passive:false});
+    handle.addEventListener('touchmove',function(e){
+      e.preventDefault();
+      var t=e.touches[0];
+      var el=document.elementFromPoint(t.clientX,t.clientY);
+      var target=el?el.closest('.fb-card[data-id]'):null;
+      cards.forEach(function(c){c.removeAttribute('data-dnd-over');});
+      if(target&&target!==card){
+        var tid=parseInt(target.dataset.id);
+        var r=target.getBoundingClientRect(),top=t.clientY<r.top+r.height/2;
+        _dnd.overId=tid;_dnd.overTop=top;
+        target.setAttribute('data-dnd-over','on');
+      }
+    },{passive:false});
+    handle.addEventListener('touchend',endDrag);
+  });
 }
 function renderTeam(){
   document.getElementById('team-badge').textContent=data.members.length;
@@ -5408,15 +5532,19 @@ function renderKanban(){
   var list=(typeof getFiltered==='function'?getFiltered():data.tasks.slice()).filter(fbProjectFilter);
   el.innerHTML=cols.map(function(col){
     var tasks=list.filter(function(t){return(t.status||'not-started')===col.id;});
-    var cards=tasks.map(function(t){
+    var cards=tasks.map(function(t,ti){
       var assignee=data.members.find(function(m){return m.id===t.assignee;});
       var due=t.due?'<span class="task-due" style="font-size:10px">🕒 '+new Date(t.due).toLocaleDateString([],{month:'short',day:'numeric'})+'</span>':'';
       var pri='<span class="tag tag-'+t.priority+'">'+t.priority+'</span>';
       var av=assignee?'<span style="font-size:10px;color:var(--text3)">👤 '+assignee.name.split(' ')[0]+'</span>':'';
       var moveBtn='<button class="kb-move-btn" onclick="event.stopPropagation();kbMoveTask('+t.id+')">Move to…</button>';
+      var orderBtns=currentSort==='manual'?'<div class="kb-order-btns">'
+        +(ti>0?'<button class="kb-order-btn" onclick="event.stopPropagation();kbReorder('+t.id+','+tasks[ti-1].id+')">↑</button>':'')
+        +(ti<tasks.length-1?'<button class="kb-order-btn" onclick="event.stopPropagation();kbReorder('+tasks[ti+1].id+','+t.id+')">↓</button>':'')
+        +'</div>':'';
       return '<div class="kb-card" draggable="true" data-id="'+t.id+'" ondragstart="kbDragStart(event)" onclick="openDetail('+t.id+')">'
         +'<div class="kb-card-title">'+t.desc+'</div>'
-        +'<div class="kb-card-meta">'+pri+due+av+'</div>'+moveBtn+'</div>';
+        +'<div class="kb-card-meta">'+pri+due+av+'</div>'+moveBtn+orderBtns+'</div>';
     }).join('');
     return '<div class="kb-col" data-status="'+col.id+'" ondragover="kbDragOver(event)" ondrop="kbDrop(event)" ondragleave="kbDragLeave(event)">'
       +'<div class="kb-col-header"><span class="kb-col-title" style="color:'+col.color+'">'+col.label+'</span><span class="kb-col-count">'+tasks.length+'</span></div>'
@@ -5440,6 +5568,15 @@ function kbMoveTask(id){
   var msg='Move to:\n1. '+labels[opts[0]]+'\n'+(opts[1]?'2. '+labels[opts[1]]:'');
   var choice=opts.length===2?(prompt(msg+'\n\nType 1 or 2:')==='2'?opts[1]:opts[0]):opts[0];
   t.status=choice;save();renderKanban();
+}
+function kbReorder(moveId,beforeId){
+  var mi=data.tasks.findIndex(function(t){return t.id===moveId;});
+  var bi=data.tasks.findIndex(function(t){return t.id===beforeId;});
+  if(mi===-1||bi===-1)return;
+  var task=data.tasks.splice(mi,1)[0];
+  var ni=data.tasks.findIndex(function(t){return t.id===beforeId;});
+  data.tasks.splice(ni,0,task);
+  save();renderKanban();
 }
 
 /* ════════════════════════════════════════
@@ -5486,16 +5623,19 @@ function renderFreeBoard(){
     var statusDotColors={'not-started':'var(--text3)','in-progress':'var(--accent2)','done':'var(--green)'};
     var statusDotColor=noColor?(statusDotColors[t.status||'not-started']||'var(--text3)'):'rgba(255,255,255,.9)';
     var statusLabel={'not-started':'●','in-progress':'◐','done':'✓'}[t.status||'not-started']||'●';
+    var handleHtml=currentSort==='manual'?'<span class="fb-drag-handle visible" style="color:'+(noColor?'var(--text3)':'rgba(255,255,255,.5)')+'">⠿</span>':'';
     return '<div class="fb-card" id="fbc-'+t.id+'" data-id="'+t.id+'" style="background:'+cardBg+';border:1px solid '+(noColor?'var(--border)':'transparent')+'">'
       +'<div class="fb-card-title" style="color:'+textColor+'">'+t.desc+'</div>'
       +'<div class="fb-card-meta">'+av+due+'</div>'
       +'<div class="fb-card-actions">'
       +'<span style="font-size:11px;flex:1"><span style="color:'+statusDotColor+'">'+statusLabel+'</span> <span style="color:'+subColor+'">'+({'not-started':'Todo','in-progress':'Doing','done':'Done'}[t.status||'not-started'])+'</span></span>'
+      +handleHtml
       +'<button class="fb-btn" style="background:'+(noColor?'var(--bg4)':'rgba(0,0,0,.25)')+';color:'+(noColor?'var(--text)':'#fff')+'" onclick="event.stopPropagation();fbOpenDetail('+t.id+')" title="Open">↗</button>'
       +'<div class="fb-color-dot" style="background:'+(noColor?'var(--bg3)':m.color)+';border-color:'+(noColor?'var(--text3)':'rgba(255,255,255,.6)')+'" onclick="event.stopPropagation();fbColorPicker('+t.id+',this)" title="Color"></div>'
       +'</div>'
       +'</div>';
   }).join('');
+  if(currentSort==='manual')attachBoardDrag();
 }
 
 function fbResizeCanvas(){
