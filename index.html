@@ -5128,9 +5128,14 @@ setTimeout(() => { injectTodayHeader(); }, 300);
   window.filterByProject=function(id){
     const p=findProjectByAny(id); if(!p)return;
     activeProjectFilter=String(p.id);
-    showView('dashboard',null);
     const title=document.getElementById('page-title'); if(title)title.textContent='Project: '+p.name;
     renderProjects();renderTasks();
+    if(typeof _taskView!=='undefined'){if(_taskView==='kanban')renderKanban();else if(_taskView==='board')renderFreeBoard();}
+    renderNotes();
+    if(typeof _notesView!=='undefined'){if(_notesView==='kanban')renderNotesKanban();else if(_notesView==='grid')renderNotesGrid();}
+    renderMeetings();
+    if(typeof _mtgView!=='undefined'){if(_mtgView==='kanban')renderMtgKanban();else if(_mtgView==='grid')renderMtgGrid();}
+    renderToday();
   };
 
   window.clearProjectFilter=function(){
