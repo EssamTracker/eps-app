@@ -5655,7 +5655,12 @@ function fbColorPickerFor(id,type,dotEl){
     };
     picker.appendChild(sw);
   });
-  var r=dotEl.getBoundingClientRect();picker.style.top=(r.bottom+6)+'px';picker.style.left=r.left+'px';
+  var r=dotEl.getBoundingClientRect();
+  var pTop=r.bottom+6,pLeft=r.left;
+  var pW=170,pH=120;
+  if(pLeft+pW>window.innerWidth)pLeft=Math.max(8,window.innerWidth-pW-8);
+  if(pTop+pH>window.innerHeight)pTop=Math.max(8,r.top-pH-6);
+  picker.style.top=pTop+'px';picker.style.left=pLeft+'px';
   document.body.appendChild(picker);
   setTimeout(function(){document.addEventListener('click',function h(){picker.remove();document.removeEventListener('click',h);},{once:true});},10);
 }
@@ -5679,8 +5684,12 @@ function fbColorPicker(id,dotEl){
     picker.appendChild(swatch);
   });
   var r=dotEl.getBoundingClientRect();
-  picker.style.top=(r.bottom+6)+'px';
-  picker.style.left=r.left+'px';
+  var pTop=r.bottom+6,pLeft=r.left;
+  var pW=170,pH=120;
+  if(pLeft+pW>window.innerWidth)pLeft=Math.max(8,window.innerWidth-pW-8);
+  if(pTop+pH>window.innerHeight)pTop=Math.max(8,r.top-pH-6);
+  picker.style.top=pTop+'px';
+  picker.style.left=pLeft+'px';
   document.body.appendChild(picker);
   setTimeout(function(){document.addEventListener('click',function h(){picker.remove();document.removeEventListener('click',h);},{once:true});},10);
 }
