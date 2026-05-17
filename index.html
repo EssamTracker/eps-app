@@ -99,7 +99,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .filter-btn{padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:none;color:var(--text2);transition:all 0.15s;font-family:'DM Sans',sans-serif}
 .filter-btn.active{background:var(--bg4);color:var(--text);border-color:var(--text3)}
 .tasks-grid{display:flex;flex-direction:column;gap:8px}
-.task-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:flex-start;gap:12px;transition:all 0.15s;cursor:pointer}
+.task-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:flex-start;gap:12px;transition:all 0.15s;cursor:pointer;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .task-card:hover{border-color:var(--text3);background:var(--bg3)}
 .task-card.is-today{border-left:2px solid rgba(255,209,102,0.5)}
 .task-card.overdue-card{border-left:2px solid rgba(255,95,109,0.6)}
@@ -108,8 +108,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .task-check.done{background:var(--green);border-color:var(--green)}
 .task-check.done::after{content:'✓';font-size:10px;color:#fff;font-weight:700}
 .task-body{flex:1;min-width:0}
-.drag-handle{cursor:grab;color:var(--text3);font-size:20px;width:32px;min-height:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-touch-callout:none;opacity:0.45;border-right:1px solid var(--border);margin-right:6px;margin-left:-4px;border-radius:var(--radius) 0 0 var(--radius)}
-.task-card:hover .drag-handle{opacity:1;background:var(--bg3)}
+.drag-handle{cursor:grab;color:var(--text2);font-size:18px;width:36px;min-height:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-touch-callout:none;opacity:0.6;border-right:1px solid var(--border);margin-right:8px;margin-left:-14px;border-radius:var(--radius) 0 0 var(--radius);background:var(--bg3)}
+.task-card:hover .drag-handle{opacity:1;background:var(--bg4)}
 .task-card.dnd-dragging{opacity:0.35}
 .task-card.dnd-dragging .drag-handle{cursor:grabbing}
 .task-card[data-dnd-over="top"]{box-shadow:0 -2px 0 0 var(--accent)!important}
