@@ -2366,6 +2366,16 @@ function _attachDndToCards(cards,cardSelector,handleSel,onDrop){
 function attachListDrag(){
   var list=document.getElementById('tasks-list');
   if(!list)return;
+  Array.from(list.querySelectorAll('.task-card[data-task-id]')).forEach(function(card){
+    if(!card.querySelector('.drag-handle')){
+      var h=document.createElement('div');
+      h.className='drag-handle';
+      h.setAttribute('oncontextmenu','return false');
+      h.textContent='⠿';
+      card.style.paddingLeft='0';
+      card.insertBefore(h,card.firstChild);
+    }
+  });
   _attachDndToCards(
     Array.from(list.querySelectorAll('.task-card[data-task-id]')),
     '.task-card[data-task-id]',
