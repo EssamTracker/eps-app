@@ -1113,6 +1113,7 @@ button,a,.nav-item,.filter-btn,.task-card,.contact-card,.lpo-card,.today-task,.i
             <button id="view-kanban-btn" class="btn btn-sm" style="border-radius:0;border:none;background:none;color:var(--text2);padding:5px 10px" onclick="setTaskView('kanban')" title="Kanban View">⊞</button>
             <button id="view-board-btn"  class="btn btn-sm" style="border-radius:0;border:none;background:none;color:var(--text2);padding:5px 10px" onclick="setTaskView('board')"  title="Free Board">🎨</button>
           </div>
+          <button id="reorder-btn" class="btn btn-ghost btn-sm" onclick="toggleReorderMode()" title="Reorder Tasks" style="font-size:13px;padding:5px 10px">⇅</button>
           <button class="btn btn-ghost btn-sm" onclick="printSection('tasks')">🖨 Print</button>
           <select class="sort-select" onchange="currentSort=this.value;if(_taskView==='kanban')renderKanban();else if(_taskView==='board')renderFreeBoard();else renderTasks()"><option value="created">Newest</option><option value="priority">Priority</option><option value="due">Due Date</option><option value="status">Status</option><option value="manual">Manual ✦</option></select>
           <div class="filter-row" id="status-filters">
@@ -5485,6 +5486,24 @@ Essam Procurement Solution`);
 var _taskView='list';
 var _dragId=null;
 var _fbDrag={active:false,id:null,startX:0,startY:0,origX:0,origY:0};
+
+/* ── reorder mode toggle ── */
+function toggleReorderMode(){
+  var btn=document.getElementById('reorder-btn');
+  var sel=document.querySelector('.sort-select');
+  if(currentSort==='manual'){
+    currentSort='created';
+    if(sel)sel.value='created';
+    if(btn){btn.style.background='';btn.style.color='';btn.textContent='⇅';}
+  } else {
+    currentSort='manual';
+    if(sel)sel.value='manual';
+    if(btn){btn.style.background='var(--accent)';btn.style.color='#fff';btn.textContent='⇅ On';}
+  }
+  if(_taskView==='kanban')renderKanban();
+  else if(_taskView==='board')renderFreeBoard();
+  else renderTasks();
+}
 
 /* ── view switcher ── */
 function setTaskView(v){
