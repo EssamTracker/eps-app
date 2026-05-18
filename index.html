@@ -5454,27 +5454,28 @@ setTimeout(() => { injectTodayHeader(); }, 300);
     const manualMode=typeof currentSort!=='undefined'&&currentSort==='manual';
     const _tm=typeof fbMeta==='function'?fbMeta()[Number(t.id)]:null;
     const tColor=(_tm&&_tm.color&&_tm.color!=='none')?_tm.color:null;
-    const cardStyle=[manualMode?'padding-left:0':'',tColor?'border-left:4px solid '+tColor:'',(!manualMode&&tColor)?'padding-left:10px':''].filter(Boolean).join(';');
+    const tTextColor=tColor?'#fff':'';
+    const cardStyle=[manualMode?'padding-left:0':'',tColor?'background:'+tColor+';border-color:transparent':''].filter(Boolean).join(';');
     return`<div class="${cls}" data-task-id="${Number(t.id)}" onclick="openDetail(${Number(t.id)})" ondblclick="event.stopPropagation();openTaskModal(${Number(t.id)})" ${cardStyle?`style="${cardStyle}"`:''}>${manualMode?`<div class="drag-handle" oncontextmenu="return false">⠿</div>`:''}<div class="task-check${t.status==='done'?' done':''}" onclick="toggleTask(${Number(t.id)},event)"></div>
       <div class="task-body">
-        <div class="task-title${t.status==='done'?' done':''}">${H(t.desc)}</div>
-        ${last?`<div style="font-size:11px;color:var(--text3);margin:-1px 0 6px 0">Last update: ${H(last.text)} · ${new Date(last.ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>`:''}
+        <div class="task-title${t.status==='done'?' done':''}" ${tColor?'style="color:#fff"':''}>${H(t.desc)}</div>
+        ${last?`<div style="font-size:11px;color:${tColor?'rgba(255,255,255,.75)':'var(--text3)'};margin:-1px 0 6px 0">Last update: ${H(last.text)} · ${new Date(last.ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>`:''}
         <div class="task-meta">
           <span class="tag tag-${A(t.priority)}">${H(t.priority)}</span>
           ${pn?`<span class="tag tag-project">${H(pn)}</span>`:''}
           ${assigneeTag(t.assignee)}
           ${isT?`<span class="tag-today-badge">Today</span>`:''}
           ${due?`<span class="task-due ${due.cls}">${H(due.str)}</span>`:''}
-          <span style="font-size:11px;color:var(--text3)">${t.status==='in-progress'?'⟳ In Progress':t.status==='done'?'✓ Done':'○ Not Started'}</span>
-          ${subTotal?`<span style="font-size:10px;color:var(--text3)">${subDone}/${subTotal} sub</span>`:''}
-          ${cc?`<span style="font-size:10px;color:var(--text3)">💬${cc}</span>`:''}
-          ${ac?`<span style="font-size:10px;color:var(--text3)">🔗${ac}</span>`:''}
+          <span style="font-size:11px;color:${tColor?'rgba(255,255,255,.8)':'var(--text3)'}">${t.status==='in-progress'?'⟳ In Progress':t.status==='done'?'✓ Done':'○ Not Started'}</span>
+          ${subTotal?`<span style="font-size:10px;color:${tColor?'rgba(255,255,255,.7)':'var(--text3)'}">${subDone}/${subTotal} sub</span>`:''}
+          ${cc?`<span style="font-size:10px;color:${tColor?'rgba(255,255,255,.7)':'var(--text3)'}">💬${cc}</span>`:''}
+          ${ac?`<span style="font-size:10px;color:${tColor?'rgba(255,255,255,.7)':'var(--text3)'}">🔗${ac}</span>`:''}
           ${typeof window.__getHashtagChipsHTML==='function'?window.__getHashtagChipsHTML(t):''}
         </div>
         ${(t.emailLogs||[]).length?`<div class="email-log-line">📧 Email prepared for <b>${H(t.emailLogs[t.emailLogs.length-1].to)}</b> · ${new Date(t.emailLogs[t.emailLogs.length-1].ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>`:''}
       </div>
       <div class="task-actions">
-        <div class="fb-color-dot" style="background:${tColor||'var(--bg4)'};border-color:${tColor?tColor:'var(--border)'};width:14px;height:14px;margin:0 2px;flex-shrink:0" onclick="event.stopPropagation();fbColorPicker(${Number(t.id)},this)" title="Color"></div>
+        <div class="fb-color-dot" style="background:${tColor||'var(--bg4)'};border-color:${tColor?'rgba(255,255,255,.4)':'var(--border)'};width:14px;height:14px;margin:0 2px;flex-shrink:0" onclick="event.stopPropagation();fbColorPicker(${Number(t.id)},this)" title="Color"></div>
         <button class="icon-btn" onclick="event.stopPropagation();openTaskModal(${Number(t.id)})" title="Edit">✎</button>
         <button class="icon-btn" onclick="emailTask(${Number(t.id)},event)" title="Email Task">📧</button>
         <button class="icon-btn" onclick="setFollowUpTomorrow(${Number(t.id)},event)" title="Follow up tomorrow">⏰</button>
@@ -5630,19 +5631,20 @@ function renderKanban(){
       var av=assignee?'<span style="font-size:10px;color:var(--text3)">👤 '+assignee.name.split(' ')[0]+'</span>':'';
       var moveBtn='<button class="kb-move-btn" onclick="event.stopPropagation();kbMoveTask('+t.id+')">Move to…</button>';
       var _ktm=fbMeta()[t.id];var kColor=(_ktm&&_ktm.color&&_ktm.color!=='none')?_ktm.color:null;
-      var colorDot='<div class="fb-color-dot" style="background:'+(kColor||'var(--bg4)')+';border-color:'+(kColor||'var(--border)')+';width:12px;height:12px;flex-shrink:0;margin-left:4px" onclick="event.stopPropagation();fbColorPicker('+t.id+',this)" title="Color"></div>';
-      var kBorderStyle=kColor?'border-left:4px solid '+kColor+';':'';
+      var kTc=kColor?'color:#fff':'';var kSc=kColor?'color:rgba(255,255,255,.75)':'color:var(--text3)';
+      var colorDot='<div class="fb-color-dot" style="background:'+(kColor||'var(--bg4)')+';border-color:'+(kColor?'rgba(255,255,255,.4)':'var(--border)')+';width:12px;height:12px;flex-shrink:0;margin-left:4px" onclick="event.stopPropagation();fbColorPicker('+t.id+',this)" title="Color"></div>';
+      var kBgStyle=kColor?'background:'+kColor+';border-color:transparent;':'';
       if(currentSort==='manual'){
         var handle='<div class="kb-drag-handle" oncontextmenu="return false">⠿</div>';
-        return '<div class="kb-card" data-id="'+t.id+'" data-col="'+col.id+'" style="display:flex;align-items:stretch;padding:0;'+kBorderStyle+'" onclick="openDetail('+t.id+')">'
+        return '<div class="kb-card" data-id="'+t.id+'" data-col="'+col.id+'" style="display:flex;align-items:stretch;padding:0;'+kBgStyle+'" onclick="openDetail('+t.id+')">'
           +handle+'<div style="flex:1;padding:10px 12px;min-width:0">'
-          +'<div class="kb-card-title">'+t.desc+'</div>'
-          +'<div class="kb-card-meta">'+pri+due+av+colorDot+'</div>'+moveBtn
+          +'<div class="kb-card-title" style="'+kTc+'">'+t.desc+'</div>'
+          +'<div class="kb-card-meta" style="'+kSc+'">'+pri+due+av+colorDot+'</div>'+moveBtn
           +'</div></div>';
       }
-      return '<div class="kb-card" draggable="true" data-id="'+t.id+'" ondragstart="kbDragStart(event)" onclick="openDetail('+t.id+')" style="'+kBorderStyle+'">'
-        +'<div class="kb-card-title">'+t.desc+'</div>'
-        +'<div class="kb-card-meta">'+pri+due+av+colorDot+'</div>'+moveBtn+'</div>';
+      return '<div class="kb-card" draggable="true" data-id="'+t.id+'" ondragstart="kbDragStart(event)" onclick="openDetail('+t.id+')" style="'+kBgStyle+'">'
+        +'<div class="kb-card-title" style="'+kTc+'">'+t.desc+'</div>'
+        +'<div class="kb-card-meta" style="'+kSc+'">'+pri+due+av+colorDot+'</div>'+moveBtn+'</div>';
     }).join('');
     return '<div class="kb-col" data-status="'+col.id+'" ondragover="kbDragOver(event)" ondrop="kbDrop(event)" ondragleave="kbDragLeave(event)">'
       +'<div class="kb-col-header"><span class="kb-col-title" style="color:'+col.color+'">'+col.label+'</span><span class="kb-col-count">'+tasks.length+'</span></div>'
