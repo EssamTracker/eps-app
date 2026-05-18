@@ -2684,6 +2684,7 @@ load();
     <button class="eps-help-tab" data-eps-help-tab="modules"  type="button">Modules</button>
     <button class="eps-help-tab" data-eps-help-tab="settings" type="button">Settings &amp; Sync</button>
     <button class="eps-help-tab" data-eps-help-tab="tips"     type="button">Tips</button>
+    <button class="eps-help-tab" data-eps-help-tab="deploy"   type="button">🚀 Deploy</button>
     <button class="eps-help-tab" data-eps-help-tab="feedback" type="button">Contact</button>
   </div>
   <div class="eps-help-body">
@@ -2747,6 +2748,52 @@ load();
     </section>
 
     
+
+    <section class="eps-help-section" data-eps-help-section="deploy">
+      <div class="eps-help-card"><h3>🚀 Deploy Essam Tracker to any host</h3><p>The entire application is a <b>single file</b> — <code style="background:var(--bg4);padding:1px 5px;border-radius:4px;font-size:11px">index.html</code>. You only need to upload that one file to any web server or static hosting service and it runs immediately. No backend, no database, no build step needed.</p><div class="eps-help-tip">Your data is stored in the browser where the app is opened — not on the server. Back up regularly using GitHub Sync.</div></div>
+
+      <div class="eps-help-card"><h3>Option 1 — GitHub Pages (Free &amp; Recommended)</h3>
+        <div class="eps-help-flow">
+          <div class="eps-help-step"><div class="eps-help-num">1</div><div><b>Create a GitHub account</b><span>Go to <b>github.com</b> → Sign up. If you already have an account, sign in.</span></div></div>
+          <div class="eps-help-step"><div class="eps-help-num">2</div><div><b>Create a new repository</b><span>Click the <b>+</b> button → <b>New repository</b>. Give it a name (e.g. <code style="background:var(--bg4);padding:1px 4px;border-radius:3px;font-size:11px">my-tracker</code>). Set it to <b>Public</b>. Tick <b>Add a README file</b>. Click <b>Create repository</b>.</span></div></div>
+          <div class="eps-help-step"><div class="eps-help-num">3</div><div><b>Upload index.html</b><span>Inside your new repo, click <b>Add file → Upload files</b>. Drag and drop <code style="background:var(--bg4);padding:1px 4px;border-radius:3px;font-size:11px">index.html</code> into the upload area. Scroll down and click <b>Commit changes</b>.</span></div></div>
+          <div class="eps-help-step"><div class="eps-help-num">4</div><div><b>Enable GitHub Pages</b><span>Go to the repo <b>Settings</b> tab → scroll to <b>Pages</b> in the left menu → under <b>Branch</b> select <b>main</b> and folder <b>/ (root)</b> → click <b>Save</b>.</span></div></div>
+          <div class="eps-help-step"><div class="eps-help-num">5</div><div><b>Get your URL</b><span>After 1–2 minutes, GitHub shows your live URL at the top of the Pages section: <code style="background:var(--bg4);padding:1px 4px;border-radius:3px;font-size:11px">https://username.github.io/my-tracker/</code>. Open it and the app is live.</span></div></div>
+        </div>
+        <div class="eps-help-tip">To update the app: upload a new index.html and commit. GitHub Pages refreshes automatically within a minute.</div>
+      </div>
+
+      <div class="eps-help-card"><h3>Option 2 — Netlify Drop (Instant, no account needed)</h3>
+        <div class="eps-help-flow">
+          <div class="eps-help-step"><div class="eps-help-num">1</div><div><b>Put index.html in a folder</b><span>Create a folder on your computer (e.g. <code style="background:var(--bg4);padding:1px 4px;border-radius:3px;font-size:11px">tracker-app</code>) and place <code style="background:var(--bg4);padding:1px 4px;border-radius:3px;font-size:11px">index.html</code> inside it.</span></div></div>
+          <div class="eps-help-step"><div class="eps-help-num">2</div><div><b>Open Netlify Drop</b><span>Go to <b>app.netlify.com/drop</b> in your browser.</span></div></div>
+          <div class="eps-help-step"><div class="eps-help-num">3</div><div><b>Drag the folder</b><span>Drag the entire folder (not just the file) onto the Netlify Drop page. Netlify deploys it instantly.</span></div></div>
+          <div class="eps-help-step"><div class="eps-help-num">4</div><div><b>Copy your URL</b><span>Netlify gives you a random URL like <code style="background:var(--bg4);padding:1px 4px;border-radius:3px;font-size:11px">https://random-name.netlify.app</code>. Create a free account to keep the URL and update the app later.</span></div></div>
+        </div>
+        <div class="eps-help-tip">Best for sharing a quick demo. Create a Netlify account to set a custom name and update easily.</div>
+      </div>
+
+      <div class="eps-help-card"><h3>Option 3 — Vercel</h3>
+        <div class="eps-help-flow">
+          <div class="eps-help-step"><div class="eps-help-num">1</div><div><b>Create a Vercel account</b><span>Go to <b>vercel.com</b> → Sign up (you can use your GitHub account).</span></div></div>
+          <div class="eps-help-step"><div class="eps-help-num">2</div><div><b>Create a new project</b><span>Dashboard → <b>Add New → Project</b>. Choose <b>Upload</b> or connect your GitHub repo that already has the index.html file.</span></div></div>
+          <div class="eps-help-step"><div class="eps-help-num">3</div><div><b>Deploy</b><span>Vercel detects a static site automatically. Click <b>Deploy</b>. Within seconds your app is live at <code style="background:var(--bg4);padding:1px 4px;border-radius:3px;font-size:11px">https://project-name.vercel.app</code>.</span></div></div>
+          <div class="eps-help-step"><div class="eps-help-num">4</div><div><b>Connect a custom domain (optional)</b><span>Project Settings → Domains → add your own domain name if you have one.</span></div></div>
+        </div>
+      </div>
+
+      <div class="eps-help-card"><h3>Option 4 — Any traditional web hosting (cPanel)</h3>
+        <div class="eps-help-flow">
+          <div class="eps-help-step"><div class="eps-help-num">1</div><div><b>Log in to your hosting cPanel</b><span>Most providers give you a cPanel link when you buy hosting — usually at <code style="background:var(--bg4);padding:1px 4px;border-radius:3px;font-size:11px">yourdomain.com/cpanel</code>.</span></div></div>
+          <div class="eps-help-step"><div class="eps-help-num">2</div><div><b>Open File Manager</b><span>Inside cPanel, click <b>File Manager</b>. Navigate to the <code style="background:var(--bg4);padding:1px 4px;border-radius:3px;font-size:11px">public_html</code> folder (this is your website root).</span></div></div>
+          <div class="eps-help-step"><div class="eps-help-num">3</div><div><b>Upload index.html</b><span>Click <b>Upload</b> → choose <code style="background:var(--bg4);padding:1px 4px;border-radius:3px;font-size:11px">index.html</code> from your computer → wait for upload to complete.</span></div></div>
+          <div class="eps-help-step"><div class="eps-help-num">4</div><div><b>Open your domain</b><span>Go to your domain in any browser — the app loads immediately. No other configuration needed.</span></div></div>
+        </div>
+        <div class="eps-help-tip">If your domain already has another site, upload index.html inside a subfolder (e.g. <code style="background:var(--bg4);padding:1px 4px;border-radius:3px;font-size:11px">public_html/tracker/</code>) and access it at <code style="background:var(--bg4);padding:1px 4px;border-radius:3px;font-size:11px">yourdomain.com/tracker/</code>.</div>
+      </div>
+
+      <div class="eps-help-card"><h3>After deploying — keep your data safe</h3><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">☁</span><span>Data is stored in the <b>browser</b> where the app is opened — not on the server. Set up GitHub Sync to back up your data (Settings &amp; Sync tab).</span></div><div class="eps-help-item"><span class="eps-help-dot">📤</span><span>Push to GitHub Sync after any major data entry to keep a backup current.</span></div><div class="eps-help-item"><span class="eps-help-dot">🔄</span><span>To update the app to a new version: just replace index.html on your host. Your browser data is separate and will not be affected.</span></div><div class="eps-help-item"><span class="eps-help-dot">👥</span><span>Each person who opens the app URL has their own isolated browser data. For shared data, all users must use GitHub Sync with the same Gist token.</span></div></div></div>
+    </section>
 
     <section class="eps-help-section" data-eps-help-section="feedback">
       <div class="eps-help-card"><h3>Feedback &amp; Support</h3><p>For feedback, suggestions, or any issue, contact the application owner directly.</p><div class="eps-help-contact-row"><span>📧</span><b>Email</b><a href="mailto:zereseos@hotmail.com">zereseos@hotmail.com</a></div><div class="eps-help-contact-row"><span>📱</span><b>Mobile</b><a href="tel:+97360021006">0097360021006</a></div></div>
