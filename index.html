@@ -2633,6 +2633,30 @@ function exportCurrentProjectReport(){
 }
 
 
+function applyModuleSettings(){
+  var s=data.settings||{};
+  var lpoBtn=document.getElementById('nav-lpo-btn');
+  if(lpoBtn)lpoBtn.style.display=s.showLPO?'':'none';
+  var priceBtn=document.getElementById('nav-price-btn');
+  if(priceBtn)priceBtn.style.display=s.showPrice?'':'none';
+  if(!s.showLPO&&document.getElementById('view-lpo')&&document.getElementById('view-lpo').style.display==='block')
+    showView('dashboard',document.querySelector('.nav-item.active'));
+  if(!s.showPrice&&document.getElementById('view-prices')&&document.getElementById('view-prices').style.display==='block')
+    showView('dashboard',document.querySelector('.nav-item.active'));
+}
+function openAppSettings(){
+  if(!data.settings)data.settings={showLPO:false,showPrice:false};
+  document.getElementById('settings-lpo-toggle').checked=!!data.settings.showLPO;
+  document.getElementById('settings-price-toggle').checked=!!data.settings.showPrice;
+  openModal('app-settings-modal');
+}
+function saveAppSettings(){
+  if(!data.settings)data.settings={};
+  data.settings.showLPO=document.getElementById('settings-lpo-toggle').checked;
+  data.settings.showPrice=document.getElementById('settings-price-toggle').checked;
+  save();
+}
+
 load();
 </script>
 
@@ -2885,6 +2909,7 @@ plBtn.className='nav-item';
 plBtn.innerHTML=`<svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M4 8h8M4 5h5M4 11h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Price Library<span class="nav-badge" id="price-badge">0</span>`;
 plBtn.onclick=function(){showView('prices',this);};
 trashBtn.parentNode.insertBefore(plBtn,trashBtn);
+if(typeof applyModuleSettings==='function')applyModuleSettings();
 
 // ---- VIEW ----
 const content=document.querySelector('.content');
@@ -5598,33 +5623,6 @@ Essam Procurement Solution`);
 var _taskView='list';
 var _dragId=null;
 var _fbDrag={active:false,id:null,startX:0,startY:0,origX:0,origY:0};
-
-/* ── app settings & module visibility ── */
-function applyModuleSettings(){
-  var s=data.settings||{};
-  var lpoBtn=document.getElementById('nav-lpo-btn');
-  if(lpoBtn)lpoBtn.style.display=s.showLPO?'':'none';
-  var priceBtn=document.getElementById('nav-price-btn');
-  if(priceBtn)priceBtn.style.display=s.showPrice?'':'none';
-  // redirect to dashboard if current view was just disabled
-  var cur=document.querySelector('.content>[id^="view-"]');
-  if(!s.showLPO&&document.getElementById('view-lpo')&&document.getElementById('view-lpo').style.display==='block')
-    showView('dashboard',document.querySelector('.nav-item[onclick*="dashboard"]'));
-  if(!s.showPrice&&document.getElementById('view-prices')&&document.getElementById('view-prices').style.display==='block')
-    showView('dashboard',document.querySelector('.nav-item[onclick*="dashboard"]'));
-}
-function openAppSettings(){
-  if(!data.settings)data.settings={showLPO:false,showPrice:false};
-  document.getElementById('settings-lpo-toggle').checked=!!data.settings.showLPO;
-  document.getElementById('settings-price-toggle').checked=!!data.settings.showPrice;
-  openModal('app-settings-modal');
-}
-function saveAppSettings(){
-  if(!data.settings)data.settings={};
-  data.settings.showLPO=document.getElementById('settings-lpo-toggle').checked;
-  data.settings.showPrice=document.getElementById('settings-price-toggle').checked;
-  save();
-}
 
 /* ── reorder mode toggle ── */
 function toggleReorderMode(){
