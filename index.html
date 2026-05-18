@@ -4094,6 +4094,7 @@ window.renderLPO=function(){
 // ═══════════════════════════════════════════════════════════
 // REPORTS MODULE v2 — Fixed
 // ═══════════════════════════════════════════════════════════
+const H=typeof escapeHtml==='function'?escapeHtml:function(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));};
 
 // ── CSS ─────────────────────────────────────────────────────
 const rptCSS=`.rpt-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
@@ -4235,10 +4236,10 @@ window.renderReports=function(){
   const hdrHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><span class="section-title">Reports & Analytics</span><button class="rpt-print-btn pr" onclick="window.rptPrint('all')">🖨 Print Full Report</button></div>`;
 
   const noFilter=['lpo','prices'];
-  const filterBar=noFilter.includes(window._rptTab)?'':rptFilterBar();
-
+  let filterBar='';
   let body='<div style="padding:20px;color:var(--text3);text-align:center">Loading...</div>';
   try{
+    if(!noFilter.includes(window._rptTab)) filterBar=rptFilterBar();
     const tab=window._rptTab;
     if(tab==='overview') body=rptOverview();
     else if(tab==='tasks') body=rptTasks();
