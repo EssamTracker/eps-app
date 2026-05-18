@@ -4178,7 +4178,10 @@ window.renderReports=function(){
   const el=document.getElementById('view-reports');
   if(!el)return;
 
-  const tabDefs=[['overview','📊 Overview'],['tasks','✅ Tasks'],['lpo','📦 LPO'],['team','👥 Team'],['prices','💰 Prices']];
+  const _s=data.settings||{};
+  const tabDefs=[['overview','📊 Overview'],['tasks','✅ Tasks'],...(_s.showLPO?[['lpo','📦 LPO']]:[]],['team','👥 Team'],...(_s.showPrice?[['prices','💰 Prices']]:[])];
+  if(window._rptTab==='lpo'&&!_s.showLPO)window._rptTab='overview';
+  if(window._rptTab==='prices'&&!_s.showPrice)window._rptTab='overview';
   const tabsHTML=`<div class="rpt-tabs">${tabDefs.map(([k,l])=>`<button class="rpt-tab${window._rptTab===k?' active':''}" onclick="window._rptTab='${k}';window.renderReports()">${l}</button>`).join('')}</div>`;
   const hdrHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><span class="section-title">Reports & Analytics</span><button class="rpt-print-btn pr" onclick="window.rptPrint('all')">🖨 Print Full Report</button></div>`;
 
@@ -4238,12 +4241,13 @@ function rptOverview(){
   ].filter(b=>b.v>0);
   const pMax=Math.max.apply(null,pBars.map(b=>b.v).concat([1]));
 
+  const showLPO=(data.settings||{}).showLPO;
   return`
 <div class="rpt-kpi">
   ${rKPI(total,'Total Tasks',rate+'% done','var(--blue)')}
   ${rKPI(ov,'Overdue',tasks.filter(t=>t.priority==='urgent'&&t.status!=='done').length+' urgent','var(--red)')}
-  ${rKPI(totalL,'Total LPOs',sdnL+' SDN Only','var(--accent)')}
-  ${rKPI(qar?qar.toLocaleString()+' QAR':'—','LPO Value',doneL+' complete','var(--today)')}
+  ${showLPO?rKPI(totalL,'Total LPOs',sdnL+' SDN Only','var(--accent)'):''}
+  ${showLPO?rKPI(qar?qar.toLocaleString()+' QAR':'—','LPO Value',doneL+' complete','var(--today)'):''}
 </div>
 <div class="rpt-grid">
   <div class="rpt-card">
@@ -4255,7 +4259,7 @@ function rptOverview(){
       </div>
     </div>
   </div>
-  <div class="rpt-card">
+  ${showLPO?`<div class="rpt-card">
     <div class="rpt-card-hdr"><span class="rpt-card-title">📦 LPO Status</span><button class="rpt-print-btn" onclick="window.rptPrint('lpo')">🖨</button></div>
     <div class="rpt-card-body">
       <div class="rpt-donut-layout">
@@ -4263,7 +4267,7 @@ function rptOverview(){
         ${rLegend(lpoSegs,totalL)}
       </div>
     </div>
-  </div>
+  </div>`:''}
   <div class="rpt-card">
     <div class="rpt-card-hdr"><span class="rpt-card-title">👥 Tasks by Member</span></div>
     <div class="rpt-card-body">${rBars(mBars,mMax,i=>rMC(i.id))}</div>
