@@ -4139,7 +4139,16 @@ const rptCSS=`.rpt-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px
 .rpt-print-btn{padding:5px 11px;border-radius:7px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-family:'DM Sans',sans-serif;transition:all .15s}
 .rpt-print-btn:hover{color:var(--text);border-color:var(--text3)}
 .rpt-print-btn.pr{background:var(--accent);color:#fff;border-color:var(--accent)}
-.rpt-donut-layout{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}`;
+.rpt-donut-layout{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.rpt-filter-bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:14px}
+.rpt-filter-sel{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:5px 9px;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;cursor:pointer;outline:none;min-width:130px}
+.rpt-filter-sel:focus{border-color:var(--accent)}
+.rpt-filter-date{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:4px 8px;font-size:11px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none}
+.rpt-filter-date:focus{border-color:var(--accent)}
+.rpt-filter-lbl{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:5px}
+.rpt-filter-clear{padding:5px 11px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--red);background:rgba(255,95,109,.1);color:var(--red);font-family:'DM Sans',sans-serif;transition:all .15s}
+.rpt-filter-clear:hover{background:rgba(255,95,109,.2)}
+.rpt-filter-badge{font-size:9px;padding:2px 7px;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;text-transform:uppercase;letter-spacing:1px}`;
 
 if(!document.getElementById('rpt-css')){const s=document.createElement('style');s.id='rpt-css';s.textContent=rptCSS;document.head.appendChild(s);}
 
@@ -4172,6 +4181,38 @@ function rKPI(num,lbl,sub,color){
 
 // ── Tab state ────────────────────────────────────────────────
 window._rptTab='overview';
+window._rptF=window._rptF||{project:'',assignee:'',dateFrom:'',dateTo:''};
+
+// ── Filter helpers ───────────────────────────────────────────
+function rptFilter(tasks){
+  const f=window._rptF||{};
+  let r=tasks;
+  if(f.project) r=r.filter(t=>t.project===f.project);
+  if(f.assignee) r=r.filter(t=>t.assignee===f.assignee);
+  if(f.dateFrom) r=r.filter(t=>t.due&&new Date(t.due)>=new Date(f.dateFrom));
+  if(f.dateTo) r=r.filter(t=>t.due&&new Date(t.due)<=new Date(f.dateTo+'T23:59:59'));
+  return r;
+}
+
+function rptFilterBar(){
+  const f=window._rptF||{};
+  const projects=[...new Set((data.tasks||[]).map(t=>t.project).filter(Boolean))].sort();
+  const members=data.members||[];
+  const active=f.project||f.assignee||f.dateFrom||f.dateTo;
+  return`<div class="rpt-filter-bar">
+    <select class="rpt-filter-sel" onchange="window._rptF.project=this.value;renderReports()">
+      <option value="">All Projects</option>
+      ${projects.map(p=>`<option value="${H(p)}"${f.project===p?' selected':''}>${H(p)}</option>`).join('')}
+    </select>
+    <select class="rpt-filter-sel" onchange="window._rptF.assignee=this.value;renderReports()">
+      <option value="">All Members</option>
+      ${members.map(m=>`<option value="${m.id}"${f.assignee===m.id?' selected':''}>${H(m.name)}</option>`).join('')}
+    </select>
+    <label class="rpt-filter-lbl">From <input type="date" class="rpt-filter-date" value="${f.dateFrom||''}" onchange="window._rptF.dateFrom=this.value;renderReports()"></label>
+    <label class="rpt-filter-lbl">To <input type="date" class="rpt-filter-date" value="${f.dateTo||''}" onchange="window._rptF.dateTo=this.value;renderReports()"></label>
+    ${active?`<button class="rpt-filter-clear" onclick="window._rptF={project:'',assignee:'',dateFrom:'',dateTo:''};renderReports()">✕ Clear</button><span class="rpt-filter-badge">Filtered</span>`:''}
+  </div>`;
+}
 
 // ── Main render ──────────────────────────────────────────────
 window.renderReports=function(){
@@ -4179,30 +4220,43 @@ window.renderReports=function(){
   if(!el)return;
 
   const _s=data.settings||{};
-  const tabDefs=[['overview','📊 Overview'],['tasks','✅ Tasks'],...(_s.showLPO?[['lpo','📦 LPO']]:[]],['team','👥 Team'],...(_s.showPrice?[['prices','💰 Prices']]:[])];
+  const tabDefs=[
+    ['overview','📊 Overview'],
+    ['tasks','✅ Tasks'],
+    ['byproject','📁 By Project'],
+    ['bymember','👥 By Member'],
+    ['timeline','📅 Timeline'],
+    ...(_s.showLPO?[['lpo','📦 LPO']]:[]),
+    ...(_s.showPrice?[['prices','💰 Prices']]:[])
+  ];
   if(window._rptTab==='lpo'&&!_s.showLPO)window._rptTab='overview';
   if(window._rptTab==='prices'&&!_s.showPrice)window._rptTab='overview';
   const tabsHTML=`<div class="rpt-tabs">${tabDefs.map(([k,l])=>`<button class="rpt-tab${window._rptTab===k?' active':''}" onclick="window._rptTab='${k}';window.renderReports()">${l}</button>`).join('')}</div>`;
   const hdrHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><span class="section-title">Reports & Analytics</span><button class="rpt-print-btn pr" onclick="window.rptPrint('all')">🖨 Print Full Report</button></div>`;
+
+  const noFilter=['lpo','prices'];
+  const filterBar=noFilter.includes(window._rptTab)?'':rptFilterBar();
 
   let body='<div style="padding:20px;color:var(--text3);text-align:center">Loading...</div>';
   try{
     const tab=window._rptTab;
     if(tab==='overview') body=rptOverview();
     else if(tab==='tasks') body=rptTasks();
+    else if(tab==='byproject') body=rptByProject();
+    else if(tab==='bymember') body=rptByMember();
+    else if(tab==='timeline') body=rptTimeline();
     else if(tab==='lpo') body=rptLPO();
-    else if(tab==='team') body=rptTeam();
     else if(tab==='prices') body=rptPrices();
   }catch(e){
     body=`<div style="padding:14px;background:rgba(255,95,109,.1);border-radius:8px;color:var(--red);font-size:12px">⚠ Error: ${e.message}<br><small style="color:var(--text3)">${e.stack?e.stack.split('\n')[1]:''}</small></div>`;
     console.error('Reports error:',e);
   }
-  el.innerHTML=hdrHTML+tabsHTML+body;
+  el.innerHTML=hdrHTML+tabsHTML+filterBar+body;
 };
 
 // ── Overview ─────────────────────────────────────────────────
 function rptOverview(){
-  const tasks=data.tasks||[];
+  const tasks=rptFilter(data.tasks||[]);
   const lpos=data.lpoItems||[];
   const total=tasks.length;
   const done=tasks.filter(t=>t.status==='done').length;
@@ -4281,7 +4335,7 @@ function rptOverview(){
 
 // ── Tasks ────────────────────────────────────────────────────
 function rptTasks(){
-  const tasks=data.tasks||[];
+  const tasks=rptFilter(data.tasks||[]);
   const ov=tasks.filter(t=>t.due&&new Date(t.due)<new Date()&&t.status!=='done').sort((a,b)=>new Date(a.due)-new Date(b.due));
   const inP=tasks.filter(t=>t.status==='in-progress');
   const pin=tasks.filter(t=>t.pinToday&&t.status!=='done');
@@ -4298,6 +4352,106 @@ ${ov.length?`<div class="rpt-sec">⚠ Overdue (${ov.length})</div><div class="rp
 ${inP.length?`<div class="rpt-card"><div class="rpt-card-body" style="padding:0"><table class="rpt-table">${thead}<tbody>${inP.map(t=>trow(t,'<span class="tag tag-medium">In Progress</span>')).join('')}</tbody></table></div></div>`:`<div style="font-size:12px;color:var(--text3);margin-bottom:13px">Nothing in progress</div>`}
 <div class="rpt-sec">☀ Today's Focus (${pin.length})</div>
 ${pin.length?`<div class="rpt-card"><div class="rpt-card-body" style="padding:0"><table class="rpt-table">${thead}<tbody>${pin.map(t=>trow(t,'<span class="tag-today-badge">Today</span>')).join('')}</tbody></table></div></div>`:`<div style="font-size:12px;color:var(--text3)">Nothing pinned for today</div>`}`;
+}
+
+// ── By Project ───────────────────────────────────────────────
+function rptByProject(){
+  const allTasks=rptFilter(data.tasks||[]);
+  const projects=[...new Set(allTasks.map(t=>t.project).filter(Boolean))].sort();
+  if(!projects.length)return'<div class="empty-state">No projects with tasks found.</div>';
+  return`<div class="rpt-grid">${projects.map(proj=>{
+    const pt=allTasks.filter(t=>t.project===proj);
+    const dn=pt.filter(t=>t.status==='done').length;
+    const ip=pt.filter(t=>t.status==='in-progress').length;
+    const ov=pt.filter(t=>t.due&&new Date(t.due)<new Date()&&t.status!=='done').length;
+    const rate=pt.length?Math.round(dn/pt.length*100):0;
+    const mems=[...new Set(pt.map(t=>t.assignee).filter(Boolean))].map(id=>(data.members||[]).find(m=>m.id===id)).filter(Boolean);
+    return`<div class="rpt-card">
+      <div class="rpt-card-hdr">
+        <span class="rpt-card-title">📁 ${H(proj)}</span>
+        <span style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--accent)">${rate}%</span>
+      </div>
+      <div class="rpt-card-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
+          ${[['Total',pt.length,'var(--text)'],['Done',dn,'var(--green)'],['Active',ip,'var(--blue)'],['Overdue',ov,'var(--red)']].map(([l,v,c])=>`<div style="text-align:center;padding:6px;background:var(--bg3);border-radius:6px"><div style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:${c}">${v}</div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">${l}</div></div>`).join('')}
+        </div>
+        <div style="height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-bottom:${mems.length?'9px':'0'}">
+          <div style="width:${rate}%;height:100%;background:var(--accent);border-radius:3px;transition:.3s"></div>
+        </div>
+        ${mems.length?`<div style="font-size:10px;color:var(--text3)">Team: ${mems.map(m=>`<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 6px;background:var(--bg4);border-radius:4px;margin:1px 2px"><span style="width:10px;height:10px;border-radius:50%;background:${rMC(m.id)};display:inline-block;flex-shrink:0"></span><span style="color:var(--text2)">${H(m.name.split(' ')[0])}</span></span>`).join('')}</div>`:''}
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── By Member ────────────────────────────────────────────────
+function rptByMember(){
+  const allTasks=rptFilter(data.tasks||[]);
+  const members=data.members||[];
+  if(!members.length)return'<div class="empty-state">No team members yet.</div>';
+  return`<div class="rpt-grid">${members.map(m=>{
+    const mt=allTasks.filter(t=>t.assignee===m.id);
+    const dn=mt.filter(t=>t.status==='done').length;
+    const ip=mt.filter(t=>t.status==='in-progress').length;
+    const ov=mt.filter(t=>t.due&&new Date(t.due)<new Date()&&t.status!=='done').length;
+    const rate=mt.length?Math.round(dn/mt.length*100):0;
+    const col=rMC(m.id);
+    const projs=[...new Set(mt.map(t=>t.project).filter(Boolean))];
+    return`<div class="rpt-card">
+      <div class="rpt-card-hdr">
+        <span class="rpt-card-title" style="display:flex;align-items:center;gap:8px">
+          <span style="width:28px;height:28px;border-radius:50%;background:${col};display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff">${rMI(m.name)}</span>
+          <span><div>${H(m.name)}</div>${m.role?`<div style="font-size:10px;color:var(--text3);font-weight:400">${H(m.role)}</div>`:''}</span>
+        </span>
+        <span style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:${col}">${rate}%</span>
+      </div>
+      <div class="rpt-card-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
+          ${[['Total',mt.length,'var(--text)'],['Done',dn,'var(--green)'],['Active',ip,'var(--blue)'],['Overdue',ov,'var(--red)']].map(([l,v,c])=>`<div style="text-align:center;padding:6px;background:var(--bg3);border-radius:6px"><div style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:${c}">${v}</div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">${l}</div></div>`).join('')}
+        </div>
+        <div style="height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-bottom:${projs.length||ov?'9px':'0'}">
+          <div style="width:${rate}%;height:100%;background:${col};border-radius:3px;transition:.3s"></div>
+        </div>
+        ${projs.length?`<div style="font-size:10px;color:var(--text3);margin-bottom:4px">Projects: ${projs.map(p=>`<span style="display:inline-block;padding:1px 6px;background:var(--bg4);border-radius:4px;margin:1px 2px;color:var(--text2)">${H(p)}</span>`).join('')}</div>`:''}
+        ${ov?`<div style="font-size:10px;color:var(--red)">⚠ ${ov} overdue task${ov>1?'s':''}</div>`:''}
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── Timeline ─────────────────────────────────────────────────
+function rptTimeline(){
+  const f=window._rptF||{};
+  let base=(data.tasks||[]).filter(t=>(!f.project||t.project===f.project)&&(!f.assignee||t.assignee===f.assignee));
+  const now=new Date();
+  const todayStr=now.toISOString().slice(0,10);
+  const dFrom=f.dateFrom||(todayStr.slice(0,8)+'01');
+  const dTo=f.dateTo||todayStr;
+  const fromDate=new Date(dFrom);
+  const toDate=new Date(dTo+'T23:59:59');
+  const inRange=base.filter(t=>t.due&&new Date(t.due)>=fromDate&&new Date(t.due)<=toDate);
+  const overdue=base.filter(t=>t.due&&new Date(t.due)<fromDate&&t.status!=='done');
+  const upcoming=base.filter(t=>t.due&&new Date(t.due)>toDate&&t.status!=='done');
+  const completed=inRange.filter(t=>t.status==='done');
+  function trow(t,badge){
+    const m=(data.members||[]).find(m=>m.id===t.assignee);
+    const due=t.due?new Date(t.due).toLocaleDateString([],{day:'numeric',month:'short',year:'numeric'}):'-';
+    const isOv=t.due&&new Date(t.due)<new Date()&&t.status!=='done';
+    return`<tr><td style="font-weight:500;color:var(--text)">${H(t.desc)}</td><td>${H(t.project||'-')}</td><td><span class="tag tag-${t.priority}">${t.priority}</span></td><td>${m?`<span style="font-size:11px">${H(m.name.split(' ')[0])}</span>`:'-'}</td><td style="${isOv?'color:var(--red);font-weight:600':''}">${due}</td><td>${badge}</td></tr>`;
+  }
+  const thead=`<thead><tr><th>Task</th><th>Project</th><th>Priority</th><th>Assigned</th><th>Due</th><th>Status</th></tr></thead>`;
+  const dFromDisp=fromDate.toLocaleDateString([],{day:'numeric',month:'short',year:'numeric'});
+  const dToDisp=toDate.toLocaleDateString([],{day:'numeric',month:'short',year:'numeric'});
+  return`
+<div class="rpt-kpi">
+  ${rKPI(inRange.length,'Due in Period',dFromDisp+' – '+dToDisp,'var(--blue)')}
+  ${rKPI(completed.length,'Completed','in period','var(--green)')}
+  ${rKPI(overdue.length,'Still Overdue','before period start','var(--red)')}
+  ${rKPI(upcoming.length,'Upcoming','after period end','var(--text3)')}
+</div>
+${overdue.length?`<div class="rpt-sec">🔴 Overdue from before ${dFromDisp} (${overdue.length})</div><div class="rpt-card"><div class="rpt-card-body" style="padding:0"><table class="rpt-table">${thead}<tbody>${overdue.sort((a,b)=>new Date(a.due)-new Date(b.due)).map(t=>trow(t,'<span class="tag tag-urgent">Overdue</span>')).join('')}</tbody></table></div></div>`:''}
+${inRange.length?`<div class="rpt-sec">📅 Due ${dFromDisp} → ${dToDisp} (${inRange.length})</div><div class="rpt-card"><div class="rpt-card-body" style="padding:0"><table class="rpt-table">${thead}<tbody>${inRange.sort((a,b)=>new Date(a.due)-new Date(b.due)).map(t=>trow(t,t.status==='done'?'<span class="tag tag-low" style="color:var(--green)">Done</span>':'<span class="tag tag-medium">Pending</span>')).join('')}</tbody></table></div></div>`:`<div class="rpt-ok">✓ No tasks due in this period</div>`}
+${upcoming.length?`<div class="rpt-sec">⏳ Upcoming after ${dToDisp} (${upcoming.length})</div><div class="rpt-card"><div class="rpt-card-body" style="padding:0"><table class="rpt-table">${thead}<tbody>${upcoming.slice(0,15).sort((a,b)=>new Date(a.due)-new Date(b.due)).map(t=>trow(t,'<span class="tag tag-medium">Upcoming</span>')).join('')}</tbody></table></div></div>`:''}`;
 }
 
 // ── LPO ─────────────────────────────────────────────────────
@@ -4409,7 +4563,7 @@ window.rptPrint=function(section){
   const logo=document.querySelector('.logo img')?document.querySelector('.logo img').src:'';
   const now=new Date();
   const ds=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  const titles={tasks:'Task Report',lpo:'LPO Report',prices:'Price Report',team:'Team Report',all:'Full Report'};
+  const titles={tasks:'Task Report',lpo:'LPO Report',prices:'Price Report',team:'Team Report',byproject:'By Project Report',bymember:'By Member Report',timeline:'Timeline Report',all:'Full Report'};
   const PCSS=`<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;color:#1a1a2e;padding:28px 32px;font-size:12px;line-height:1.5}.hdr{display:flex;justify-content:space-between;margin-bottom:6px}.hl{display:flex;align-items:center;gap:12px}.hl img{width:44px;height:44px;object-fit:contain;border-radius:8px}.cn{font-family:monospace;font-size:18px;font-weight:700;letter-spacing:1px}.cs{font-size:9px;color:#9090a8;text-transform:uppercase;letter-spacing:1px;margin-top:2px}.rn{font-family:monospace;font-size:14px;font-weight:700;color:#6c63ff}.gd{font-size:11px;color:#5a5a72;margin-top:3px}.div{height:2px;background:linear-gradient(90deg,#6c63ff,#4da6ff);border-radius:2px;margin:12px 0 18px}.kpi{display:grid;gap:10px;margin-bottom:18px}.kc{border:1px solid #e8e8f0;border-radius:10px;padding:12px;border-top-width:2px;text-align:center}.kn{font-family:monospace;font-size:22px;font-weight:700}.kl{font-size:9px;color:#9090a8;text-transform:uppercase;letter-spacing:1px;margin-top:3px}.sec{font-size:10px;font-weight:700;color:#5a5a72;text-transform:uppercase;letter-spacing:2px;margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid #e8e8f0}table{width:100%;border-collapse:collapse;margin-bottom:14px;page-break-inside:avoid}th{text-align:left;padding:7px 9px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#5a5a72;border-bottom:2px solid #e8e8f0;background:#f8f8fc}td{padding:7px 9px;border-bottom:1px solid #f0f0f5;vertical-align:middle}tr:nth-child(even) td{background:#fafafa}tr:last-child td{border-bottom:none}.bp{background:#fcebeb;color:#a32d2d}.bh{background:#faeeda;color:#854f0b}.bm{background:#e6f1fb;color:#185fa5}.bl{background:#eaf3de;color:#3b6d11}.bg{background:#eaf3de;color:#3b6d11}.bi{background:#e6f1fb;color:#185fa5}.bn{background:#fef3e2;color:#854f0b}.bar{height:4px;background:#e8e8f0;border-radius:2px;display:inline-block;min-width:50px}.bf{height:100%;border-radius:2px}.foot{margin-top:24px;padding-top:10px;border-top:1px solid #e8e8f0;display:flex;justify-content:space-between;font-size:10px;color:#9090a8}.pba{position:fixed;top:14px;right:14px;display:flex;gap:8px}button{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600}.bpr{background:#6c63ff;color:#fff}.bcl{background:#f0f0f5}@media print{.pba{display:none}@page{margin:1.8cm 1.5cm;size:A4}}
 /* ===== Clean Project Row + Three Dots Menu ===== */
 #projects-nav .project-item{
@@ -4478,9 +4632,11 @@ window.rptPrint=function(section){
 
 </style>`;
 
+  const f=window._rptF||{};
+  const filterDesc=[f.project?'Project: '+f.project:'',f.assignee?'Member: '+((data.members||[]).find(m=>m.id===f.assignee)||{}).name:'',f.dateFrom?'From: '+f.dateFrom:'',f.dateTo?'To: '+f.dateTo:''].filter(Boolean).join(' · ');
   let content='';
   const lpos=data.lpoItems||[];
-  const tasks=data.tasks||[];
+  const tasks=rptFilter(data.tasks||[]);
 
   if(section==='tasks'||section==='all'){
     const done=tasks.filter(t=>t.status==='done').length;
@@ -4505,7 +4661,7 @@ window.rptPrint=function(section){
   }
 
   const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titles[section]||'Report'}</title>${PCSS}</head><body><div class="pba"><button class="bpr" onclick="window.print()">🖨 Print</button><button class="bcl" onclick="window.close()">✕</button></div><div class="hdr"><div class="hl">${logo?`<img src="${logo}">`:''}<div><div class="cn">Essam Tracker</div><div class="cs">Essam Tracker · BETA 7.00</div></div></div><div style="text-align:right"><div class="rn">${titles[section]||'Report'}</div><div class="gd">${ds}</div></div></div><div class="div"></div>${content}<div class="foot"><span>Essam Tracker · BETA 7.00</span><span>${ds}</span><span>Confidential</span></div></body></html>`);
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titles[section]||'Report'}</title>${PCSS}</head><body><div class="pba"><button class="bpr" onclick="window.print()">🖨 Print</button><button class="bcl" onclick="window.close()">✕</button></div><div class="hdr"><div class="hl">${logo?`<img src="${logo}">`:''}<div><div class="cn">Essam Tracker</div><div class="cs">Essam Tracker · BETA 7.00</div></div></div><div style="text-align:right"><div class="rn">${titles[section]||'Report'}</div><div class="gd">${ds}</div>${filterDesc?`<div style="font-size:9px;color:#6c63ff;margin-top:3px;font-weight:600">🔍 ${filterDesc}</div>`:''}</div></div><div class="div"></div>${content}<div class="foot"><span>Essam Tracker · BETA 7.00</span><span>${ds}</span><span>Confidential</span></div></body></html>`);
   w.document.close();
 };
 
