@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0f0f13">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="EPS">
+<meta name="apple-mobile-web-app-title" content="Essam Tracker">
 <link rel="apple-touch-icon" href="icon.png">
 <script>
 (function(){
@@ -22,7 +22,7 @@
   }
 })();
 </script>
-<title>Essam Procurement Solution</title>
+<title>Essam Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
@@ -1897,7 +1897,7 @@ Details:
 ${t.notes||'-'}
 
 Regards,
-Essam Procurement Solution`);
+Essam Tracker`);
   addNotification('Task emailed to '+m.name+': '+t.desc);
   save();
   window.open('mailto:'+encodeURIComponent(m.email)+'?subject='+subject+'&body='+body,'_blank');
@@ -2661,152 +2661,97 @@ load();
 </script>
 
 
-<!-- EPS Help Panel - independent add-on -->
+<!-- Essam Tracker Help Panel -->
 <button class="eps-help-launcher" id="epsHelpOpen" type="button" title="Application Guide">?</button>
 <div class="eps-help-backdrop" id="epsHelpBackdrop"></div>
 <aside class="eps-help-panel" id="epsHelpPanel" aria-hidden="true">
   <div class="eps-help-head">
     <div class="eps-help-mark">?</div>
     <div>
-      <div class="eps-help-title">Application Guide</div>
-      <div class="eps-help-sub">Practical guide for using Essam Procurement Solution as a procurement follow-up system.</div>
-      <div class="eps-help-version">Beta 5</div>
+      <div class="eps-help-title">Essam Tracker — Guide</div>
+      <div class="eps-help-sub">Full guide covering all features. Tap a tab to jump to any section.</div>
+      <div class="eps-help-version">v1.0</div>
     </div>
     <button class="eps-help-close" id="epsHelpClose" type="button">×</button>
   </div>
   <div class="eps-help-tabs">
-    <button class="eps-help-tab active" data-eps-help-tab="overview" type="button">Overview</button>
-    <button class="eps-help-tab" data-eps-help-tab="workflow" type="button">Workflow</button>
-    <button class="eps-help-tab" data-eps-help-tab="tasks" type="button">Tasks</button>
-    <button class="eps-help-tab" data-eps-help-tab="meetings" type="button">Meetings</button>
-    <button class="eps-help-tab" data-eps-help-tab="contacts" type="button">Contacts</button>
-    <button class="eps-help-tab" data-eps-help-tab="hashtags" type="button">Hashtags</button>
-    <button class="eps-help-tab" data-eps-help-tab="tips" type="button">Manager Tips</button>
-    <button class="eps-help-tab" data-eps-help-tab="feedback" type="button">Feedback</button>
+    <button class="eps-help-tab active" data-eps-help-tab="overview"  type="button">Overview</button>
+    <button class="eps-help-tab" data-eps-help-tab="tasks"    type="button">Tasks</button>
+    <button class="eps-help-tab" data-eps-help-tab="views"    type="button">Views</button>
+    <button class="eps-help-tab" data-eps-help-tab="organize" type="button">Projects &amp; Tags</button>
+    <button class="eps-help-tab" data-eps-help-tab="people"   type="button">Team &amp; Contacts</button>
+    <button class="eps-help-tab" data-eps-help-tab="meetings" type="button">Meetings &amp; Notes</button>
+    <button class="eps-help-tab" data-eps-help-tab="modules"  type="button">Modules</button>
+    <button class="eps-help-tab" data-eps-help-tab="settings" type="button">Settings &amp; Sync</button>
+    <button class="eps-help-tab" data-eps-help-tab="tips"     type="button">Tips</button>
+    <button class="eps-help-tab" data-eps-help-tab="feedback" type="button">Contact</button>
   </div>
   <div class="eps-help-body">
     <section class="eps-help-section active" data-eps-help-section="overview">
-      <div class="eps-help-card">
-        <h3>What this application is for</h3>
-        <p>This app is designed for procurement follow-up: tasks, projects, meetings, notes, contacts, reports, and daily priorities in one place.</p>
-        <p>The main goal is not to make your team write long reports. The goal is to capture the minimum useful information so you can see what is pending, who is responsible, and what needs action today.</p>
-        <div class="eps-help-tip">Best rule: every important follow-up should become a task linked to a project, owner, priority, and due date.</div>
-      </div>
-      <div class="eps-help-card">
-        <h3>What to use it for</h3>
-        <div class="eps-help-mini-grid">
-          <div class="eps-help-mini"><b>Daily follow-up</b><span>See today’s urgent work and pending actions.</span></div>
-          <div class="eps-help-mini"><b>Project control</b><span>Keep each task connected to the right project.</span></div>
-          <div class="eps-help-mini"><b>Team assignment</b><span>Know who is handling each procurement item.</span></div>
-          <div class="eps-help-mini"><b>Meeting tracking</b><span>Record meetings and convert decisions into tasks.</span></div>
-          <div class="eps-help-mini"><b>Supplier contacts</b><span>Keep supplier details and specialties searchable.</span></div>
-          <div class="eps-help-mini"><b>Reports</b><span>Review workload, status, and overdue actions quickly.</span></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="eps-help-section" data-eps-help-section="workflow">
-      <div class="eps-help-card">
-        <h3>Recommended procurement workflow</h3>
-        <div class="eps-help-flow">
-          <div class="eps-help-step"><div class="eps-help-num">1</div><div><b>Create project</b><span>Create the project first so all tasks, meetings, and notes have a clear location.</span></div></div>
-          <div class="eps-help-step"><div class="eps-help-num">2</div><div><b>Add task</b><span>Write a clear action title, assign owner, choose priority, set due date, and add attachment/email reference when needed.</span></div></div>
-          <div class="eps-help-step"><div class="eps-help-num">3</div><div><b>Follow daily</b><span>Use Today’s Focus for tasks and meetings that need attention today.</span></div></div>
-          <div class="eps-help-step"><div class="eps-help-num">4</div><div><b>Update status</b><span>Do not leave tasks stale. Update status, add comments, or attach the latest reference.</span></div></div>
-          <div class="eps-help-step"><div class="eps-help-num">5</div><div><b>Close properly</b><span>Mark complete only when the required action is actually finished, not just discussed.</span></div></div>
-        </div>
-      </div>
-      <div class="eps-help-card"><h3>Minimum data you should force the team to enter</h3><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">1</span><span>Project name</span></div><div class="eps-help-item"><span class="eps-help-dot">2</span><span>Task title / required action</span></div><div class="eps-help-item"><span class="eps-help-dot">3</span><span>Assigned person</span></div><div class="eps-help-item"><span class="eps-help-dot">4</span><span>Due date and priority</span></div><div class="eps-help-item"><span class="eps-help-dot">5</span><span>Important reference: file attachment, email link, quotation, or note</span></div></div></div>
+      <div class="eps-help-card"><h3>What is Essam Tracker?</h3><p>A complete work-tracking system for managing tasks, projects, meetings, notes, contacts, and team — all in one place. Built to reduce the gap between what is assigned and what actually gets done.</p><div class="eps-help-tip">Golden rule: every action must become a task with an owner, priority, and due date.</div></div>
+      <div class="eps-help-card"><h3>What’s inside</h3><div class="eps-help-mini-grid"><div class="eps-help-mini"><b>✅ Tasks</b><span>Create, assign, prioritise, track status, attach files, add comments.</span></div><div class="eps-help-mini"><b>☀ Today’s Focus</b><span>See only what needs action today.</span></div><div class="eps-help-mini"><b>📋 3 Views</b><span>List, Kanban board, and Free Board.</span></div><div class="eps-help-mini"><b>🎨 Task Colors</b><span>Color-code tasks — visible across all views.</span></div><div class="eps-help-mini"><b>📁 Projects</b><span>Group all work by project.</span></div><div class="eps-help-mini"><b>#️⃣ Hashtags</b><span>Cross-project labels like #payment or #delivery.</span></div><div class="eps-help-mini"><b>📅 Meetings</b><span>Schedule, repeat, convert to tasks.</span></div><div class="eps-help-mini"><b>📝 Notes</b><span>Quick notes linked to projects.</span></div><div class="eps-help-mini"><b>👥 Team</b><span>Add members and assign tasks.</span></div><div class="eps-help-mini"><b>📞 Contacts</b><span>Supplier and contractor directory.</span></div><div class="eps-help-mini"><b>📊 Reports</b><span>Completion rate, overdue, workload.</span></div><div class="eps-help-mini"><b>☁ Sync</b><span>Backup &amp; restore via GitHub Gist.</span></div></div></div>
+      <div class="eps-help-card"><h3>Quick start in 3 steps</h3><div class="eps-help-flow"><div class="eps-help-step"><div class="eps-help-num">1</div><div><b>Add your team</b><span>Go to Team → add members. You need at least one member to create tasks.</span></div></div><div class="eps-help-step"><div class="eps-help-num">2</div><div><b>Create a project</b><span>Click New Project in the sidebar. All tasks live inside a project.</span></div></div><div class="eps-help-step"><div class="eps-help-num">3</div><div><b>Add your first task</b><span>Click + New Task, fill in the details, and set a due date and priority.</span></div></div></div></div>
     </section>
 
     <section class="eps-help-section" data-eps-help-section="tasks">
-      <div class="eps-help-card"><h3>Tasks</h3><p>Tasks are the core of the system. Use them for real actions such as sending RFQ, following quotation, issuing comparison, preparing PO, getting approval, or closing supplier comments.</p><div class="eps-help-tip">Avoid vague tasks like “Follow supplier”. Write the action clearly: “Follow ABC for revised furniture quotation for Project X”.</div></div>
-      <div class="eps-help-card"><h3>Attachments, email links and Email Task</h3><p>Use attachment/file link to connect supporting documents such as quotations, comparison sheets, drawings, or approvals.</p><p>Use email link/reference when the task depends on an email thread. You can also use Email Task to open a ready email to the assigned team member, and the task will keep a log showing who it was sent to and when.</p><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">✓</span><span>The app prevents repeated identical links inside the same task.</span></div><div class="eps-help-item"><span class="eps-help-dot">✓</span><span>Use comments for updates, not for storing every document name.</span></div><div class="eps-help-item"><span class="eps-help-dot">✓</span><span>Keep title short, and put details in notes/comments only when needed.</span></div></div></div>
-      <div class="eps-help-card"><h3>Today’s Focus</h3><p>This is your execution list for today. It should include today’s due tasks, pinned priorities, and today’s meetings.</p><p>Do not put everything in Today’s Focus. If everything is urgent, nothing is urgent.</p></div>
-      <div class="eps-help-card"><h3>Hashtags on tasks</h3><p>Beyond the project, you can tag tasks with hashtags such as <b>#contracts</b>, <b>#payment</b>, or <b>#delivery</b>. This lets you group tasks by type of work across all projects.</p><div class="eps-help-tip">Open the <b>Hashtags</b> tab in this guide for the full workflow and recommended tags.</div></div>
+      <div class="eps-help-card"><h3>Creating tasks</h3><p>Every task needs: a clear description, an assignee, a project, a priority, and a due date. These five fields make follow-up possible.</p><div class="eps-help-tip">Write the action clearly: "Send revised quotation to ABC for Office Renovation" — not just "Follow ABC".</div></div>
+      <div class="eps-help-card"><h3>Task status</h3><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">○</span><span><b>Not Started</b> — created but no action taken yet.</span></div><div class="eps-help-item"><span class="eps-help-dot">◐</span><span><b>In Progress</b> — being actively worked on.</span></div><div class="eps-help-item"><span class="eps-help-dot">✓</span><span><b>Done</b> — fully completed. Task is crossed out automatically.</span></div></div><p style="margin-top:8px">Click the circle on the left of any task card to toggle Done quickly.</p></div>
+      <div class="eps-help-card"><h3>Priority levels</h3><div class="eps-help-mini-grid"><div class="eps-help-mini"><b style="color:#ef4444">Urgent</b><span>Needs action today. Use sparingly.</span></div><div class="eps-help-mini"><b style="color:#f97316">High</b><span>Important, should be done soon.</span></div><div class="eps-help-mini"><b style="color:#eab308">Medium</b><span>Normal follow-up pace.</span></div><div class="eps-help-mini"><b style="color:#6b7280">Low</b><span>Can wait, but still tracked.</span></div></div></div>
+      <div class="eps-help-card"><h3>Attachments &amp; Email Task</h3><p>Attach a file link or email thread URL to any task as a reference. Use <b>Email Task</b> (📧) to open a ready email to the assigned member — the task logs who it was sent to and when.</p></div>
+      <div class="eps-help-card"><h3>Comments &amp; updates</h3><p>Open a task → add comments to log progress. The last comment is shown on the card as a quick update. Use comments for status updates, not for storing document names.</p></div>
+      <div class="eps-help-card"><h3>Pin to Today / Follow-up</h3><p>Use ☀ to pin a task to Today's Focus. Use ⏰ to schedule a follow-up reminder for tomorrow.</p></div>
+      <div class="eps-help-card"><h3>Task color</h3><p>Click the small color dot (●) on any task card to assign a background color. The color appears in all three views — List, Kanban, and Free Board. Use colors to group tasks visually by urgency, team, or type.</p></div>
+    </section>
+
+    <section class="eps-help-section" data-eps-help-section="views">
+      <div class="eps-help-card"><h3>Three views for tasks</h3><p>Switch between views using the <b>☰ ⊞ ⊡</b> buttons at the top of All Tasks. Each view shows the same tasks — just presented differently.</p></div>
+      <div class="eps-help-card"><h3>☰ List view</h3><p>The default view. Shows all tasks as a scrollable list with full details: priority, due date, assignee, status, subtask count, and last comment.</p><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">↑↓</span><span>Sort by Newest, Priority, Due Date, Status, or Manual order.</span></div><div class="eps-help-item"><span class="eps-help-dot">🔍</span><span>Use search and filters to narrow down by status, priority, or assignee.</span></div></div></div>
+      <div class="eps-help-card"><h3>⊞ Kanban view</h3><p>Three columns: <b>Not Started · In Progress · Done</b>. Drag a card between columns to change its status instantly. Each column shows a live count.</p><div class="eps-help-tip">Use Kanban when you want a visual snapshot of work in progress vs. pending.</div></div>
+      <div class="eps-help-card"><h3>⊡ Free Board</h3><p>A free-position canvas where each task is a floating card. Drag cards anywhere to arrange them spatially — by project, urgency, or any layout that works for you.</p><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">🎨</span><span>Click the color dot to assign a card color — syncs to List and Kanban views too.</span></div><div class="eps-help-item"><span class="eps-help-dot">↗</span><span>Click ↗ to open the task detail panel.</span></div></div><div class="eps-help-tip">Use Free Board for visual planning or grouping tasks by proximity.</div></div>
+      <div class="eps-help-card"><h3>⇅ Manual reorder</h3><p>Click the <b>⇅</b> button (next to the sort dropdown) to activate Manual reorder mode. A drag handle (⠿) appears on the left of each card — press and hold it to drag the card to a new position. Works in all three views. Your order is saved after refresh.</p></div>
+    </section>
+
+    <section class="eps-help-section" data-eps-help-section="organize">
+      <div class="eps-help-card"><h3>Projects</h3><p>Every task must belong to a project. Projects appear in the sidebar — click any project to filter tasks, meetings, and notes to that project only.</p><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">+</span><span>Create from sidebar → New Project.</span></div><div class="eps-help-item"><span class="eps-help-dot">✎</span><span>Click a project name to edit or delete it.</span></div><div class="eps-help-item"><span class="eps-help-dot">📊</span><span>Each project has a report page with task breakdown and completion rate.</span></div></div></div>
+      <div class="eps-help-card"><h3>Hashtags</h3><p>Hashtags are cross-project labels. A task belongs to one project, but can carry many hashtags. Use them to group tasks by type of work regardless of project.</p><div class="eps-help-mini-grid"><div class="eps-help-mini"><b>#payment</b><span>Invoices and payment follow-up.</span></div><div class="eps-help-mini"><b>#delivery</b><span>Pending or incoming deliveries.</span></div><div class="eps-help-mini"><b>#contracts</b><span>Contract review or signature needed.</span></div><div class="eps-help-mini"><b>#approval</b><span>Waiting for management approval.</span></div><div class="eps-help-mini"><b>#rfq</b><span>Quotation requests to suppliers.</span></div><div class="eps-help-mini"><b>#urgent</b><span>Needs immediate attention.</span></div></div><div class="eps-help-flow" style="margin-top:10px"><div class="eps-help-step"><div class="eps-help-num">1</div><div><b>Create</b><span>Sidebar → Hashtags → + New Hashtag. Choose a name and color.</span></div></div><div class="eps-help-step"><div class="eps-help-num">2</div><div><b>Tag</b><span>When editing a task, click hashtag chips in the Hashtags field.</span></div></div><div class="eps-help-step"><div class="eps-help-num">3</div><div><b>Filter</b><span>Click any hashtag in the sidebar to see only tasks with that tag.</span></div></div></div><div class="eps-help-tip">Rule: Project = WHERE. Hashtag = WHAT KIND. Keep hashtags to 5–10 max.</div></div>
+    </section>
+
+    <section class="eps-help-section" data-eps-help-section="people">
+      <div class="eps-help-card"><h3>Team members</h3><p>Go to <b>Team</b> to add your team. Each member has a name, role, and optional email. Tasks are assigned to team members — you need at least one member to create tasks.</p><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">📊</span><span>Team page shows each member's task count, completion rate, and overdue items.</span></div><div class="eps-help-item"><span class="eps-help-dot">🔍</span><span>Filter All Tasks by member using the assignee filter buttons at the top.</span></div></div></div>
+      <div class="eps-help-card"><h3>Contacts</h3><p>Use <b>Contacts</b> for external parties: suppliers, contractors, consultants, service providers. Each contact can have company, person name, phone, email, type, specialty, rating, and notes.</p><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">⭐</span><span>Rate contacts (1–5 stars) to track supplier performance.</span></div><div class="eps-help-item"><span class="eps-help-dot">✓</span><span>Mark preferred suppliers with the Preferred flag for quick filtering.</span></div><div class="eps-help-item"><span class="eps-help-dot">🏷</span><span>Assign specialties to filter by trade or service type.</span></div></div><div class="eps-help-tip">Keep specialties clean — avoid near-duplicates like "Steel" and "Steel Works".</div></div>
     </section>
 
     <section class="eps-help-section" data-eps-help-section="meetings">
-      <div class="eps-help-card"><h3>Meetings</h3><p>Use meetings to record important discussions, coordination points, consultant/client follow-up, supplier meetings, and internal procurement reviews.</p><p>After each meeting, convert decisions into tasks. A meeting without actions is only a note, not follow-up.</p></div>
-      <div class="eps-help-card"><h3>Recurring meetings</h3><p>Beta 5 supports repeated meetings such as daily, weekly, or monthly meetings, with an optional repeat-until date.</p><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">D</span><span>Daily: useful for short internal follow-up during critical periods.</span></div><div class="eps-help-item"><span class="eps-help-dot">W</span><span>Weekly: useful for project procurement meetings.</span></div><div class="eps-help-item"><span class="eps-help-dot">M</span><span>Monthly: useful for management review or supplier performance review.</span></div></div><div class="eps-help-tip">Do not create recurring meetings for everything. Use it only for meetings that really repeat, otherwise the calendar becomes noise.</div></div>
+      <div class="eps-help-card"><h3>Meetings</h3><p>Schedule meetings from the <b>Meetings</b> section. Add title, date/time, attendees, and link to a project. After the meeting, open it and use <b>Create Task from Meeting</b> to convert decisions into actions.</p><div class="eps-help-tip">A meeting without resulting tasks is just a note. Always convert decisions into tasks.</div></div>
+      <div class="eps-help-card"><h3>Recurring meetings</h3><p>Set a meeting to repeat Daily, Weekly, or Monthly with an optional end date. Useful for procurement reviews, site coordination, or team stand-ups.</p><div class="eps-help-tip">Only use recurrence for meetings that genuinely repeat — too many recurring entries clutter the calendar.</div></div>
+      <div class="eps-help-card"><h3>Notes</h3><p>Use <b>My Notes</b> for reference information, quick observations, or anything that is not an action. Notes can be linked to a project.</p><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">⊡</span><span>Notes appear on the Free Board as colored cards you can position freely.</span></div><div class="eps-help-item"><span class="eps-help-dot">🎨</span><span>Assign a color to a note card on the Free Board to distinguish it visually.</span></div></div><div class="eps-help-tip">Notes = reference. Tasks = actions. Do not use notes as a substitute for tasks.</div></div>
     </section>
 
-    <section class="eps-help-section" data-eps-help-section="contacts">
-      <div class="eps-help-card"><h3>Contacts</h3><p>Use Contacts for suppliers, contractors, service providers, and consultants. Add company, contact person, phone, email, type, specialty, and notes.</p><p>The specialties list now supports search and prevents duplicate entries, including duplicates with different letter case or extra spaces.</p></div>
-      <div class="eps-help-card"><h3>Specialties</h3><p>Specialties help you filter suppliers quickly. Keep the list clean and avoid very similar names like “Furniture”, “Furnitures”, and “Loose Furniture” unless you really need separate categories.</p><div class="eps-help-tip">Cleaner specialties = faster supplier search.</div></div>
+    <section class="eps-help-section" data-eps-help-section="modules">
+      <div class="eps-help-card"><h3>Optional modules</h3><p>LPO Tracker and Price Library are hidden by default to keep the sidebar clean. Enable them from <b>⚙ Settings</b> in the sidebar whenever you need them. Disabling a module never deletes its data.</p></div>
+      <div class="eps-help-card"><h3>📄 LPO Tracker</h3><p>Track Local Purchase Orders from creation to delivery. Each LPO has: supplier, project, amount, status, and expected delivery date.</p><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">📊</span><span>Dashboard shows totals for Pending, Delayed, and Completed LPOs.</span></div><div class="eps-help-item"><span class="eps-help-dot">🔍</span><span>Filter by status: All, Pending, Approved, Delivered, Delayed, Cancelled.</span></div></div></div>
+      <div class="eps-help-card"><h3>💰 Price Library</h3><p>Maintain a reference list of material and service prices with full price history.</p><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">📈</span><span>Each item stores price history — see how prices changed over time.</span></div><div class="eps-help-item"><span class="eps-help-dot">💱</span><span>Supports multiple currencies: QAR, EGP, USD, EUR, SAR, AED…</span></div><div class="eps-help-item"><span class="eps-help-dot">📦</span><span>Customise units (Piece, Meter, kg, Ton…) from the ⚙ Units button.</span></div></div></div>
+      <div class="eps-help-card"><h3>📊 Reports &amp; Analytics</h3><p>View overall completion rate, overdue tasks sorted by days late, per-member workload, and per-project breakdown. Access reports from the project page or the daily stats bar.</p></div>
     </section>
 
-    <section class="eps-help-section" data-eps-help-section="hashtags">
-      <div class="eps-help-card">
-        <h3>What are Hashtags?</h3>
-        <p>Hashtags are flexible labels you can attach to any task — across different projects — to group tasks by type of work.</p>
-        <p>Projects answer the question <i>“which job is this for?”</i>. Hashtags answer <i>“what kind of work is this?”</i>. The two work side by side without conflict.</p>
-        <div class="eps-help-tip">Example: a task can belong to project <b>Office Renovation</b> and also carry the hashtag <b>#contracts</b>. Another task in <b>Warehouse Setup</b> can also carry <b>#contracts</b>. Now you can see all contract-related work across all projects in one click.</div>
-      </div>
-
-      <div class="eps-help-card">
-        <h3>Recommended hashtags for procurement</h3>
-        <div class="eps-help-mini-grid">
-          <div class="eps-help-mini"><b>#contracts</b><span>Anything tied to a contract that needs review, signature, or follow-up.</span></div>
-          <div class="eps-help-mini"><b>#payment</b><span>Payment requests, invoices waiting approval, or payment follow-up with finance.</span></div>
-          <div class="eps-help-mini"><b>#delivery</b><span>Pending deliveries, expected shipments, or site delivery coordination.</span></div>
-          <div class="eps-help-mini"><b>#rfq</b><span>Request for quotation pending from suppliers.</span></div>
-          <div class="eps-help-mini"><b>#approval</b><span>Items waiting for management or client approval.</span></div>
-          <div class="eps-help-mini"><b>#urgent-supplier</b><span>Critical supplier issues that need immediate attention.</span></div>
-        </div>
-        <div class="eps-help-tip">Keep your hashtag list short (5–10 tags). Too many hashtags becomes noise — the same problem as too many specialties.</div>
-      </div>
-
-      <div class="eps-help-card">
-        <h3>How to use hashtags</h3>
-        <div class="eps-help-flow">
-          <div class="eps-help-step"><div class="eps-help-num">1</div><div><b>Create a hashtag</b><span>From the sidebar, scroll to the <b>Hashtags</b> section and click <b>+ New Hashtag</b>. Pick a name and a color.</span></div></div>
-          <div class="eps-help-step"><div class="eps-help-num">2</div><div><b>Tag a task</b><span>When creating or editing a task, click any hashtag chip in the <b>Hashtags</b> field. You can select multiple hashtags per task.</span></div></div>
-          <div class="eps-help-step"><div class="eps-help-num">3</div><div><b>Filter</b><span>Click any hashtag in the sidebar to filter all tasks by that tag. The page title shows the active hashtag, and the count next to each hashtag tells you how many tasks carry it.</span></div></div>
-          <div class="eps-help-step"><div class="eps-help-num">4</div><div><b>Edit or delete</b><span>Hover over any hashtag in the sidebar and click the <b>⋮</b> button to rename, change color, or delete it. Deleting a hashtag removes it from all tasks but does not delete the tasks themselves.</span></div></div>
-        </div>
-      </div>
-
-      <div class="eps-help-card">
-        <h3>Practical use case</h3>
-        <p>You want to know how many contracts are pending across all your projects right now.</p>
-        <div class="eps-help-list">
-          <div class="eps-help-item"><span class="eps-help-dot">1</span><span>Make sure every contract-related task carries the hashtag <b>#contracts</b>.</span></div>
-          <div class="eps-help-item"><span class="eps-help-dot">2</span><span>The number next to <b>#contracts</b> in the sidebar is your live count.</span></div>
-          <div class="eps-help-item"><span class="eps-help-dot">3</span><span>Click <b>#contracts</b> to open the full list, then sort by due date or priority.</span></div>
-          <div class="eps-help-item"><span class="eps-help-dot">4</span><span>Same workflow works for <b>#payment</b>, <b>#delivery</b>, or any other tag you create.</span></div>
-        </div>
-      </div>
-
-      <div class="eps-help-card">
-        <h3>Hashtags vs Projects — when to use which</h3>
-        <div class="eps-help-mini-grid">
-          <div class="eps-help-mini"><b>Use a Project when…</b><span>The work belongs to one specific job, location, or contract scope. A task lives in exactly one project.</span></div>
-          <div class="eps-help-mini"><b>Use a Hashtag when…</b><span>You want to group similar types of work across many projects. A task can carry many hashtags.</span></div>
-        </div>
-        <div class="eps-help-tip">Rule of thumb: project = the “where”. Hashtag = the “what kind”.</div>
-      </div>
+    <section class="eps-help-section" data-eps-help-section="settings">
+      <div class="eps-help-card"><h3>⚙ Settings</h3><p>Click <b>Settings</b> in the sidebar to manage optional modules. Toggle <b>LPO Tracker</b> and <b>Price Library</b> on or off. Your choice is saved automatically — disabled modules keep their data.</p></div>
+      <div class="eps-help-card"><h3>☁ GitHub Sync</h3><p>All data is stored locally in your browser. To back up and sync across devices, connect GitHub Sync from the sidebar footer.</p><div class="eps-help-flow"><div class="eps-help-step"><div class="eps-help-num">1</div><div><b>Create a GitHub token</b><span>GitHub → Settings → Developer Settings → Personal Access Tokens → create with <b>gist</b> scope.</span></div></div><div class="eps-help-step"><div class="eps-help-num">2</div><div><b>Paste the token</b><span>Click ☁ GitHub Sync in the sidebar, paste the token, and click Connect.</span></div></div><div class="eps-help-step"><div class="eps-help-num">3</div><div><b>Push / Pull</b><span>Push to save your data to GitHub. Pull to restore from a previous backup.</span></div></div></div><div class="eps-help-tip">Sync is manual — push after important data entry sessions to keep your backup current.</div></div>
+      <div class="eps-help-card"><h3>🌙 Light / Dark mode</h3><p>Click the ☀️/🌙 button in the top bar to switch between dark and light mode. Your preference is saved in the browser.</p></div>
     </section>
 
     <section class="eps-help-section" data-eps-help-section="tips">
-      <div class="eps-help-card"><h3>Manager rules</h3><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">1</span><span>Do not accept tasks without a project.</span></div><div class="eps-help-item"><span class="eps-help-dot">2</span><span>Do not accept “in progress” forever. Every task needs a next action.</span></div><div class="eps-help-item"><span class="eps-help-dot">3</span><span>Use overdue tasks as your first review list every morning.</span></div><div class="eps-help-item"><span class="eps-help-dot">4</span><span>Use notes for references, but use tasks for actions.</span></div><div class="eps-help-item"><span class="eps-help-dot">5</span><span>If the team does not update status, the dashboard will become decoration, not management.</span></div></div></div>
-      <div class="eps-help-card"><h3>Keyboard / quick use</h3><p>Use <span class="eps-help-kbd">Esc</span> to close this help panel. Use search and filters before creating new duplicate entries.</p></div>
-      <div class="eps-help-tip">Blind spot: more features will not fix weak discipline. Keep the process simple and make updates part of the daily routine.</div>
+      <div class="eps-help-card"><h3>Manager rules</h3><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">1</span><span>Never accept a task without a project, assignee, and due date.</span></div><div class="eps-help-item"><span class="eps-help-dot">2</span><span>"In Progress" forever is not progress. Every task needs a next concrete action.</span></div><div class="eps-help-item"><span class="eps-help-dot">3</span><span>Start every morning on the Overdue list — that is your real priority queue.</span></div><div class="eps-help-item"><span class="eps-help-dot">4</span><span>Notes = reference. Tasks = actions. Do not mix them.</span></div><div class="eps-help-item"><span class="eps-help-dot">5</span><span>If the team does not update status, the dashboard becomes decoration.</span></div><div class="eps-help-item"><span class="eps-help-dot">6</span><span>Use Today's Focus as your execution list — not your wish list.</span></div><div class="eps-help-item"><span class="eps-help-dot">7</span><span>Use task colors to separate teams or urgency levels at a glance.</span></div><div class="eps-help-item"><span class="eps-help-dot">8</span><span>Back up to GitHub Sync after any major data entry session.</span></div></div></div>
+      <div class="eps-help-card"><h3>Shortcuts</h3><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-kbd">Esc</span><span>Close any open panel or modal.</span></div><div class="eps-help-item"><span class="eps-help-kbd">Click ●</span><span>Toggle task status (Not Started ↔ Done).</span></div><div class="eps-help-item"><span class="eps-help-kbd">⇅ button</span><span>Activate manual drag-reorder mode.</span></div><div class="eps-help-item"><span class="eps-help-kbd">Color dot</span><span>Open color picker on any task card.</span></div></div></div>
+      <div class="eps-help-tip">More features will not fix weak discipline. Keep the workflow simple and update tasks as part of the daily routine.</div>
     </section>
 
+    
+
     <section class="eps-help-section" data-eps-help-section="feedback">
-      <div class="eps-help-card">
-        <h3>Feedback & Support</h3>
-        <p>If you have feedback, suggestions, or any issue while using the application, you can contact the application owner directly.</p>
-        <div class="eps-help-contact-row"><span>📧</span><b>Email</b><a href="mailto:zereseos@hotmail.com">zereseos@hotmail.com</a></div>
-        <div class="eps-help-contact-row"><span>📱</span><b>Mobile</b><a href="tel:+97360021006">0097360021006</a></div>
-      </div>
-      <div class="eps-help-card">
-        <h3>Ownership</h3>
-        <p>This application concept and working version are owned by Eng. Mohamed Essam Menofy.</p>
-        <div class="eps-help-tip">For professional use, keep feedback specific: screen name, issue, what you clicked, and what result you expected.</div>
-      </div>
-      <div class="eps-help-footer">© All Rights Reserved<br><b>Eng. Mohamed Essam Menofy</b></div>
+      <div class="eps-help-card"><h3>Feedback &amp; Support</h3><p>For feedback, suggestions, or any issue, contact the application owner directly.</p><div class="eps-help-contact-row"><span>📧</span><b>Email</b><a href="mailto:zereseos@hotmail.com">zereseos@hotmail.com</a></div><div class="eps-help-contact-row"><span>📱</span><b>Mobile</b><a href="tel:+97360021006">0097360021006</a></div></div>
+      <div class="eps-help-card"><h3>Ownership</h3><p>Essam Tracker is designed and owned by <b>Eng. Mohamed Essam Menofy</b>.</p><div class="eps-help-tip">When reporting an issue: mention the section name, what you clicked, and what you expected to happen.</div></div>
+      <div class="eps-help-footer">© All Rights Reserved · <b>Eng. Mohamed Essam Menofy</b></div>
     </section>
   </div>
 </aside>
@@ -3433,7 +3378,7 @@ window.exportBackup = function(){
   const backup = {
     version: 1,
     exportDate: new Date().toISOString(),
-    appName: 'Essam Procurement Solution',
+    appName: 'Essam Tracker',
     data: data
   };
   const blob = new Blob([JSON.stringify(backup, null, 2)], {type: 'application/json'});
@@ -3555,7 +3500,7 @@ function openPrintWindow(htmlContent, title){
 <html>
 <head>
 <meta charset="UTF-8">
-<title>${title} — Essam Procurement Solution</title>
+<title>${title} — Essam Tracker</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'DM Sans',Arial,sans-serif;color:#1a1a2e;background:#fff;padding:32px;font-size:13px;line-height:1.5}
@@ -5565,7 +5510,7 @@ Details:
 ${t.notes||'-'}
 
 Regards,
-Essam Procurement Solution`);
+Essam Tracker`);
     window.open('mailto:'+encodeURIComponent(m.email)+'?subject='+subject+'&body='+body,'_blank');
     if(confirmed){
       if(!Array.isArray(t.emailLogs))t.emailLogs=[];
@@ -6707,7 +6652,7 @@ function closeMobileSidebar(){
       method:'POST',
       headers:{'Authorization':'token '+token,'Content-Type':'application/json'},
       body:JSON.stringify({
-        description:'Essam Procurement Solution — app data',
+        description:'Essam Tracker — app data',
         public:false,
         files:{'eps_data.json':{content:localStorage.getItem(DATA_KEY)||'{}'}}
       })
