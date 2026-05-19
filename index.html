@@ -5668,6 +5668,8 @@ setTimeout(() => { injectTodayHeader(); }, 300);
     const _tm=typeof fbMeta==='function'?fbMeta()[Number(t.id)]:null;
     const tColor=(_tm&&_tm.color&&_tm.color!=='none')?_tm.color:null;
     const tTextColor=tColor?'#fff':'';
+    const ovDays=t.due&&t.status!=='done'&&new Date(t.due)<new Date()?Math.ceil((new Date()-new Date(t.due))/86400000):0;
+    const ovClr=ovDays>20?'#7f1d1d':ovDays>10?'#991b1b':ovDays>5?'#dc2626':ovDays>2?'#ea580c':'#d97706';
     const cardStyle=[manualMode?'padding-left:0':'',tColor?'background:'+tColor+';border-color:transparent':''].filter(Boolean).join(';');
     return`<div class="${cls}" data-task-id="${Number(t.id)}" onclick="openDetail(${Number(t.id)})" ondblclick="event.stopPropagation();openTaskModal(${Number(t.id)})" ${cardStyle?`style="${cardStyle}"`:''}>${manualMode?`<div class="drag-handle" oncontextmenu="return false">⠿</div>`:''}<div class="task-check${t.status==='done'?' done':''}" onclick="toggleTask(${Number(t.id)},event)"></div>
       <div class="task-body">
@@ -5678,6 +5680,7 @@ setTimeout(() => { injectTodayHeader(); }, 300);
           ${pn?`<span class="tag tag-project">${H(pn)}</span>`:''}
           ${assigneeTag(t.assignee)}
           ${isT?`<span class="tag-today-badge">Today</span>`:''}
+          ${ovDays?`<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;font-family:'Space Mono',monospace;${tColor?'background:rgba(0,0,0,.28);color:#fff':'background:'+ovClr+'1a;color:'+ovClr+';border:1px solid '+ovClr+'55'}">⚠ ${ovDays}d late</span>`:''}
           ${due?`<span class="task-due ${due.cls}">${H(due.str)}</span>`:''}
           <span style="font-size:11px;color:${tColor?'rgba(255,255,255,.8)':'var(--text3)'}">${t.status==='in-progress'?'⟳ In Progress':t.status==='done'?'✓ Done':'○ Not Started'}</span>
           ${subTotal?`<span style="font-size:10px;color:${tColor?'rgba(255,255,255,.7)':'var(--text3)'}">${subDone}/${subTotal} sub</span>`:''}
@@ -5843,21 +5846,24 @@ function renderKanban(){
       var pri='<span class="tag tag-'+t.priority+'">'+t.priority+'</span>';
       var av=assignee?'<span style="font-size:10px;color:var(--text3)">👤 '+assignee.name.split(' ')[0]+'</span>':'';
       var moveBtn='<button class="kb-move-btn" onclick="event.stopPropagation();kbMoveTask('+t.id+')">Move to…</button>';
+      var kOvDays=t.due&&t.status!=='done'&&new Date(t.due)<new Date()?Math.ceil((new Date()-new Date(t.due))/86400000):0;
+      var kOvClr=kOvDays>20?'#7f1d1d':kOvDays>10?'#991b1b':kOvDays>5?'#dc2626':kOvDays>2?'#ea580c':'#d97706';
       var _ktm=fbMeta()[t.id];var kColor=(_ktm&&_ktm.color&&_ktm.color!=='none')?_ktm.color:null;
       var kTc=kColor?'color:#fff':'';var kSc=kColor?'color:rgba(255,255,255,.75)':'color:var(--text3)';
       var colorDot='<div class="fb-color-dot" style="background:'+(kColor||'var(--bg4)')+';border-color:'+(kColor?'rgba(255,255,255,.4)':'var(--border)')+';width:12px;height:12px;flex-shrink:0;margin-left:4px" onclick="event.stopPropagation();fbColorPicker('+t.id+',this)" title="Color"></div>';
       var kBgStyle=kColor?'background:'+kColor+';border-color:transparent;':'';
+      var kOvBadge=kOvDays?'<span style="display:inline-flex;align-items:center;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:700;font-family:monospace;'+(kColor?'background:rgba(0,0,0,.28);color:#fff':'background:'+kOvClr+'1a;color:'+kOvClr+';border:1px solid '+kOvClr+'55')+'">⚠ '+kOvDays+'d late</span>':'';
       if(currentSort==='manual'){
         var handle='<div class="kb-drag-handle" oncontextmenu="return false">⠿</div>';
         return '<div class="kb-card" data-id="'+t.id+'" data-col="'+col.id+'" style="display:flex;align-items:stretch;padding:0;'+kBgStyle+'" onclick="openDetail('+t.id+')">'
           +handle+'<div style="flex:1;padding:10px 12px;min-width:0">'
           +'<div class="kb-card-title" style="'+kTc+'">'+t.desc+'</div>'
-          +'<div class="kb-card-meta" style="'+kSc+'">'+pri+due+av+colorDot+'</div>'+moveBtn
+          +'<div class="kb-card-meta" style="'+kSc+'">'+pri+kOvBadge+due+av+colorDot+'</div>'+moveBtn
           +'</div></div>';
       }
       return '<div class="kb-card" draggable="true" data-id="'+t.id+'" ondragstart="kbDragStart(event)" onclick="openDetail('+t.id+')" style="'+kBgStyle+'">'
         +'<div class="kb-card-title" style="'+kTc+'">'+t.desc+'</div>'
-        +'<div class="kb-card-meta" style="'+kSc+'">'+pri+due+av+colorDot+'</div>'+moveBtn+'</div>';
+        +'<div class="kb-card-meta" style="'+kSc+'">'+pri+kOvBadge+due+av+colorDot+'</div>'+moveBtn+'</div>';
     }).join('');
     return '<div class="kb-col" data-status="'+col.id+'" ondragover="kbDragOver(event)" ondrop="kbDrop(event)" ondragleave="kbDragLeave(event)">'
       +'<div class="kb-col-header"><span class="kb-col-title" style="color:'+col.color+'">'+col.label+'</span><span class="kb-col-count">'+tasks.length+'</span></div>'
