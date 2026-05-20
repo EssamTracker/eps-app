@@ -1,0 +1,35 @@
+name: Setup Supabase RLS
+
+on:
+  workflow_dispatch:
+    inputs:
+      access_token:
+        description: 'Supabase Access Token (sbp_...)'
+        required: true
+
+jobs:
+  setup-rls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run RLS setup SQL
+        run: |
+          curl -s -X POST \
+            "https://api.supabase.com/v1/projects/jhrameohgbqcjtgruhue/database/query" \
+            -H "Authorization: Bearer ${{ github.event.inputs.access_token }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "query": "alter table eps_projects enable row level security; alter table eps_tasks enable row level security; alter table eps_meetings enable row level security; alter table eps_notes enable row level security; alter table eps_contacts enable row level security; alter table eps_team_members enable row level security; alter table eps_packages enable row level security; alter table eps_boq_items enable row level security; alter table eps_price_items enable row level security; alter table eps_lpo_items enable row level security; alter table eps_app_settings enable row level security; drop policy if exists eps_projects_owner_access on eps_projects; create policy eps_projects_owner_access on eps_projects for all to authenticated using (app_id = auth.uid()::text) with check (app_id = auth.uid()::text); drop policy if exists eps_tasks_owner_access on eps_tasks; create policy eps_tasks_owner_access on eps_tasks for all to authenticated using (app_id = auth.uid()::text) with check (app_id = auth.uid()::text); drop policy if exists eps_meetings_owner_access on eps_meetings; create policy eps_meetings_owner_access on eps_meetings for all to authenticated using (app_id = auth.uid()::text) with check (app_id = auth.uid()::text); drop policy if exists eps_notes_owner_access on eps_notes; create policy eps_notes_owner_access on eps_notes for all to authenticated using (app_id = auth.uid()::text) with check (app_id = auth.uid()::text); drop policy if exists eps_contacts_owner_access on eps_contacts; create policy eps_contacts_owner_access on eps_contacts for all to authenticated using (app_id = auth.uid()::text) with check (app_id = auth.uid()::text); drop policy if exists eps_team_members_owner_access on eps_team_members; create policy eps_team_members_owner_access on eps_team_members for all to authenticated using (app_id = auth.uid()::text) with check (app_id = auth.uid()::text); drop policy if exists eps_packages_owner_access on eps_packages; create policy eps_packages_owner_access on eps_packages for all to authenticated using (app_id = auth.uid()::text) with check (app_id = auth.uid()::text); drop policy if exists eps_boq_items_owner_access on eps_boq_items; create policy eps_boq_items_owner_access on eps_boq_items for all to authenticated using (app_id = auth.uid()::text) with check (app_id = auth.uid()::text); drop policy if exists eps_price_items_owner_access on eps_price_items; create policy eps_price_items_owner_access on eps_price_items for all to authenticated using (app_id = auth.uid()::text) with check (app_id = auth.uid()::text); drop policy if exists eps_lpo_items_owner_access on eps_lpo_items; create policy eps_lpo_items_owner_access on eps_lpo_items for all to authenticated using (app_id = auth.uid()::text) with check (app_id = auth.uid()::text); drop policy if exists eps_app_settings_owner_access on eps_app_settings; create policy eps_app_settings_owner_access on eps_app_settings for all to authenticated using (app_id = auth.uid()::text) with check (app_id = auth.uid()::text);"
+            }' | tee /tmp/rls_result.json
+
+          echo ""
+          echo "=== Result ==="
+          cat /tmp/rls_result.json
+
+          if grep -q "error" /tmp/rls_result.json; then
+            echo "FAILED"
+            exit 1
+          else
+            echo "SUCCESS - RLS policies applied"
+          fi
