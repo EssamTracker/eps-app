@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Essam Procurement Solution</title>
+<title>Essam Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1092,7 +1092,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <img src="data:image/png;base64,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" style="width:36px;height:36px;object-fit:contain;border-radius:6px">
       <div>
         <div style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:#e8e8f0;letter-spacing:0.5px">ESSAM</div>
-        <div style="font-size:9px;color:#9090a8;letter-spacing:1px;text-transform:uppercase">Procurement Solution · Beta 5</div>
+        <div style="font-size:9px;color:#9090a8;letter-spacing:1px;text-transform:uppercase">Essam Tracker · Beta 10</div>
       </div>
     </div>
   </div>
@@ -1152,7 +1152,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="sidebar-footer">
     <div class="user-card">
       <div class="s-avatar" id="user-avatar">E</div>
-      <div class="user-meta"><div class="user-name" id="user-name">Essam</div><div class="user-role" id="user-role">Procurement Solution · Beta 5</div></div>
+      <div class="user-meta"><div class="user-name" id="user-name">Essam</div><div class="user-role" id="user-role">Essam Tracker · Beta 10</div></div>
       <button class="logout-btn" id="logout-btn" onclick="logoutUser()" title="Logout">↗</button>
     </div>
   </div>
@@ -1632,7 +1632,7 @@ function updateUserCard(){
   const logout=document.getElementById('logout-btn');
   if(avatar)avatar.textContent=(name[0]||'E').toUpperCase();
   if(nameEl)nameEl.textContent=currentAuthUser?name:'Essam';
-  if(roleEl)roleEl.textContent=currentAuthUser?'Private workspace':'Procurement Solution · Beta 5';
+  if(roleEl)roleEl.textContent=currentAuthUser?'Private workspace':'Essam Tracker · Beta 10';
   if(logout)logout.style.display=currentAuthUser?'flex':'none';
 }
 async function setCurrentUser(user){
@@ -2259,7 +2259,7 @@ Details:
 ${t.notes||'-'}
 
 Regards,
-Essam Procurement Solution`);
+Essam Tracker`);
   addNotification('Task emailed to '+m.name+': '+t.desc);
   save();
   window.open('mailto:'+encodeURIComponent(m.email)+'?subject='+subject+'&body='+body,'_blank');
@@ -2823,8 +2823,8 @@ startApp();
     <div class="eps-help-mark">?</div>
     <div>
       <div class="eps-help-title">Application Guide</div>
-      <div class="eps-help-sub">Practical guide for using Essam Procurement Solution as a procurement follow-up system.</div>
-      <div class="eps-help-version">Beta 5</div>
+      <div class="eps-help-sub">Practical guide for using Essam Tracker as a procurement follow-up system.</div>
+      <div class="eps-help-version">Beta 10</div>
     </div>
     <button class="eps-help-close" id="epsHelpClose" type="button">×</button>
   </div>
@@ -2882,7 +2882,7 @@ startApp();
 
     <section class="eps-help-section" data-eps-help-section="meetings">
       <div class="eps-help-card"><h3>Meetings</h3><p>Use meetings to record important discussions, coordination points, consultant/client follow-up, supplier meetings, and internal procurement reviews.</p><p>After each meeting, convert decisions into tasks. A meeting without actions is only a note, not follow-up.</p></div>
-      <div class="eps-help-card"><h3>Recurring meetings</h3><p>Beta 5 supports repeated meetings such as daily, weekly, or monthly meetings, with an optional repeat-until date.</p><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">D</span><span>Daily: useful for short internal follow-up during critical periods.</span></div><div class="eps-help-item"><span class="eps-help-dot">W</span><span>Weekly: useful for project procurement meetings.</span></div><div class="eps-help-item"><span class="eps-help-dot">M</span><span>Monthly: useful for management review or supplier performance review.</span></div></div><div class="eps-help-tip">Do not create recurring meetings for everything. Use it only for meetings that really repeat, otherwise the calendar becomes noise.</div></div>
+      <div class="eps-help-card"><h3>Recurring meetings</h3><p>Beta 10 supports repeated meetings such as daily, weekly, or monthly meetings, with an optional repeat-until date.</p><div class="eps-help-list"><div class="eps-help-item"><span class="eps-help-dot">D</span><span>Daily: useful for short internal follow-up during critical periods.</span></div><div class="eps-help-item"><span class="eps-help-dot">W</span><span>Weekly: useful for project procurement meetings.</span></div><div class="eps-help-item"><span class="eps-help-dot">M</span><span>Monthly: useful for management review or supplier performance review.</span></div></div><div class="eps-help-tip">Do not create recurring meetings for everything. Use it only for meetings that really repeat, otherwise the calendar becomes noise.</div></div>
     </section>
 
     <section class="eps-help-section" data-eps-help-section="contacts">
@@ -3108,7 +3108,7 @@ window.exportBackup = function(){
   const backup = {
     version: 1,
     exportDate: new Date().toISOString(),
-    appName: 'Essam Procurement Solution',
+    appName: 'Essam Tracker',
     data: data
   };
   const blob = new Blob([JSON.stringify(backup, null, 2)], {type: 'application/json'});
@@ -3208,7 +3208,7 @@ function getHeader(title, subtitle){
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #1a1a2e">
       ${LOGO_SRC ? `<img src="${LOGO_SRC}" style="width:50px;height:50px;object-fit:contain">` : '<div style="width:50px;height:50px;background:#6c63ff;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px">E</div>'}
       <div style="flex:1">
-        <div style="font-size:20px;font-weight:700;color:#1a1a2e;letter-spacing:0.5px">ESSAM Procurement Solution</div>
+        <div style="font-size:20px;font-weight:700;color:#1a1a2e;letter-spacing:0.5px">Essam Tracker</div>
         <div style="font-size:13px;color:#5a5a72;margin-top:2px">${title} ${subtitle?'— '+subtitle:''}</div>
       </div>
       <div style="text-align:right;font-size:11px;color:#9090a8">
@@ -3224,7 +3224,7 @@ function openPrintWindow(htmlContent, title){
 <html>
 <head>
 <meta charset="UTF-8">
-<title>${title} — Essam Procurement Solution</title>
+<title>${title} — Essam Tracker</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'DM Sans',Arial,sans-serif;color:#1a1a2e;background:#fff;padding:32px;font-size:13px;line-height:1.5}
@@ -3886,7 +3886,7 @@ window.rptPrint=function(section){
   }
 
   const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titles[section]||'Report'}</title>${PCSS}</head><body><div class="pba"><button class="bpr" onclick="window.print()">🖨 Print</button><button class="bcl" onclick="window.close()">✕</button></div><div class="hdr"><div class="hl">${logo?`<img src="${logo}">`:''}<div><div class="cn">ESSAM</div><div class="cs">Procurement Solution · Beta 5</div></div></div><div style="text-align:right"><div class="rn">${titles[section]||'Report'}</div><div class="gd">${ds}</div></div></div><div class="div"></div>${content}<div class="foot"><span>ESSAM Procurement Solution · Beta 5</span><span>${ds}</span><span>Confidential</span></div></body></html>`);
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titles[section]||'Report'}</title>${PCSS}</head><body><div class="pba"><button class="bpr" onclick="window.print()">🖨 Print</button><button class="bcl" onclick="window.close()">✕</button></div><div class="hdr"><div class="hl">${logo?`<img src="${logo}">`:''}<div><div class="cn">ESSAM</div><div class="cs">Essam Tracker · Beta 10</div></div></div><div style="text-align:right"><div class="rn">${titles[section]||'Report'}</div><div class="gd">${ds}</div></div></div><div class="div"></div>${content}<div class="foot"><span>ESSAM Essam Tracker · Beta 10</span><span>${ds}</span><span>Confidential</span></div></body></html>`);
   w.document.close();
 };
 
@@ -4232,7 +4232,7 @@ Details:
 ${t.notes||'-'}
 
 Regards,
-Essam Procurement Solution`);
+Essam Tracker`);
     window.open('mailto:'+encodeURIComponent(m.email)+'?subject='+subject+'&body='+body,'_blank');
     if(confirmed){
       if(!Array.isArray(t.emailLogs))t.emailLogs=[];
@@ -4315,7 +4315,7 @@ function closeMobileSidebar(){
 </script>
 
 <!-- ============================================================
-     HASHTAG FEATURE MODULE (Beta 5)
+     HASHTAG FEATURE MODULE (Beta 10)
      Self-contained. Appended to avoid conflicts with prior code.
      - Adds data.hashtags = [{id,name,color}]
      - Adds task.hashtags = [hashtagId,...]
