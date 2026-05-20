@@ -1131,6 +1131,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 13V6l4-4h6a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1z" stroke="currentColor" stroke-width="1.5"/><path d="M6 2v4H2M5 9h6M5 11.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Reports
       </button>
+      <button class="nav-item" id="incoming-nav-btn" onclick="showView('incoming',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Incoming <span id="incoming-badge" class="nav-badge" style="display:none;background:var(--accent2)">0</span>
+      </button>
       <button class="nav-item" onclick="openAppSettings(this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M12.6 3.4l-1.4 1.4M4.8 11.2l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         Settings
@@ -1354,6 +1358,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="section-header"><span class="section-title">Trash</span><button class="btn btn-ghost" onclick="emptyTrash()">Empty Trash</button></div>
       <div id="trash-list" class="tasks-grid"></div>
     </div>
+
+    <div id="view-incoming" style="display:none"></div>
 
   </div>
 </div>
@@ -2525,6 +2531,7 @@ function taskCard(t){
     +'<button class="icon-btn" style="'+iBtnS+'" onclick="setFollowUpTomorrow('+t.id+',event)" title="Follow up tomorrow">⏰</button>'
     +'<button class="icon-btn'+(isT?' pin-active':'')+'" style="'+iBtnS+'" onclick="togglePin('+t.id+',event)" title="Pin to Today">☀</button>'
     +'<button class="icon-btn" style="'+iBtnS+'" onclick="deleteTask('+t.id+',event)">✕</button>'
+    +'<button class="icon-btn" style="'+iBtnS+'" onclick="event.stopPropagation();window.showSendTask('+t.id+',event)" title="Send Task">📤</button>'
     +'</div>'
     +'</div>';
 }
@@ -2709,7 +2716,7 @@ function render(){
 }
 
 function showView(v,el){
-  ['today','dashboard','contacts','team','notes','meetings','trash'].forEach(n=>{const e=document.getElementById('view-'+n);if(e)e.style.display=n===v?'block':'none';});
+  ['today','dashboard','contacts','team','notes','meetings','trash','incoming'].forEach(n=>{const e=document.getElementById('view-'+n);if(e)e.style.display=n===v?'block':'none';});
   const titles={today:"Today's Focus",dashboard:'All Tasks',contacts:'Contacts',team:'Team',notes:'My Notes',meetings:'Meetings',trash:'Trash',reports:'Reports & Analytics'};
   document.getElementById('page-title').textContent=titles[v]||v;
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
@@ -4200,6 +4207,7 @@ window.rptPrint=function(section){
         <button class="icon-btn" style="${tColor?'background:rgba(0,0,0,.2);border-color:transparent;color:#fff':''}" onclick="setFollowUpTomorrow(${Number(t.id)},event)" title="Follow up tomorrow">⏰</button>
         <button class="icon-btn${isT?' pin-active':''}" style="${tColor?'background:rgba(0,0,0,.2);border-color:transparent;color:#fff':''}" onclick="togglePin(${Number(t.id)},event)" title="Pin to Today">☀</button>
         <button class="icon-btn" style="${tColor?'background:rgba(0,0,0,.2);border-color:transparent;color:#fff':''}" onclick="deleteTask(${Number(t.id)},event)">✕</button>
+        <button class="icon-btn" style="${tColor?'background:rgba(0,0,0,.2);border-color:transparent;color:#fff':''}" onclick="event.stopPropagation();window.showSendTask(${Number(t.id)},event)" title="Send Task">📤</button>
       </div>
     </div>`;
   };
@@ -5379,6 +5387,276 @@ function fbAttachDrag(card){
       else if(_mtgView==='grid')renderMtgGrid();
     }
   };
+})();
+</script>
+
+<!-- ============================================================
+     TASK SHARING MODULE
+     Allows sending tasks to other users by email.
+     Recipient can accept (task added to their list, linked) or reject.
+     Status syncs back to sender via eps_task_invitations table.
+     ============================================================ -->
+<script>
+(function(){
+  'use strict';
+  var TBL='eps_task_invitations';
+  var _sent=[],_recv=[];
+
+  function _sb(){return(typeof supabaseClient!=='undefined')?supabaseClient:null;}
+  function _uid(){return(typeof currentAuthUser!=='undefined'&&currentAuthUser)?currentAuthUser.id:null;}
+  function _uem(){return(typeof currentAuthUser!=='undefined'&&currentAuthUser)?(currentAuthUser.email||'').toLowerCase():'';}
+  function _tasks(){return(typeof data!=='undefined')?data.tasks:[];}
+
+  /* ── Load invitations ── */
+  async function loadInv(){
+    if(!_sb()||!_uid())return;
+    var r=await _sb().from(TBL).select('*');
+    if(r.error){console.warn('inv load:',r.error);return;}
+    var rows=r.data||[];
+    var myId=_uid(),myEm=_uem();
+    _sent=rows.filter(function(x){return x.from_user_id===myId;});
+    _recv=rows.filter(function(x){return x.to_email===myEm;});
+    _badge();
+    var inc=document.getElementById('view-incoming');
+    if(inc&&inc.style.display!=='none')window.renderIncoming();
+    if(typeof renderTasks==='function')renderTasks();
+  }
+
+  function _badge(){
+    var n=_recv.filter(function(x){return x.status==='pending';}).length;
+    var el=document.getElementById('incoming-badge');
+    if(el){el.textContent=n;el.style.display=n?'inline-flex':'none';}
+  }
+
+  /* ── Send Task Modal ── */
+  window.showSendTask=function(taskId,e){
+    if(e){e.stopPropagation();e.preventDefault();}
+    if(!_sb()){alert('Not connected to server');return;}
+    var old=document.getElementById('stm');if(old)old.remove();
+    var task=_tasks().find(function(t){return t.id===taskId;});
+    if(!task)return;
+    var m=document.createElement('div');
+    m.id='stm';
+    m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px';
+    m.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:360px">'
+      +'<div style="font-size:15px;font-weight:600;margin-bottom:6px">📤 Send Task</div>'
+      +'<div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.5">'+task.desc+'</div>'
+      +'<input id="stm-em" type="email" placeholder="Recipient email address" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">'
+      +'<div style="display:flex;gap:8px;margin-top:14px">'
+      +'<button onclick="document.getElementById(\'stm\').remove()" style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit">Cancel</button>'
+      +'<button onclick="window._doSendTask('+taskId+')" style="flex:1;padding:10px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit;font-weight:600">Send ↗</button>'
+      +'</div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click',function(ev){if(ev.target===m)m.remove();});
+    setTimeout(function(){var i=document.getElementById('stm-em');if(i)i.focus();},80);
+  };
+
+  window._doSendTask=async function(taskId){
+    var emEl=document.getElementById('stm-em');
+    if(!emEl)return;
+    var toEm=emEl.value.trim().toLowerCase();
+    if(!toEm||!toEm.includes('@')){alert('Please enter a valid email');return;}
+    if(toEm===_uem()){alert('Cannot send a task to yourself');return;}
+    var task=_tasks().find(function(t){return t.id===taskId;});
+    if(!task)return;
+    var dup=_sent.find(function(s){return s.original_task_id===String(taskId)&&s.to_email===toEm&&s.status==='pending';});
+    if(dup){alert('Already sent to '+toEm+' — awaiting their response');document.getElementById('stm').remove();return;}
+    document.getElementById('stm').remove();
+    var inv={
+      id:'inv_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+      from_user_id:_uid(),
+      from_email:_uem(),
+      to_email:toEm,
+      to_user_id:null,
+      original_task_id:String(taskId),
+      recipient_task_id:null,
+      task_snapshot:JSON.parse(JSON.stringify(task)),
+      status:'pending',
+      created_at:new Date().toISOString(),
+      updated_at:new Date().toISOString()
+    };
+    var r=await _sb().from(TBL).insert([inv]);
+    if(r.error){alert('Failed to send: '+r.error.message);return;}
+    _sent.push(inv);
+    var toast=document.createElement('div');
+    toast.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 22px;border-radius:24px;font-size:13px;font-weight:600;z-index:600;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap';
+    toast.textContent='✓ Task sent to '+toEm;
+    document.body.appendChild(toast);
+    setTimeout(function(){toast.remove();},3000);
+    if(typeof renderTasks==='function')renderTasks();
+  };
+
+  /* ── Accept ── */
+  window._acceptInv=async function(invId){
+    var inv=_recv.find(function(x){return x.id===invId;});
+    if(!inv)return;
+    var snap=inv.task_snapshot||{};
+    var newId=Date.now();
+    var newTask=Object.assign({},snap,{
+      id:newId,
+      delegatedFrom:invId,
+      delegatedFromEmail:inv.from_email||inv.from_user_id,
+      pinToday:false,
+      status:snap.status==='done'?'not-started':(snap.status||'not-started'),
+      created:new Date().toISOString()
+    });
+    if(typeof data!=='undefined')data.tasks.push(newTask);
+    var r=await _sb().from(TBL).update({
+      status:'accepted',
+      to_user_id:_uid(),
+      recipient_task_id:String(newId),
+      updated_at:new Date().toISOString()
+    }).eq('id',invId);
+    if(r.error){alert('Error accepting: '+r.error.message);return;}
+    inv.status='accepted';inv.recipient_task_id=String(newId);
+    if(typeof save==='function')save();
+    _badge();window.renderIncoming();
+    if(typeof renderTasks==='function')renderTasks();
+  };
+
+  /* ── Reject ── */
+  window._rejectInv=async function(invId){
+    if(!confirm('Reject this task?'))return;
+    var r=await _sb().from(TBL).update({status:'rejected',updated_at:new Date().toISOString()}).eq('id',invId);
+    if(r.error){alert('Error rejecting: '+r.error.message);return;}
+    var inv=_recv.find(function(x){return x.id===invId;});
+    if(inv)inv.status='rejected';
+    _badge();window.renderIncoming();
+  };
+
+  /* ── Sync snapshot when recipient updates their linked task ── */
+  async function syncSnap(task){
+    if(!task||!task.delegatedFrom||!_sb())return;
+    var r=await _sb().from(TBL).update({
+      task_snapshot:JSON.parse(JSON.stringify(task)),
+      updated_at:new Date().toISOString()
+    }).eq('id',task.delegatedFrom);
+    if(r.error)console.warn('syncSnap:',r.error);
+  }
+
+  /* Hook toggleTask to sync snapshot on status change */
+  var _origTT=window.toggleTask;
+  window.toggleTask=function(id,e){
+    if(typeof _origTT==='function')_origTT(id,e);
+    setTimeout(function(){
+      var t=_tasks().find(function(x){return x.id===id;});
+      if(t&&t.delegatedFrom)syncSnap(t);
+    },500);
+  };
+
+  /* Hook save to sync all linked task snapshots */
+  var _origSave=window.save;
+  window.save=function(){
+    if(typeof _origSave==='function')_origSave();
+    _tasks().filter(function(t){return t.delegatedFrom;}).forEach(function(t){syncSnap(t);});
+  };
+
+  /* ── Render Incoming View ── */
+  window.renderIncoming=function(){
+    var el=document.getElementById('view-incoming');
+    if(!el)return;
+    var pending=_recv.filter(function(x){return x.status==='pending';});
+    var accepted=_recv.filter(function(x){return x.status==='accepted';});
+    var rejected=_recv.filter(function(x){return x.status==='rejected';});
+
+    function card(inv,withActions){
+      var s=inv.task_snapshot||{};
+      var pc='tag-'+(s.priority||'medium');
+      var sc={'not-started':'○ Not Started','in-progress':'⟳ In Progress','done':'✓ Done'}[s.status||'not-started']||'';
+      var dueStr=s.due?('<span class="task-due">🕒 '+new Date(s.due).toLocaleDateString([],{month:'short',day:'numeric'})+'</span>'):'';
+      return '<div class="task-card" style="margin-bottom:10px">'
+        +'<div class="task-body">'
+        +'<div style="font-size:11px;color:var(--accent2);margin-bottom:5px;font-weight:500">📥 From: '+(inv.from_email||inv.from_user_id)+'</div>'
+        +'<div class="task-title">'+(s.desc||'Task')+'</div>'
+        +(s.notes?'<div style="font-size:12px;color:var(--text2);margin:4px 0 6px;line-height:1.4">'+s.notes+'</div>':'')
+        +'<div class="task-meta">'
+        +'<span class="tag '+pc+'">'+(s.priority||'medium')+'</span>'
+        +(s.project?'<span class="tag tag-project">'+s.project+'</span>':'')
+        +dueStr
+        +(withActions?'':'<span style="font-size:11px;color:var(--text3)">'+sc+'</span>')
+        +'</div>'
+        +'</div>'
+        +(withActions
+          ?'<div class="task-actions">'
+            +'<button class="icon-btn" style="color:var(--green);border-color:rgba(34,200,138,.4);font-size:15px" onclick="window._acceptInv(\''+inv.id+'\')" title="Accept">✓</button>'
+            +'<button class="icon-btn" style="color:var(--red);border-color:rgba(255,95,109,.4)" onclick="window._rejectInv(\''+inv.id+'\')" title="Reject">✕</button>'
+            +'</div>'
+          :'')
+        +'</div>';
+    }
+
+    var h='<div style="max-width:680px">'
+      +'<div class="panel-title" style="margin-bottom:18px">📥 Incoming Tasks</div>';
+    if(!pending.length&&!accepted.length&&!rejected.length){
+      h+='<div style="color:var(--text3);font-size:13px;text-align:center;padding:60px 0;opacity:.6">No incoming tasks yet</div>';
+    }
+    if(pending.length){
+      h+='<div style="font-size:11px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">⏳ Pending · '+pending.length+'</div>';
+      h+=pending.map(function(inv){return card(inv,true);}).join('');
+    }
+    if(accepted.length){
+      h+='<div style="font-size:11px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin:20px 0 10px">✓ Accepted · '+accepted.length+'</div>';
+      h+=accepted.map(function(inv){return card(inv,false);}).join('');
+    }
+    if(rejected.length){
+      h+='<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:20px 0 10px;opacity:.5">✕ Rejected · '+rejected.length+'</div>';
+      h+=rejected.map(function(inv){return card(inv,false);}).join('');
+    }
+    h+='</div>';
+    el.innerHTML=h;
+  };
+
+  /* ── Delegation badges in task cards ── */
+  var _origTC=window.taskCard;
+  window.taskCard=function(t){
+    var html=typeof _origTC==='function'?_origTC(t):'';
+    if(!html)return html;
+    var badge='';
+    /* Badge for tasks I sent */
+    var inv=_sent.find(function(s){return s.original_task_id===String(t.id);});
+    if(inv){
+      var sc=inv.status==='accepted'?'var(--green)':inv.status==='rejected'?'var(--red)':'var(--text3)';
+      var sl=inv.status==='accepted'?'✓ Accepted':inv.status==='rejected'?'✕ Rejected':'⏳ Awaiting response';
+      var snapSt='';
+      if(inv.status==='accepted'&&inv.task_snapshot&&inv.task_snapshot.status){
+        snapSt=' · '+({'not-started':'Not Started','in-progress':'In Progress','done':'Done'}[inv.task_snapshot.status]||inv.task_snapshot.status);
+      }
+      badge='<div style="font-size:10px;color:'+sc+';margin-top:6px;padding:3px 8px;background:'+sc.replace(')',',0.12)').replace('var(','rgba(255,255,255,')+';border-radius:4px;display:inline-block">📤 '+inv.to_email+' · '+sl+snapSt+'</div>';
+    }
+    /* Badge for tasks received and accepted */
+    if(t.delegatedFromEmail){
+      badge='<div style="font-size:10px;color:var(--accent2);margin-top:6px;padding:3px 8px;background:rgba(108,99,255,.12);border-radius:4px;display:inline-block">📥 From: '+t.delegatedFromEmail+'</div>';
+    }
+    if(badge){
+      /* Insert before task-actions closing */
+      html=html.replace(/(<div class="task-actions")/,'<div style="padding:0 12px 6px">'+badge+'</div>$1');
+    }
+    return html;
+  };
+
+  /* ── Hook showView to show "Incoming" title ── */
+  var _origSV=window.showView;
+  window.showView=function(v,el){
+    if(typeof _origSV==='function')_origSV(v,el);
+    if(v==='incoming'){
+      var pt=document.getElementById('page-title');
+      if(pt)pt.textContent='Incoming Tasks';
+      window.renderIncoming();
+    }
+  };
+
+  /* ── Hook load() to also fetch invitations ── */
+  var _origLoad=window.load;
+  window.load=async function(){
+    if(typeof _origLoad==='function')await _origLoad();
+    await loadInv();
+  };
+
+  /* Poll every 2 minutes for new invitations */
+  setInterval(loadInv,120000);
+
+  /* Export for debugging */
+  window._sharingModule={loadInv:loadInv,sent:function(){return _sent;},recv:function(){return _recv;}};
 })();
 </script>
 
