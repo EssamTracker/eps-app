@@ -5392,9 +5392,10 @@ function fbAttachDrag(card){
 
 <!-- ============================================================
      TASK SHARING MODULE
-     Allows sending tasks to other users by email.
-     Recipient can accept (task added to their list, linked) or reject.
-     Status syncs back to sender via eps_task_invitations table.
+     - Send tasks to team members (picker) or any email
+     - Team member invitation: adding member with email notifies them
+     - Recipient can accept/reject tasks and team connections
+     - Linked tasks: status syncs back to sender
      ============================================================ -->
 <script>
 (function(){
@@ -5428,27 +5429,59 @@ function fbAttachDrag(card){
     if(el){el.textContent=n;el.style.display=n?'inline-flex':'none';}
   }
 
-  /* ── Send Task Modal ── */
+  /* ── Send Task Modal (Team Picker) ── */
   window.showSendTask=function(taskId,e){
     if(e){e.stopPropagation();e.preventDefault();}
     if(!_sb()){alert('Not connected to server');return;}
     var old=document.getElementById('stm');if(old)old.remove();
     var task=_tasks().find(function(t){return t.id===taskId;});
     if(!task)return;
-    var m=document.createElement('div');
-    m.id='stm';
-    m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px';
-    m.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:360px">'
-      +'<div style="font-size:15px;font-weight:600;margin-bottom:6px">📤 Send Task</div>'
-      +'<div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.5">'+task.desc+'</div>'
-      +'<input id="stm-em" type="email" placeholder="Recipient email address" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">'
-      +'<div style="display:flex;gap:8px;margin-top:14px">'
+    /* Build team member list with emails */
+    var members=(typeof data!=='undefined'?data.members||[]:[]). filter(function(m){return m.email&&m.email.trim();});
+    var listHtml='';
+    if(members.length){
+      listHtml='<div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Team Members</div>'
+        +'<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;max-height:200px;overflow-y:auto">'
+        +members.map(function(m){
+          var c=typeof mColor==='function'?mColor(m.id):'var(--accent)';
+          var init=typeof mInit==='function'?mInit(m.name):(m.name||'?')[0].toUpperCase();
+          return '<div onclick="window._stmPick(\''+m.email.trim().toLowerCase()+'\')" '
+            +'style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg3);transition:background .15s" '
+            +'onmouseover="this.style.background=\'var(--bg4)\'" onmouseout="this.style.background=\'var(--bg3)\'">'
+            +'<div style="width:30px;height:30px;border-radius:50%;background:'+c+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">'+init+'</div>'
+            +'<div style="flex:1;min-width:0">'
+            +'<div style="font-size:13px;font-weight:500">'+m.name+'</div>'
+            +'<div style="font-size:11px;color:var(--text3)">'+m.email.trim()+'</div>'
+            +'</div>'
+            +'<div style="font-size:18px;opacity:.4">→</div>'
+            +'</div>';
+        }).join('')
+        +'</div>'
+        +'<div style="font-size:11px;color:var(--text3);margin-bottom:6px">Or enter any email:</div>';
+    } else {
+      listHtml='<div style="font-size:12px;color:var(--text3);margin-bottom:10px">No team members with emails. Add emails in Team first, or enter manually:</div>';
+    }
+    var m2=document.createElement('div');
+    m2.id='stm';
+    m2.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px';
+    m2.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:380px">'
+      +'<div style="font-size:15px;font-weight:600;margin-bottom:4px">📤 Send Task</div>'
+      +'<div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.4">'+task.desc+'</div>'
+      +listHtml
+      +'<input id="stm-em" type="email" placeholder="email@example.com" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">'
+      +'<div style="display:flex;gap:8px;margin-top:12px">'
       +'<button onclick="document.getElementById(\'stm\').remove()" style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit">Cancel</button>'
       +'<button onclick="window._doSendTask('+taskId+')" style="flex:1;padding:10px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit;font-weight:600">Send ↗</button>'
       +'</div></div>';
-    document.body.appendChild(m);
-    m.addEventListener('click',function(ev){if(ev.target===m)m.remove();});
+    document.body.appendChild(m2);
+    m2.addEventListener('click',function(ev){if(ev.target===m2)m2.remove();});
     setTimeout(function(){var i=document.getElementById('stm-em');if(i)i.focus();},80);
+  };
+
+  /* Pick team member email into input */
+  window._stmPick=function(email){
+    var inp=document.getElementById('stm-em');
+    if(inp){inp.value=email;inp.focus();}
   };
 
   window._doSendTask=async function(taskId){
@@ -5551,13 +5584,53 @@ function fbAttachDrag(card){
     _tasks().filter(function(t){return t.delegatedFrom;}).forEach(function(t){syncSnap(t);});
   };
 
+  /* ── Hook saveMember: send team invite when member added with email ── */
+  var _origSaveMember=window.saveMember;
+  window.saveMember=function(){
+    /* Capture email + name before calling original */
+    var nameEl=document.getElementById('member-name');
+    var emailEl=document.getElementById('member-email');
+    var isEdit=typeof editMemberId!=='undefined'&&editMemberId;
+    var toEmail=emailEl?emailEl.value.trim().toLowerCase():'';
+    if(typeof _origSaveMember==='function')_origSaveMember();
+    /* Only send invite for NEW members with an email */
+    if(!isEdit&&toEmail&&toEmail.includes('@')&&_sb()&&_uid()&&toEmail!==_uem()){
+      var memberName=nameEl?nameEl.value.trim():'Team Member';
+      var myName=_uem(); /* use email as display name fallback */
+      /* Try to get display name from user metadata */
+      if(typeof currentAuthUser!=='undefined'&&currentAuthUser&&currentAuthUser.user_metadata&&currentAuthUser.user_metadata.display_name){
+        myName=currentAuthUser.user_metadata.display_name;
+      }
+      var inv={
+        id:'tinv_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+        from_user_id:_uid(),
+        from_email:_uem(),
+        to_email:toEmail,
+        to_user_id:null,
+        original_task_id:'team_invite',
+        recipient_task_id:null,
+        task_snapshot:{type:'team_invite',from_name:myName,member_name:memberName,from_email:_uem()},
+        status:'pending',
+        created_at:new Date().toISOString(),
+        updated_at:new Date().toISOString()
+      };
+      _sb().from(TBL).insert([inv]).then(function(r){
+        if(!r.error){_sent.push(inv);}
+        else{console.warn('team invite failed:',r.error);}
+      });
+    }
+  };
+
   /* ── Render Incoming View ── */
   window.renderIncoming=function(){
     var el=document.getElementById('view-incoming');
     if(!el)return;
-    var pending=_recv.filter(function(x){return x.status==='pending';});
-    var accepted=_recv.filter(function(x){return x.status==='accepted';});
-    var rejected=_recv.filter(function(x){return x.status==='rejected';});
+    var allPending=_recv.filter(function(x){return x.status==='pending';});
+    var taskPending=allPending.filter(function(x){return x.original_task_id!=='team_invite';});
+    var teamPending=allPending.filter(function(x){return x.original_task_id==='team_invite';});
+    var pending=taskPending;
+    var accepted=_recv.filter(function(x){return x.status==='accepted'&&x.original_task_id!=='team_invite';});
+    var rejected=_recv.filter(function(x){return x.status==='rejected'&&x.original_task_id!=='team_invite';});
 
     function card(inv,withActions){
       var s=inv.task_snapshot||{};
@@ -5585,17 +5658,39 @@ function fbAttachDrag(card){
         +'</div>';
     }
 
+    /* Team invite card */
+    function teamCard(inv){
+      var s=inv.task_snapshot||{};
+      return '<div class="task-card" style="margin-bottom:10px">'
+        +'<div class="task-body">'
+        +'<div style="font-size:11px;color:var(--accent2);margin-bottom:5px;font-weight:500">🤝 Team Connection Request</div>'
+        +'<div class="task-title">'+(s.from_name||inv.from_email)+' wants to add you to their team</div>'
+        +'<div class="task-meta"><span style="font-size:11px;color:var(--text3)">From: '+(inv.from_email||inv.from_user_id)+'</span></div>'
+        +'</div>'
+        +'<div class="task-actions">'
+        +'<button class="icon-btn" style="color:var(--green);border-color:rgba(34,200,138,.4);font-size:15px" onclick="window._acceptTeamInv(\''+inv.id+'\')" title="Accept">✓</button>'
+        +'<button class="icon-btn" style="color:var(--red);border-color:rgba(255,95,109,.4)" onclick="window._rejectInv(\''+inv.id+'\')" title="Reject">✕</button>'
+        +'</div>'
+        +'</div>';
+    }
+
+    var totalPending=pending.length+teamPending.length;
     var h='<div style="max-width:680px">'
-      +'<div class="panel-title" style="margin-bottom:18px">📥 Incoming Tasks</div>';
-    if(!pending.length&&!accepted.length&&!rejected.length){
-      h+='<div style="color:var(--text3);font-size:13px;text-align:center;padding:60px 0;opacity:.6">No incoming tasks yet</div>';
+      +'<div class="panel-title" style="margin-bottom:18px">📥 Incoming</div>';
+    if(!totalPending&&!accepted.length&&!rejected.length){
+      h+='<div style="color:var(--text3);font-size:13px;text-align:center;padding:60px 0;opacity:.6">No incoming tasks or connection requests yet</div>';
+    }
+    /* Team invites first */
+    if(teamPending.length){
+      h+='<div style="font-size:11px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🤝 Team Requests · '+teamPending.length+'</div>';
+      h+=teamPending.map(function(inv){return teamCard(inv);}).join('');
     }
     if(pending.length){
-      h+='<div style="font-size:11px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">⏳ Pending · '+pending.length+'</div>';
+      h+='<div style="font-size:11px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin:'+(teamPending.length?'20px':'0')+' 0 10px">⏳ Task Requests · '+pending.length+'</div>';
       h+=pending.map(function(inv){return card(inv,true);}).join('');
     }
     if(accepted.length){
-      h+='<div style="font-size:11px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin:20px 0 10px">✓ Accepted · '+accepted.length+'</div>';
+      h+='<div style="font-size:11px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin:20px 0 10px">✓ Accepted Tasks · '+accepted.length+'</div>';
       h+=accepted.map(function(inv){return card(inv,false);}).join('');
     }
     if(rejected.length){
@@ -5604,6 +5699,26 @@ function fbAttachDrag(card){
     }
     h+='</div>';
     el.innerHTML=h;
+  };
+
+  /* ── Accept Team Invite: auto-add sender to my team ── */
+  window._acceptTeamInv=async function(invId){
+    var inv=_recv.find(function(x){return x.id===invId;});
+    if(!inv)return;
+    var r=await _sb().from(TBL).update({status:'accepted',to_user_id:_uid(),updated_at:new Date().toISOString()}).eq('id',invId);
+    if(r.error){alert('Error: '+r.error.message);return;}
+    inv.status='accepted';
+    /* Auto-add sender to my team if not already there */
+    if(typeof data!=='undefined'){
+      var s=inv.task_snapshot||{};
+      var exists=data.members.find(function(m){return m.email&&m.email.toLowerCase()===inv.from_email.toLowerCase();});
+      if(!exists){
+        data.members.push({id:Date.now(),name:s.from_name||inv.from_email,role:'Connected User',email:inv.from_email,phone:''});
+        if(typeof save==='function')save();
+        if(typeof renderTeam==='function')renderTeam();
+      }
+    }
+    _badge();window.renderIncoming();
   };
 
   /* ── Delegation badges in task cards ── */
