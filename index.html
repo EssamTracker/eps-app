@@ -104,6 +104,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .task-card.is-today{border-left:2px solid rgba(255,209,102,0.5)}
 .task-card.overdue-card{border-left:2px solid rgba(255,95,109,0.6)}
 .task-card.due-soon{border-left:2px solid rgba(245,166,35,0.6)}
+.task-card.urgent-card{border:2px solid rgba(239,68,68,0.65)!important;box-shadow:0 0 0 3px rgba(239,68,68,0.07),0 2px 10px rgba(239,68,68,0.12)!important}
+.today-task.urgent-today{border-left:3px solid var(--red)!important;background:rgba(239,68,68,0.05)}
 .task-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;margin-top:1px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center}
 .task-check.done{background:var(--green);border-color:var(--green)}
 .task-check.done::after{content:'✓';font-size:10px;color:#fff;font-weight:700}
@@ -2154,12 +2156,16 @@ function getFiltered(){
 }
 function sortTasks(tasks){
   if(currentSort==='manual')return[...tasks];
-  return[...tasks].sort((a,b)=>{
+  const sorted=[...tasks].sort((a,b)=>{
     if(currentSort==='priority')return(PRIORITY_ORDER[a.priority]||2)-(PRIORITY_ORDER[b.priority]||2);
     if(currentSort==='due'){if(!a.due&&!b.due)return 0;if(!a.due)return 1;if(!b.due)return-1;return new Date(a.due)-new Date(b.due);}
     if(currentSort==='status')return(STATUS_ORDER[a.status]||0)-(STATUS_ORDER[b.status]||0);
     return new Date(b.created)-new Date(a.created);
   });
+  if(currentSort==='priority')return sorted;
+  const urgentActive=sorted.filter(t=>t.priority==='urgent'&&t.status!=='done');
+  const rest=sorted.filter(t=>!(t.priority==='urgent'&&t.status!=='done'));
+  return[...urgentActive,...rest];
 }
 
 // RENDER HELPERS
@@ -2203,12 +2209,25 @@ function taskCard(t){
 
 function isTodayDate(d){return d&&new Date(d).toDateString()===new Date().toDateString();}
 function renderToday(){
-  let pinned=data.tasks.filter(t=>t.pinToday);
+  let pinned=data.tasks.filter(t=>t.pinToday&&t.status!=='done');
   const todayDate=new Date();
   const startOfToday=new Date(todayDate.getFullYear(),todayDate.getMonth(),todayDate.getDate());
   const sameDay=(d1,d2)=>d1.getFullYear()===d2.getFullYear()&&d1.getMonth()===d2.getMonth()&&d1.getDate()===d2.getDate();
 
   if(activeProjectFilter){const pid=getActiveProjectId();pinned=pinned.filter(t=>{const p=data.projects.find(x=>x.name===t.project || String(x.id)===String(t.projectId||''));return p&&String(p.id)===pid;});}
+
+  // Urgent tasks: auto-include even if not pinned
+  const pinnedIds=new Set(pinned.map(t=>t.id));
+  let urgentAuto=(data.tasks||[]).filter(t=>t.priority==='urgent'&&t.status!=='done'&&!pinnedIds.has(t.id));
+  if(activeProjectFilter) urgentAuto=urgentAuto.filter(t=>itemMatchesActiveProject(t));
+
+  // Replace lowest-priority pinned tasks with urgent ones (1-for-1 swap in display)
+  const PORDER={urgent:0,high:1,medium:2,low:3};
+  let displayPinned=[...pinned].sort((a,b)=>(PORDER[a.priority]||2)-(PORDER[b.priority]||2));
+  if(urgentAuto.length>0&&displayPinned.length>0){
+    const bumpCount=Math.min(urgentAuto.length,displayPinned.filter(t=>t.priority==='low'||t.priority==='medium').length);
+    if(bumpCount>0) displayPinned=displayPinned.slice(0,displayPinned.length-bumpCount);
+  }
 
   let todayMeetings=getMeetingsForDate(todayDate);
   let todayNotes=(data.notes||[]).filter(n=>n.hasDue&&n.due&&sameDay(new Date(n.due),todayDate));
@@ -2220,18 +2239,26 @@ function renderToday(){
     overdueNotes=overdueNotes.filter(n=>itemMatchesActiveProject(n));
   }
 
-  document.getElementById('today-badge').textContent=pinned.length+todayMeetings.length+todayNotes.length+overdueNotes.length;
+  const totalCount=urgentAuto.length+displayPinned.length+todayMeetings.length+todayNotes.length+overdueNotes.length;
+  document.getElementById('today-badge').textContent=totalCount||'';
   const el=document.getElementById('today-tasks-list');
-  const done=pinned.filter(t=>t.todayDone||t.status==='done').length,pct=pinned.length?Math.round(done/pinned.length*100):0;
+  const allTodayTasks=[...urgentAuto,...displayPinned];
+  const done=allTodayTasks.filter(t=>t.todayDone||t.status==='done').length;
+  const pct=allTodayTasks.length?Math.round(done/allTodayTasks.length*100):0;
   document.getElementById('today-prog-fill').style.width=pct+'%';
   document.getElementById('today-prog-label').textContent=pct+'%';
 
-  if(!pinned.length&&!todayMeetings.length&&!todayNotes.length&&!overdueNotes.length){
+  if(!urgentAuto.length&&!displayPinned.length&&!todayMeetings.length&&!todayNotes.length&&!overdueNotes.length){
     el.innerHTML='<div class="today-empty">No tasks pinned, notes, or meetings scheduled for today.<br><span style="font-size:11px">Click ☀ on any task to pin it.</span></div>';
     return;
   }
 
-  const taskHtml=pinned.map(t=>{
+  const urgentHtml=urgentAuto.length?
+    `<div style="font-size:10px;color:var(--red);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin:0 0 4px;display:flex;align-items:center;gap:5px">⚡ Urgent<span style="font-size:9px;font-weight:400;color:var(--text3)">(auto-added)</span></div>`+
+    urgentAuto.map(t=>{const isDone=t.todayDone||t.status==='done';return`<div class="today-task urgent-today${isDone?' pinned-done':''}" onclick="openDetail(${t.id})"><div class="today-check${isDone?' done':''}" onclick="event.stopPropagation();toggleTodayDone(${t.id})"></div><div class="today-task-text${isDone?' done':''}">${t.desc}</div><span class="tag tag-urgent">urgent</span>${assigneeTag(t.assignee)}<button class="icon-btn" style="font-size:11px;opacity:.6" onclick="event.stopPropagation();togglePin(${t.id},event)" title="Pin">☀</button></div>`;}).join('')
+    :'';
+
+  const taskHtml=displayPinned.map(t=>{
     const isDone=t.todayDone||t.status==='done';
     return`<div class="today-task${isDone?' pinned-done':''}" onclick="openDetail(${t.id})"><div class="today-check${isDone?' done':''}" onclick="event.stopPropagation();toggleTodayDone(${t.id})"></div><div class="today-task-text${isDone?' done':''}">${t.desc}</div><span class="tag tag-${t.priority}">${t.priority}</span>${assigneeTag(t.assignee)}<button class="unpin-btn" onclick="event.stopPropagation();togglePin(${t.id},event)">✕</button></div>`;
   }).join('');
@@ -2245,7 +2272,7 @@ function renderToday(){
   const overdueNoteHtml=overdueNotes.length?`<div style="font-size:10px;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin:10px 0 4px">Overdue Notes</div>`+
     overdueNotes.map(n=>`<div class="today-task" style="cursor:default;border-left:2px solid var(--red)"><div class="note-title" style="margin:0">📝</div><div class="today-task-text">${n.title}</div>${itemProjectName(n)?`<span class="tag tag-project">📁 ${itemProjectName(n)}</span>`:''}<span class="task-due overdue">${new Date(n.due).toLocaleDateString([],{month:'short',day:'numeric'})}</span></div>`).join(''):'';
 
-  el.innerHTML=taskHtml+meetingHtml+noteHtml+overdueNoteHtml;
+  el.innerHTML=urgentHtml+taskHtml+meetingHtml+noteHtml+overdueNoteHtml;
 }
 function renderOverdueTasks(){
   const el=document.getElementById('overdue-tasks-list');
@@ -5662,7 +5689,7 @@ setTimeout(() => { injectTodayHeader(); }, 300);
     const subDone=(t.subtasks||[]).filter(s=>s.done).length,subTotal=(t.subtasks||[]).length;
     const cc=(t.comments||[]).length,ac=(t.attachments||[]).length;
     const last=(t.comments||[]).length?t.comments[t.comments.length-1]:null;
-    let cls='task-card';if(isT)cls+=' is-today';else if(ds==='overdue'&&t.status!=='done')cls+=' overdue-card';else if(ds==='soon'&&t.status!=='done')cls+=' due-soon';
+    let cls='task-card';if(isT)cls+=' is-today';else if(ds==='overdue'&&t.status!=='done')cls+=' overdue-card';else if(ds==='soon'&&t.status!=='done')cls+=' due-soon';if(t.priority==='urgent'&&t.status!=='done')cls+=' urgent-card';
     const pn=taskProjectName(t);
     const manualMode=typeof currentSort!=='undefined'&&currentSort==='manual';
     const _tm=typeof fbMeta==='function'?fbMeta()[Number(t.id)]:null;
