@@ -5436,87 +5436,161 @@ function fbAttachDrag(card){
     var old=document.getElementById('stm');if(old)old.remove();
     var task=_tasks().find(function(t){return t.id===taskId;});
     if(!task)return;
-    /* Build team member list with emails */
-    var members=(typeof data!=='undefined'?data.members||[]:[]). filter(function(m){return m.email&&m.email.trim();});
-    var listHtml='';
-    if(members.length){
-      listHtml='<div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Team Members</div>'
-        +'<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;max-height:200px;overflow-y:auto">'
-        +members.map(function(m){
-          var c=typeof mColor==='function'?mColor(m.id):'var(--accent)';
-          var init=typeof mInit==='function'?mInit(m.name):(m.name||'?')[0].toUpperCase();
-          return '<div onclick="window._stmPick(\''+m.email.trim().toLowerCase()+'\')" '
-            +'style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg3);transition:background .15s" '
-            +'onmouseover="this.style.background=\'var(--bg4)\'" onmouseout="this.style.background=\'var(--bg3)\'">'
-            +'<div style="width:30px;height:30px;border-radius:50%;background:'+c+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">'+init+'</div>'
-            +'<div style="flex:1;min-width:0">'
-            +'<div style="font-size:13px;font-weight:500">'+m.name+'</div>'
-            +'<div style="font-size:11px;color:var(--text3)">'+m.email.trim()+'</div>'
-            +'</div>'
-            +'<div style="font-size:18px;opacity:.4">→</div>'
-            +'</div>';
-        }).join('')
-        +'</div>'
-        +'<div style="font-size:11px;color:var(--text3);margin-bottom:6px">Or enter any email:</div>';
-    } else {
-      listHtml='<div style="font-size:12px;color:var(--text3);margin-bottom:10px">No team members with emails. Add emails in Team first, or enter manually:</div>';
-    }
-    var m2=document.createElement('div');
-    m2.id='stm';
-    m2.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px';
-    m2.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:380px">'
-      +'<div style="font-size:15px;font-weight:600;margin-bottom:4px">📤 Send Task</div>'
-      +'<div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.4">'+task.desc+'</div>'
-      +listHtml
-      +'<input id="stm-em" type="email" placeholder="email@example.com" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">'
-      +'<div style="display:flex;gap:8px;margin-top:12px">'
-      +'<button onclick="document.getElementById(\'stm\').remove()" style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit">Cancel</button>'
-      +'<button onclick="window._doSendTask('+taskId+')" style="flex:1;padding:10px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit;font-weight:600">Send ↗</button>'
-      +'</div></div>';
-    document.body.appendChild(m2);
-    m2.addEventListener('click',function(ev){if(ev.target===m2)m2.remove();});
-    setTimeout(function(){var i=document.getElementById('stm-em');if(i)i.focus();},80);
-  };
+    var allMembers=(typeof data!=='undefined'?data.members||[]:[]). filter(function(m){return m.email&&m.email.trim();});
+    window._stmRecipients=[];
 
-  /* Pick team member email into input */
-  window._stmPick=function(email){
-    var inp=document.getElementById('stm-em');
-    if(inp){inp.value=email;inp.focus();}
+    function _stmRender(){
+      var recips=window._stmRecipients;
+      var usedEmails=recips.map(function(r){return r.email;});
+      var available=allMembers.filter(function(m){return usedEmails.indexOf(m.email.trim().toLowerCase())<0;});
+
+      /* Recipients staging area */
+      var recipHtml='';
+      if(recips.length){
+        recipHtml='<div style="margin-bottom:14px">'
+          +'<div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Recipients</div>'
+          +recips.map(function(r,i){
+            var isAction=r.role==='action';
+            return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;border:1px solid var(--border);margin-bottom:6px;background:var(--bg3)">'
+              +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(r.name||r.email)+'</div>'
+              +'<div style="font-size:11px;color:var(--text3)">'+r.email+'</div></div>'
+              +'<button onclick="window._stmToggleRole('+i+')" style="padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid;cursor:pointer;white-space:nowrap;'
+              +(isAction?'background:var(--accent);color:#fff;border-color:var(--accent)':'background:transparent;color:var(--accent2);border-color:var(--accent2)')
+              +'">'+(isAction?'Action':'CC')+'</button>'
+              +'<button onclick="window._stmRemove('+i+')" style="padding:3px 7px;border-radius:6px;font-size:12px;background:transparent;border:1px solid var(--border);color:var(--text3);cursor:pointer">✕</button>'
+              +'</div>';
+          }).join('')
+          +'</div>';
+      }
+
+      /* Team member picker (only un-selected members) */
+      var listHtml='';
+      if(available.length){
+        listHtml='<div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Add from Team</div>'
+          +'<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px;max-height:160px;overflow-y:auto">'
+          +available.map(function(m){
+            var c=typeof mColor==='function'?mColor(m.id):'var(--accent)';
+            var init=typeof mInit==='function'?mInit(m.name):(m.name||'?')[0].toUpperCase();
+            var em=m.email.trim().toLowerCase();
+            return '<div onclick="window._stmAddMember(\''+em+'\',\''+m.name.replace(/'/g,'\\\'')+'\')" '
+              +'style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg3)" '
+              +'onmouseover="this.style.background=\'var(--bg4)\'" onmouseout="this.style.background=\'var(--bg3)\'">'
+              +'<div style="width:28px;height:28px;border-radius:50%;background:'+c+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">'+init+'</div>'
+              +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">'+m.name+'</div>'
+              +'<div style="font-size:11px;color:var(--text3)">'+m.email.trim()+'</div></div>'
+              +'<div style="font-size:16px;color:var(--text3)">+</div>'
+              +'</div>';
+          }).join('')
+          +'</div>';
+      } else if(!allMembers.length){
+        listHtml='<div style="font-size:12px;color:var(--text3);margin-bottom:10px">No team members with emails yet.</div>';
+      }
+
+      var hasRecips=recips.length>0;
+      var inner='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto">'
+        +'<div style="font-size:15px;font-weight:600;margin-bottom:4px">📤 Send Task</div>'
+        +'<div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.4">'+task.desc+'</div>'
+        +recipHtml
+        +listHtml
+        +'<div style="font-size:11px;color:var(--text3);margin-bottom:6px">Or add by email:</div>'
+        +'<div style="display:flex;gap:8px;margin-bottom:14px">'
+        +'<input id="stm-em" type="email" placeholder="email@example.com" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">'
+        +'<button onclick="window._stmAddEmail()" style="padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg4);color:var(--text);cursor:pointer;font-size:13px;white-space:nowrap;font-family:inherit">+ Add</button>'
+        +'</div>'
+        +'<div style="display:flex;gap:8px">'
+        +'<button onclick="document.getElementById(\'stm\').remove()" style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit">Cancel</button>'
+        +'<button onclick="window._doSendTask('+taskId+')" style="flex:'+(hasRecips?2:1)+';padding:10px;border-radius:8px;border:none;background:'+(hasRecips?'var(--accent)':'var(--bg4)')+';color:'+(hasRecips?'#fff':'var(--text3)')+';cursor:pointer;font-family:inherit;font-weight:600">'
+        +(hasRecips?'Send to '+recips.length+' recipient'+(recips.length>1?'s':'')+'  ↗':'Send ↗')
+        +'</button></div></div>';
+
+      var existing=document.getElementById('stm');
+      if(existing){existing.innerHTML=inner;}
+      else{
+        var overlay=document.createElement('div');
+        overlay.id='stm';
+        overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px';
+        overlay.innerHTML=inner;
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click',function(ev){if(ev.target===overlay)overlay.remove();});
+      }
+    }
+
+    window._stmAddMember=function(email,name){
+      if(!window._stmRecipients.find(function(r){return r.email===email;}))
+        window._stmRecipients.push({email:email,name:name,role:'action'});
+      _stmRender();
+    };
+    window._stmAddEmail=function(){
+      var inp=document.getElementById('stm-em');
+      if(!inp)return;
+      var email=inp.value.trim().toLowerCase();
+      if(!email||!email.includes('@')){alert('Enter a valid email');return;}
+      if(email===_uem()){alert('Cannot send to yourself');return;}
+      var member=allMembers.find(function(m){return m.email.trim().toLowerCase()===email;});
+      var name=member?member.name:email.split('@')[0];
+      if(!window._stmRecipients.find(function(r){return r.email===email;}))
+        window._stmRecipients.push({email:email,name:name,role:'action'});
+      inp.value='';
+      _stmRender();
+    };
+    window._stmToggleRole=function(i){
+      if(window._stmRecipients[i])
+        window._stmRecipients[i].role=window._stmRecipients[i].role==='action'?'cc':'action';
+      _stmRender();
+    };
+    window._stmRemove=function(i){
+      window._stmRecipients.splice(i,1);
+      _stmRender();
+    };
+
+    _stmRender();
   };
 
   window._doSendTask=async function(taskId){
-    var emEl=document.getElementById('stm-em');
-    if(!emEl)return;
-    var toEm=emEl.value.trim().toLowerCase();
-    if(!toEm||!toEm.includes('@')){alert('Please enter a valid email');return;}
-    if(toEm===_uem()){alert('Cannot send a task to yourself');return;}
+    var recips=window._stmRecipients||[];
+    /* Fallback: check manual input if no recipients staged */
+    if(!recips.length){
+      var emEl=document.getElementById('stm-em');
+      var toEm=emEl?emEl.value.trim().toLowerCase():'';
+      if(!toEm||!toEm.includes('@')){alert('Add at least one recipient');return;}
+      if(toEm===_uem()){alert('Cannot send to yourself');return;}
+      recips=[{email:toEm,name:toEm.split('@')[0],role:'action'}];
+    }
     var task=_tasks().find(function(t){return t.id===taskId;});
     if(!task)return;
-    var dup=_sent.find(function(s){return s.original_task_id===String(taskId)&&s.to_email===toEm&&s.status==='pending';});
-    if(dup){alert('Already sent to '+toEm+' — awaiting their response');document.getElementById('stm').remove();return;}
-    document.getElementById('stm').remove();
-    var inv={
-      id:'inv_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-      from_user_id:_uid(),
-      from_email:_uem(),
-      to_email:toEm,
-      to_user_id:null,
-      original_task_id:String(taskId),
-      recipient_task_id:null,
-      task_snapshot:JSON.parse(JSON.stringify(task)),
-      status:'pending',
-      created_at:new Date().toISOString(),
-      updated_at:new Date().toISOString()
-    };
-    var r=await _sb().from(TBL).insert([inv]);
-    if(r.error){alert('Failed to send: '+r.error.message);return;}
-    _sent.push(inv);
-    var toast=document.createElement('div');
-    toast.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 22px;border-radius:24px;font-size:13px;font-weight:600;z-index:600;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap';
-    toast.textContent='✓ Task sent to '+toEm;
-    document.body.appendChild(toast);
-    setTimeout(function(){toast.remove();},3000);
-    if(typeof renderTasks==='function')renderTasks();
+    var modal=document.getElementById('stm');if(modal)modal.remove();
+    var sent=0;
+    for(var i=0;i<recips.length;i++){
+      var rec=recips[i];
+      var dup=_sent.find(function(s){return s.original_task_id===String(taskId)&&s.to_email===rec.email&&s.status==='pending';});
+      if(dup)continue;
+      var snap=Object.assign({},JSON.parse(JSON.stringify(task)),{role:rec.role});
+      var inv={
+        id:'inv_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+        from_user_id:_uid(),
+        from_email:_uem(),
+        to_email:rec.email,
+        to_user_id:null,
+        original_task_id:String(taskId),
+        recipient_task_id:null,
+        task_snapshot:snap,
+        status:'pending',
+        created_at:new Date().toISOString(),
+        updated_at:new Date().toISOString()
+      };
+      var r=await _sb().from(TBL).insert([inv]);
+      if(!r.error){_sent.push(inv);sent++;}
+      else{console.warn('send failed:',r.error);}
+    }
+    window._stmRecipients=[];
+    if(sent>0){
+      var toast=document.createElement('div');
+      toast.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 22px;border-radius:24px;font-size:13px;font-weight:600;z-index:600;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap';
+      toast.textContent='✓ Task sent to '+sent+' recipient'+(sent>1?'s':'');
+      document.body.appendChild(toast);
+      setTimeout(function(){toast.remove();},3000);
+      if(typeof renderTasks==='function')renderTasks();
+    }
   };
 
   /* ── Accept ── */
@@ -5529,6 +5603,7 @@ function fbAttachDrag(card){
       id:newId,
       delegatedFrom:invId,
       delegatedFromEmail:inv.from_email||inv.from_user_id,
+      delegatedRole:snap.role||'action',
       pinToday:false,
       status:snap.status==='done'?'not-started':(snap.status||'not-started'),
       created:new Date().toISOString()
@@ -5637,9 +5712,15 @@ function fbAttachDrag(card){
       var pc='tag-'+(s.priority||'medium');
       var sc={'not-started':'○ Not Started','in-progress':'⟳ In Progress','done':'✓ Done'}[s.status||'not-started']||'';
       var dueStr=s.due?('<span class="task-due">🕒 '+new Date(s.due).toLocaleDateString([],{month:'short',day:'numeric'})+'</span>'):'';
+      var role=s.role||'action';
+      var roleTag=role==='cc'
+        ?'<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:transparent;border:1px solid var(--accent2);color:var(--accent2);margin-left:6px">CC</span>'
+        :'<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--accent);color:#fff;margin-left:6px">Action</span>';
       return '<div class="task-card" style="margin-bottom:10px">'
         +'<div class="task-body">'
-        +'<div style="font-size:11px;color:var(--accent2);margin-bottom:5px;font-weight:500">📥 From: '+(inv.from_email||inv.from_user_id)+'</div>'
+        +'<div style="font-size:11px;color:var(--accent2);margin-bottom:5px;font-weight:500;display:flex;align-items:center">'
+        +(role==='cc'?'📋':'📥')+' From: '+(inv.from_email||inv.from_user_id)+roleTag
+        +'</div>'
         +'<div class="task-title">'+(s.desc||'Task')+'</div>'
         +(s.notes?'<div style="font-size:12px;color:var(--text2);margin:4px 0 6px;line-height:1.4">'+s.notes+'</div>':'')
         +'<div class="task-meta">'
@@ -5727,20 +5808,35 @@ function fbAttachDrag(card){
     var html=typeof _origTC==='function'?_origTC(t):'';
     if(!html)return html;
     var badge='';
-    /* Badge for tasks I sent */
-    var inv=_sent.find(function(s){return s.original_task_id===String(t.id);});
-    if(inv){
-      var sc=inv.status==='accepted'?'var(--green)':inv.status==='rejected'?'var(--red)':'var(--text3)';
-      var sl=inv.status==='accepted'?'✓ Accepted':inv.status==='rejected'?'✕ Rejected':'⏳ Awaiting response';
-      var snapSt='';
-      if(inv.status==='accepted'&&inv.task_snapshot&&inv.task_snapshot.status){
-        snapSt=' · '+({'not-started':'Not Started','in-progress':'In Progress','done':'Done'}[inv.task_snapshot.status]||inv.task_snapshot.status);
+    /* Badge for tasks I sent — aggregate all invitations for this task */
+    var invs=_sent.filter(function(s){return s.original_task_id===String(t.id);});
+    if(invs.length){
+      var byRole={action:[],cc:[]};
+      invs.forEach(function(x){
+        var role=(x.task_snapshot&&x.task_snapshot.role)||'action';
+        byRole[role].push(x);
+      });
+      var parts=[];
+      if(byRole.action.length){
+        var names=byRole.action.map(function(x){
+          var n=x.to_email.split('@')[0];
+          var st=x.status==='accepted'?' ✓':x.status==='rejected'?' ✕':'';
+          return n+st;
+        }).join(', ');
+        parts.push('Action: '+names);
       }
-      badge='<div style="font-size:10px;color:'+sc+';margin-top:6px;padding:3px 8px;background:'+sc.replace(')',',0.12)').replace('var(','rgba(255,255,255,')+';border-radius:4px;display:inline-block">📤 '+inv.to_email+' · '+sl+snapSt+'</div>';
+      if(byRole.cc.length){
+        parts.push('CC: '+byRole.cc.map(function(x){return x.to_email.split('@')[0];}).join(', '));
+      }
+      var anyPending=invs.some(function(x){return x.status==='pending';});
+      var statusColor=anyPending?'var(--text3)':'var(--green)';
+      badge='<div style="font-size:10px;color:'+statusColor+';margin-top:6px;padding:3px 8px;background:rgba(108,99,255,.1);border-radius:4px;display:inline-block">📤 Exported to: '+parts.join(' · ')+'</div>';
     }
     /* Badge for tasks received and accepted */
     if(t.delegatedFromEmail){
-      badge='<div style="font-size:10px;color:var(--accent2);margin-top:6px;padding:3px 8px;background:rgba(108,99,255,.12);border-radius:4px;display:inline-block">📥 From: '+t.delegatedFromEmail+'</div>';
+      var isCC=t.delegatedRole==='cc';
+      badge='<div style="font-size:10px;color:var(--accent2);margin-top:6px;padding:3px 8px;background:rgba(108,99,255,.12);border-radius:4px;display:inline-block">'
+        +(isCC?'📋 CC from: ':'📥 Imported from: ')+t.delegatedFromEmail+'</div>';
     }
     if(badge){
       /* Insert before task-actions closing */
