@@ -99,6 +99,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .tasks-grid{display:flex;flex-direction:column;gap:8px}
 .task-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:flex-start;gap:12px;transition:all 0.15s;cursor:pointer}
 .task-card:hover{border-color:var(--text3);background:var(--bg3)}
+.task-card.is-urgent{border-left:3px solid var(--red)!important;box-shadow:0 0 0 1px rgba(255,95,109,0.15)}
 .task-card.is-today{border-left:2px solid rgba(255,209,102,0.5)}
 .task-card.overdue-card{border-left:2px solid rgba(255,95,109,0.6)}
 .task-card.due-soon{border-left:2px solid rgba(245,166,35,0.6)}
@@ -2352,6 +2353,11 @@ function getFiltered(){
 }
 function sortTasks(tasks){
   return[...tasks].sort((a,b)=>{
+    if(currentSort!=='manual'){
+      const aU=a.priority==='urgent'&&a.status!=='done'?0:1;
+      const bU=b.priority==='urgent'&&b.status!=='done'?0:1;
+      if(aU!==bU)return aU-bU;
+    }
     if(currentSort==='priority')return(PRIORITY_ORDER[a.priority]||2)-(PRIORITY_ORDER[b.priority]||2);
     if(currentSort==='due'){if(!a.due&&!b.due)return 0;if(!a.due)return 1;if(!b.due)return-1;return new Date(a.due)-new Date(b.due);}
     if(currentSort==='status')return(STATUS_ORDER[a.status]||0)-(STATUS_ORDER[b.status]||0);
@@ -2366,7 +2372,7 @@ function taskCard(t){
   const subDone=t.subtasks?t.subtasks.filter(s=>s.done).length:0,subTotal=t.subtasks?t.subtasks.length:0;
   const cc=t.comments?t.comments.length:0,ac=t.attachments?t.attachments.length:0;
   const last=t.comments&&t.comments.length?t.comments[t.comments.length-1]:null;
-  let cls='task-card';if(isT)cls+=' is-today';else if(ds==='overdue'&&t.status!=='done')cls+=' overdue-card';else if(ds==='soon'&&t.status!=='done')cls+=' due-soon';
+  let cls='task-card';if(t.priority==='urgent'&&t.status!=='done')cls+=' is-urgent';if(isT)cls+=' is-today';else if(ds==='overdue'&&t.status!=='done')cls+=' overdue-card';else if(ds==='soon'&&t.status!=='done')cls+=' due-soon';
   return`<div class="${cls}" onclick="openDetail(${t.id})">
     <div class="task-check${t.status==='done'?' done':''}" onclick="toggleTask(${t.id},event)"></div>
     <div class="task-body">
@@ -2399,7 +2405,10 @@ function taskCard(t){
 
 function isTodayDate(d){return d&&new Date(d).toDateString()===new Date().toDateString();}
 function renderToday(){
-  let pinned=data.tasks.filter(t=>t.pinToday);
+  // Auto-include urgent (not done), exclude low priority
+  let pinned=data.tasks.filter(t=>(t.pinToday||t.priority==='urgent')&&t.status!=='done'&&t.priority!=='low');
+  // Remove duplicates by id
+  pinned=[...new Map(pinned.map(t=>[t.id,t])).values()];
   const todayDate=new Date();
   const startOfToday=new Date(todayDate.getFullYear(),todayDate.getMonth(),todayDate.getDate());
   const sameDay=(d1,d2)=>d1.getFullYear()===d2.getFullYear()&&d1.getMonth()===d2.getMonth()&&d1.getDate()===d2.getDate();
@@ -4022,7 +4031,7 @@ window.rptPrint=function(section){
     const subDone=(t.subtasks||[]).filter(s=>s.done).length,subTotal=(t.subtasks||[]).length;
     const cc=(t.comments||[]).length,ac=(t.attachments||[]).length;
     const last=(t.comments||[]).length?t.comments[t.comments.length-1]:null;
-    let cls='task-card';if(isT)cls+=' is-today';else if(ds==='overdue'&&t.status!=='done')cls+=' overdue-card';else if(ds==='soon'&&t.status!=='done')cls+=' due-soon';
+    let cls='task-card';if(t.priority==='urgent'&&t.status!=='done')cls+=' is-urgent';if(isT)cls+=' is-today';else if(ds==='overdue'&&t.status!=='done')cls+=' overdue-card';else if(ds==='soon'&&t.status!=='done')cls+=' due-soon';
     const pn=taskProjectName(t);
     return`<div class="${cls}" onclick="openDetail(${Number(t.id)})">
       <div class="task-check${t.status==='done'?' done':''}" onclick="toggleTask(${Number(t.id)},event)"></div>
