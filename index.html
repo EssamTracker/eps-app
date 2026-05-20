@@ -4289,20 +4289,8 @@ function closeMobileSidebar(){
   document.querySelector('.sidebar').classList.remove('mobile-open');
   document.getElementById('sidebar-overlay').classList.remove('show');
 }
-// Close sidebar when a nav item is clicked on mobile
+// Sidebar stays open until explicitly closed via overlay or hamburger
 (function(){
-  document.querySelectorAll('.nav-item').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      if(window.innerWidth<=768) closeMobileSidebar();
-    });
-  });
-  const nav=document.querySelector('.nav');
-  if(nav){
-    nav.addEventListener('click',function(e){
-      if(window.innerWidth<=768 && e.target.closest('.nav-item')) closeMobileSidebar();
-    });
-  }
-
   // Fix iOS Safari: buttons inside overflow:hidden containers need this
   if(/iPhone|iPad|iPod/.test(navigator.userAgent)){
     document.body.style.cursor='pointer';
