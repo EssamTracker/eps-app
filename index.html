@@ -2253,15 +2253,17 @@ function renderToday(){
     return;
   }
 
+  const _tc=window.taskCard||taskCard;
+
   const urgentHtml=urgentAuto.length?
-    `<div style="font-size:10px;color:var(--red);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin:0 0 4px;display:flex;align-items:center;gap:5px">⚡ Urgent<span style="font-size:9px;font-weight:400;color:var(--text3)">(auto-added)</span></div>`+
-    urgentAuto.map(t=>{const isDone=t.todayDone||t.status==='done';return`<div class="today-task urgent-today${isDone?' pinned-done':''}" onclick="openDetail(${t.id})"><div class="today-check${isDone?' done':''}" onclick="event.stopPropagation();toggleTodayDone(${t.id})"></div><div class="today-task-text${isDone?' done':''}">${t.desc}</div><span class="tag tag-urgent">urgent</span>${assigneeTag(t.assignee)}<button class="icon-btn" style="font-size:11px;opacity:.6" onclick="event.stopPropagation();togglePin(${t.id},event)" title="Pin">☀</button></div>`;}).join('')
+    `<div style="font-size:10px;color:var(--red);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin:0 0 8px;display:flex;align-items:center;gap:5px">⚡ Urgent<span style="font-size:9px;font-weight:400;color:var(--text3)">(auto-added)</span></div>`+
+    urgentAuto.map(t=>_tc(t)).join('')
     :'';
 
-  const taskHtml=displayPinned.map(t=>{
-    const isDone=t.todayDone||t.status==='done';
-    return`<div class="today-task${isDone?' pinned-done':''}" onclick="openDetail(${t.id})"><div class="today-check${isDone?' done':''}" onclick="event.stopPropagation();toggleTodayDone(${t.id})"></div><div class="today-task-text${isDone?' done':''}">${t.desc}</div><span class="tag tag-${t.priority}">${t.priority}</span>${assigneeTag(t.assignee)}<button class="unpin-btn" onclick="event.stopPropagation();togglePin(${t.id},event)">✕</button></div>`;
-  }).join('');
+  const taskHtml=displayPinned.length?
+    (urgentAuto.length?`<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin:12px 0 8px">📌 Pinned</div>`:'')
+    +displayPinned.map(t=>_tc(t)).join('')
+    :'';
 
   const meetingHtml=todayMeetings.length?`<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:10px 0 4px">Today's Meetings</div>`+
     todayMeetings.map(m=>`<div class="today-task" style="cursor:default"><div class="meeting-dot"></div><div class="today-task-text">${m.title}</div>${itemProjectName(m)?`<span class="tag tag-project">📁 ${itemProjectName(m)}</span>`:''}${m.time?`<span class="task-due due-soon">${displayMeetingTimeForDate(m,todayDate).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>`:''}${m.with?`<span style="font-size:11px;color:var(--text3)">with ${m.with}</span>`:''}</div>`).join(''):'';
