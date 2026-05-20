@@ -924,6 +924,118 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   .btn.btn-primary span{display:none}
 }
 
+/* ===== MOBILE IMPROVEMENTS ===== */
+@media(max-width:768px){
+  /* Topbar: give actions flex-shrink so they don't push title */
+  .topbar{flex-wrap:nowrap;overflow:hidden}
+  .topbar-actions{flex-shrink:0;gap:5px}
+  .topbar-actions .btn span{display:none}
+  .topbar-actions .btn{padding:6px 8px;min-width:32px;justify-content:center}
+  .notif-btn{min-width:34px}
+
+  /* Section header: compact, don't break layout */
+  .section-header{flex-wrap:wrap;gap:6px}
+
+  /* View switcher: compact */
+  #view-list-btn,#view-kanban-btn,#view-board-btn{padding:5px 8px!important;font-size:13px}
+
+  /* Sort select: shorter */
+  .sort-select{max-width:110px;font-size:11px}
+
+  /* Filter row: horizontal scroll */
+  .filter-row,#status-filters,#priority-filters,#assignee-filters-main{
+    flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  .filter-row::-webkit-scrollbar{display:none}
+
+  /* Reports tabs: horizontal scroll */
+  .rpt-tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;gap:4px}
+  .rpt-tabs::-webkit-scrollbar{display:none}
+  .rpt-tab{white-space:nowrap;padding:5px 10px;font-size:11px;flex-shrink:0}
+
+  /* Reports filter bar: stack vertically */
+  .rpt-filter-bar{flex-direction:column;align-items:stretch;gap:6px}
+  .rpt-filter-sel{width:100%;font-size:12px;padding:6px 8px}
+  .rpt-filter-date{font-size:12px;padding:5px 6px}
+  .rpt-filter-lbl{font-size:12px}
+
+  /* Reports KPI: 2 columns on mobile */
+  .rpt-kpi{grid-template-columns:repeat(2,1fr)!important}
+  .rpt-grid{grid-template-columns:1fr!important}
+
+  /* Free board: scrollable canvas, fixed card width */
+  #free-board{overflow:auto;-webkit-overflow-scrolling:touch}
+  .fb-card{width:190px!important}
+
+  /* Kanban: already stacks vertically, just ensure padding */
+  .kb-col{width:100%!important}
+
+  /* Task card meta: wrap and scroll */
+  .task-meta{flex-wrap:wrap;gap:4px}
+
+  /* Today header: stack max-tasks row */
+  #view-today>div:nth-child(2){flex-wrap:wrap;gap:6px}
+  #max-today-input{width:36px}
+
+  /* Modals: full-screen bottom sheet already set, improve header */
+  .modal{padding:18px 16px}
+
+  /* Detail panel: no overflow on mobile */
+  .detail-panel{overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+  /* Member filter row: horizontal scroll */
+  .member-filter-row{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .member-filter-row::-webkit-scrollbar{display:none}
+
+  /* Print buttons: hide on mobile */
+  .rpt-print-btn.pr{display:none}
+}
+
+@media(max-width:480px){
+  /* Topbar: even tighter */
+  .topbar-actions .btn{padding:5px 7px}
+  .page-title{font-size:12px;max-width:110px}
+
+  /* Hide secondary topbar buttons */
+  #project-export-btn{display:none}
+
+  /* Task card: compact padding, always show actions */
+  .task-card{padding:10px 11px;gap:9px}
+  .task-meta{gap:3px}
+  .tag{font-size:9px;padding:1px 5px}
+  .tag-today-badge{font-size:9px;padding:1px 5px}
+
+  /* Section header row with sort+view: wrap */
+  .section-header > div[style*="display:flex"]{flex-wrap:wrap;gap:5px}
+
+  /* Reports: tighter */
+  .rpt-kpi-card{padding:10px}
+  .rpt-kpi-num{font-size:19px}
+  .rpt-table th,.rpt-table td{padding:5px 7px;font-size:11px}
+
+  /* Quick add area */
+  #quick-task-desc{font-size:13px}
+  .panel{padding:12px}
+
+  /* Stats card */
+  .stat-card{padding:12px}
+  .stat-label{font-size:9px}
+
+  /* Free board canvas: wider on narrow screens */
+  #free-board-canvas{min-width:600px}
+
+  /* Contact card */
+  .contact-card{padding:12px}
+
+  /* Meetings item */
+  .meeting-item{padding:10px 12px}
+  .meeting-time{min-width:40px;font-size:10px}
+  .meeting-title{font-size:12px}
+}
+
 /* ===== DRAG HANDLE ===== */
 .drag-handle{width:26px;align-self:stretch;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--border);border-radius:8px 0 0 8px;font-size:15px;color:var(--text3);cursor:grab;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;opacity:0.55;flex-shrink:0}
 .task-card[data-dnd-over="top"]{box-shadow:0 -2px 0 0 var(--accent)!important}
