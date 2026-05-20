@@ -2492,34 +2492,39 @@ function taskCard(t){
   const cc=t.comments?t.comments.length:0,ac=t.attachments?t.attachments.length:0;
   const last=t.comments&&t.comments.length?t.comments[t.comments.length-1]:null;
   let cls='task-card';if(t.priority==='urgent'&&t.status!=='done')cls+=' is-urgent';if(isT)cls+=' is-today';else if(ds==='overdue'&&t.status!=='done')cls+=' overdue-card';else if(ds==='soon'&&t.status!=='done')cls+=' due-soon';
-  return`<div class="${cls}" onclick="openDetail(${t.id})">
-    <div class="task-check${t.status==='done'?' done':''}" onclick="toggleTask(${t.id},event)"></div>
-    <div class="task-body">
-      <div class="task-title${t.status==='done'?' done':''}">${t.desc}</div>
-      ${last?`<div style="font-size:11px;color:var(--text3);margin:-1px 0 6px 0">Last update: ${last.text} · ${new Date(last.ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>`:''}
-      <div class="task-meta">
-        <span class="tag tag-${t.priority}">${t.priority}</span>
-        ${t.project?`<span class="tag tag-project">${t.project}</span>`:''}
-        ${assigneeTag(t.assignee)}
-        ${isT?`<span class="tag-today-badge">Today</span>`:''}
-        ${due?`<span class="task-due ${due.cls}">${due.str}</span>`:''}
-        <span style="font-size:11px;color:var(--text3)">${t.status==='in-progress'?'⟳ In Progress':t.status==='done'?'✓ Done':'○ Not Started'}</span>
-        ${subTotal?`<span style="font-size:10px;color:var(--text3)">${subDone}/${subTotal} sub</span>`:''}
-        ${cc?`<span style="font-size:10px;color:var(--text3)">💬${cc}</span>`:''}
-        ${ac?`<span style="font-size:10px;color:var(--text3)">🔗${ac}</span>`:''}
-        ${t.source==='meeting'?`<span class="tag tag-project">📌 From Meeting</span>`:''}
-        ${typeof window.__getHashtagChipsHTML==='function'?window.__getHashtagChipsHTML(t):''}
-      </div>
-      ${t.emailLogs&&t.emailLogs.length?`<div class="email-log-line">📧 Sent to <b>${t.emailLogs[t.emailLogs.length-1].to}</b> · ${new Date(t.emailLogs[t.emailLogs.length-1].ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>`:''}
-    </div>
-    <div class="task-actions">
-      <button class="icon-btn" onclick="event.stopPropagation();openTaskModal(${t.id})" title="Edit">✎</button>
-      <button class="icon-btn" onclick="emailTask(${t.id},event)" title="Email Task">📧</button>
-      <button class="icon-btn" onclick="setFollowUpTomorrow(${t.id},event)" title="Follow up tomorrow">⏰</button>
-      <button class="icon-btn${isT?' pin-active':''}" onclick="togglePin(${t.id},event)" title="Pin to Today">☀</button>
-      <button class="icon-btn" onclick="deleteTask(${t.id},event)">✕</button>
-    </div>
-  </div>`;
+  const _tm=typeof fbMeta==='function'?fbMeta()[Number(t.id)]:null;
+  const tColor=(_tm&&_tm.color&&_tm.color!=='none')?_tm.color:null;
+  const cardStyle=tColor?' style="border-left:4px solid '+tColor+'"':' style=""';
+  const colorDotBtn='<div class="fb-color-dot" style="background:'+(tColor||'var(--bg4)')+';border-color:'+(tColor?tColor:'var(--border)')+';width:14px;height:14px;flex-shrink:0" onclick="event.stopPropagation();fbColorPicker('+Number(t.id)+',this)" title="Color"></div>';
+  return'<div class="'+cls+'"'+cardStyle+' onclick="openDetail('+t.id+')">'
+    +'<div class="task-check'+(t.status==='done'?' done':'')+'" onclick="toggleTask('+t.id+',event)"></div>'
+    +'<div class="task-body">'
+    +'<div class="task-title'+(t.status==='done'?' done':'')+'">'+t.desc+'</div>'
+    +(last?'<div style="font-size:11px;color:var(--text3);margin:-1px 0 6px 0">Last update: '+last.text+' · '+new Date(last.ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</div>':'')
+    +'<div class="task-meta">'
+    +'<span class="tag tag-'+t.priority+'">'+t.priority+'</span>'
+    +(t.project?'<span class="tag tag-project">'+t.project+'</span>':'')
+    +assigneeTag(t.assignee)
+    +(isT?'<span class="tag-today-badge">Today</span>':'')
+    +(due?'<span class="task-due '+due.cls+'">'+due.str+'</span>':'')
+    +'<span style="font-size:11px;color:var(--text3)">'+(t.status==='in-progress'?'⧳ In Progress':t.status==='done'?'✓ Done':'○ Not Started')+'</span>'
+    +(subTotal?'<span style="font-size:10px;color:var(--text3)">'+subDone+'/'+subTotal+' sub</span>':'')
+    +(cc?'<span style="font-size:10px;color:var(--text3)">💬'+cc+'</span>':'')
+    +(ac?'<span style="font-size:10px;color:var(--text3)">🔗'+ac+'</span>':'')
+    +(t.source==='meeting'?'<span class="tag tag-project">📌 From Meeting</span>':'')
+    +(typeof window.__getHashtagChipsHTML==='function'?window.__getHashtagChipsHTML(t):'')
+    +'</div>'
+    +(t.emailLogs&&t.emailLogs.length?'<div class="email-log-line">📧 Sent to <b>'+t.emailLogs[t.emailLogs.length-1].to+'</b> · '+new Date(t.emailLogs[t.emailLogs.length-1].ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</div>':'')
+    +'</div>'
+    +'<div class="task-actions">'
+    +colorDotBtn
+    +'<button class="icon-btn" onclick="event.stopPropagation();openTaskModal('+t.id+')" title="Edit">✎</button>'
+    +'<button class="icon-btn" onclick="emailTask('+t.id+',event)" title="Email Task">📧</button>'
+    +'<button class="icon-btn" onclick="setFollowUpTomorrow('+t.id+',event)" title="Follow up tomorrow">⏰</button>'
+    +'<button class="icon-btn'+(isT?' pin-active':'')+'" onclick="togglePin('+t.id+',event)" title="Pin to Today">☀</button>'
+    +'<button class="icon-btn" onclick="deleteTask('+t.id+',event)">✕</button>'
+    +'</div>'
+    +'</div>';
 }
 
 function isTodayDate(d){return d&&new Date(d).toDateString()===new Date().toDateString();}
@@ -4161,7 +4166,12 @@ window.rptPrint=function(section){
     const last=(t.comments||[]).length?t.comments[t.comments.length-1]:null;
     let cls='task-card';if(t.priority==='urgent'&&t.status!=='done')cls+=' is-urgent';if(isT)cls+=' is-today';else if(ds==='overdue'&&t.status!=='done')cls+=' overdue-card';else if(ds==='soon'&&t.status!=='done')cls+=' due-soon';
     const pn=taskProjectName(t);
-    return`<div class="${cls}" onclick="openDetail(${Number(t.id)})">
+    // Task color from fbMeta
+    const _tm=typeof fbMeta==='function'?fbMeta()[Number(t.id)]:null;
+    const tColor=(_tm&&_tm.color&&_tm.color!=='none')?_tm.color:null;
+    const cardStyle=tColor?` style="border-left:4px solid ${tColor}"`:' style=""';
+    const colorDotBtn=`<div class="fb-color-dot" style="background:${tColor||'var(--bg4)'};border-color:${tColor?tColor:'var(--border)'};width:14px;height:14px;flex-shrink:0" onclick="event.stopPropagation();fbColorPicker(${Number(t.id)},this)" title="Color"></div>`;
+    return`<div class="${cls}"${cardStyle} onclick="openDetail(${Number(t.id)})">
       <div class="task-check${t.status==='done'?' done':''}" onclick="toggleTask(${Number(t.id)},event)"></div>
       <div class="task-body">
         <div class="task-title${t.status==='done'?' done':''}">${H(t.desc)}</div>
@@ -4181,6 +4191,7 @@ window.rptPrint=function(section){
         ${(t.emailLogs||[]).length?`<div class="email-log-line">📧 Email prepared for <b>${H(t.emailLogs[t.emailLogs.length-1].to)}</b> · ${new Date(t.emailLogs[t.emailLogs.length-1].ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>`:''}
       </div>
       <div class="task-actions">
+        ${colorDotBtn}
         <button class="icon-btn" onclick="event.stopPropagation();openTaskModal(${Number(t.id)})" title="Edit">✎</button>
         <button class="icon-btn" onclick="emailTask(${Number(t.id)},event)" title="Email Task">📧</button>
         <button class="icon-btn" onclick="setFollowUpTomorrow(${Number(t.id)},event)" title="Follow up tomorrow">⏰</button>
@@ -5355,32 +5366,7 @@ function fbAttachDrag(card){
   },{passive:true});
 }
 
-/* ════════ TASK COLOR IN LIST VIEW ════════ */
-(function(){
-  var _orig=window.taskCard||function(){return'';};
-  window.taskCard=function(t){
-    var manualMode=typeof currentSort!=='undefined'&&currentSort==='manual';
-    var _tm=typeof fbMeta==='function'?fbMeta()[Number(t.id)]:null;
-    var tColor=(_tm&&_tm.color&&_tm.color!=='none')?_tm.color:null;
-    var card=_orig(t);
-    if(!tColor&&!manualMode)return card;
-    // inject color border-left and color dot into existing card
-    if(tColor){
-      card=card.replace(/(<div class="task-card[^"]*"[^>]*style=")([^"]*)"/,function(m,pre,sty){
-        return pre+(sty?sty+';':'')+'border-left:4px solid '+tColor+'"';
-      });
-      if(!/ style=/.test(card.substring(0,100))){
-        card=card.replace(/(<div class="task-card[^"]*")( data-task-id)/,'$1 style="border-left:4px solid '+tColor+'"$2');
-      }
-    }
-    // inject color dot into task-actions
-    if(typeof fbColorPicker==='function'){
-      var dot='<div class="fb-color-dot" style="background:'+(tColor||'var(--bg4)')+';border-color:'+(tColor?tColor:'var(--border)')+';width:14px;height:14px;margin:0 2px;flex-shrink:0" onclick="event.stopPropagation();fbColorPicker('+Number(t.id)+',this)" title="Color"></div>';
-      card=card.replace('<div class="task-actions">','<div class="task-actions">'+dot);
-    }
-    return card;
-  };
-})();
+/* ════════ TASK COLOR: handled directly in window.taskCard (Bug Fix Pack) ════════ */
 
 /* hook into renderTasks / renderNotes / renderMeetings */
 (function(){
