@@ -5697,87 +5697,141 @@ function fbAttachDrag(card){
   };
 
   /* ── Render Incoming View ── */
-  window.renderIncoming=function(){
+  window.renderIncoming=function(tab){
     var el=document.getElementById('view-incoming');
     if(!el)return;
-    var allPending=_recv.filter(function(x){return x.status==='pending';});
-    var taskPending=allPending.filter(function(x){return x.original_task_id!=='team_invite';});
-    var teamPending=allPending.filter(function(x){return x.original_task_id==='team_invite';});
-    var pending=taskPending;
-    var accepted=_recv.filter(function(x){return x.status==='accepted'&&x.original_task_id!=='team_invite';});
-    var rejected=_recv.filter(function(x){return x.status==='rejected'&&x.original_task_id!=='team_invite';});
+    tab=tab||window._inTab||'incoming';
+    window._inTab=tab;
 
-    function card(inv,withActions){
-      var s=inv.task_snapshot||{};
-      var pc='tag-'+(s.priority||'medium');
-      var sc={'not-started':'○ Not Started','in-progress':'⟳ In Progress','done':'✓ Done'}[s.status||'not-started']||'';
-      var dueStr=s.due?('<span class="task-due">🕒 '+new Date(s.due).toLocaleDateString([],{month:'short',day:'numeric'})+'</span>'):'';
-      var role=s.role||'action';
-      var roleTag=role==='cc'
-        ?'<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:transparent;border:1px solid var(--accent2);color:var(--accent2);margin-left:6px">CC</span>'
-        :'<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--accent);color:#fff;margin-left:6px">Action</span>';
-      return '<div class="task-card" style="margin-bottom:10px">'
-        +'<div class="task-body">'
-        +'<div style="font-size:11px;color:var(--accent2);margin-bottom:5px;font-weight:500;display:flex;align-items:center">'
-        +(role==='cc'?'📋':'📥')+' From: '+(inv.from_email||inv.from_user_id)+roleTag
-        +'</div>'
-        +'<div class="task-title">'+(s.desc||'Task')+'</div>'
-        +(s.notes?'<div style="font-size:12px;color:var(--text2);margin:4px 0 6px;line-height:1.4">'+s.notes+'</div>':'')
-        +'<div class="task-meta">'
-        +'<span class="tag '+pc+'">'+(s.priority||'medium')+'</span>'
-        +(s.project?'<span class="tag tag-project">'+s.project+'</span>':'')
-        +dueStr
-        +(withActions?'':'<span style="font-size:11px;color:var(--text3)">'+sc+'</span>')
-        +'</div>'
-        +'</div>'
-        +(withActions
-          ?'<div class="task-actions">'
-            +'<button class="icon-btn" style="color:var(--green);border-color:rgba(34,200,138,.4);font-size:15px" onclick="window._acceptInv(\''+inv.id+'\')" title="Accept">✓</button>'
-            +'<button class="icon-btn" style="color:var(--red);border-color:rgba(255,95,109,.4)" onclick="window._rejectInv(\''+inv.id+'\')" title="Reject">✕</button>'
-            +'</div>'
-          :'')
-        +'</div>';
+    function tabBtn(id,label){
+      var active=tab===id;
+      return '<button onclick="window.renderIncoming(\''+id+'\')" style="padding:9px 18px;border:none;border-bottom:2px solid '+(active?'var(--accent)':'transparent')+';background:transparent;color:'+(active?'var(--accent)':'var(--text3)')+';cursor:pointer;font-family:inherit;font-size:13px;font-weight:'+(active?600:400)+';transition:.15s">'+label+'</button>';
+    }
+    var tabBar='<div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border)">'
+      +tabBtn('incoming','📥 Incoming')
+      +tabBtn('sent','📤 Sent')
+      +'</div>';
+
+    var h='<div style="max-width:680px"><div class="panel-title" style="margin-bottom:18px">📥 Incoming</div>'+tabBar;
+
+    if(tab==='sent'){
+      /* ── Sent tab: all tasks I've sent ── */
+      var sentTasks=_sent.filter(function(x){return x.original_task_id!=='team_invite';});
+      if(!sentTasks.length){
+        h+='<div style="color:var(--text3);font-size:13px;text-align:center;padding:60px 0;opacity:.6">No sent tasks yet</div>';
+      } else {
+        /* Group multiple recipients by original task id */
+        var byTask={};
+        sentTasks.forEach(function(x){
+          if(!byTask[x.original_task_id])byTask[x.original_task_id]=[];
+          byTask[x.original_task_id].push(x);
+        });
+        var stMap={'pending':'⏳','accepted':'✓','rejected':'✕'};
+        var scMap={'pending':'var(--text3)','accepted':'var(--green)','rejected':'var(--red)'};
+        Object.keys(byTask).forEach(function(tid){
+          var group=byTask[tid];
+          var snap=group[0].task_snapshot||{};
+          var pc='tag-'+(snap.priority||'medium');
+          var recipRows=group.map(function(x){
+            var role=(x.task_snapshot&&x.task_snapshot.role)||'action';
+            var isAction=role==='action';
+            var roleStyle=isAction?'background:var(--accent);color:#fff':'border:1px solid var(--accent2);color:var(--accent2)';
+            var snapSt=(x.status==='accepted'&&x.task_snapshot&&x.task_snapshot.status)
+              ?' · '+({'not-started':'Not Started','in-progress':'In Progress','done':'Done'}[x.task_snapshot.status]||x.task_snapshot.status):'';
+            return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'
+              +'<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;'+roleStyle+'">'+(isAction?'Action':'CC')+'</span>'
+              +'<span style="font-size:12px;flex:1">'+x.to_email+'</span>'
+              +'<span style="font-size:11px;color:'+scMap[x.status]+'">'+stMap[x.status]+snapSt+'</span>'
+              +'</div>';
+          }).join('');
+          h+='<div class="task-card" style="margin-bottom:10px"><div class="task-body">'
+            +'<div class="task-title">'+snap.desc+'</div>'
+            +'<div class="task-meta"><span class="tag '+pc+'">'+(snap.priority||'medium')+'</span>'
+            +(snap.project?'<span class="tag tag-project">'+snap.project+'</span>':'')+'</div>'
+            +'<div style="margin-top:8px">'+recipRows+'</div>'
+            +'</div></div>';
+        });
+      }
+
+    } else {
+      /* ── Incoming tab ── */
+      var allPending=_recv.filter(function(x){return x.status==='pending';});
+      var teamPending=allPending.filter(function(x){return x.original_task_id==='team_invite';});
+      var taskPending=allPending.filter(function(x){return x.original_task_id!=='team_invite';});
+      var ccPending=taskPending.filter(function(x){return (x.task_snapshot&&x.task_snapshot.role)==='cc';});
+      var actionPending=taskPending.filter(function(x){return (x.task_snapshot&&x.task_snapshot.role)!=='cc';});
+      var accepted=_recv.filter(function(x){return x.status==='accepted'&&x.original_task_id!=='team_invite';});
+      var rejected=_recv.filter(function(x){return x.status==='rejected'&&x.original_task_id!=='team_invite';});
+
+      function card(inv,withActions,isCC){
+        var s=inv.task_snapshot||{};
+        var pc='tag-'+(s.priority||'medium');
+        var sc={'not-started':'○ Not Started','in-progress':'⟳ In Progress','done':'✓ Done'}[s.status||'not-started']||'';
+        var dueStr=s.due?('<span class="task-due">🕒 '+new Date(s.due).toLocaleDateString([],{month:'short',day:'numeric'})+'</span>'):'';
+        var roleTag=isCC
+          ?'<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;border:1px solid var(--accent2);color:var(--accent2);margin-left:6px">CC</span>'
+          :'<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--accent);color:#fff;margin-left:6px">Action</span>';
+        return '<div class="task-card" style="margin-bottom:10px">'
+          +'<div class="task-body">'
+          +'<div style="font-size:11px;color:var(--accent2);margin-bottom:5px;font-weight:500;display:flex;align-items:center">'
+          +(isCC?'📋':'📥')+' From: '+(inv.from_email||inv.from_user_id)+roleTag+'</div>'
+          +'<div class="task-title">'+(s.desc||'Task')+'</div>'
+          +(s.notes?'<div style="font-size:12px;color:var(--text2);margin:4px 0 6px;line-height:1.4">'+s.notes+'</div>':'')
+          +'<div class="task-meta"><span class="tag '+pc+'">'+(s.priority||'medium')+'</span>'
+          +(s.project?'<span class="tag tag-project">'+s.project+'</span>':'')+dueStr
+          +(withActions?'':'<span style="font-size:11px;color:var(--text3)">'+sc+'</span>')+'</div>'
+          +'</div>'
+          +(withActions
+            ?(isCC
+              ?'<div class="task-actions"><button class="icon-btn" style="color:var(--green);border-color:rgba(34,200,138,.4);font-size:12px;padding:5px 12px;white-space:nowrap" onclick="window._acceptInv(\''+inv.id+'\')" title="Acknowledge">Got it ✓</button></div>'
+              :'<div class="task-actions">'
+                +'<button class="icon-btn" style="color:var(--green);border-color:rgba(34,200,138,.4);font-size:15px" onclick="window._acceptInv(\''+inv.id+'\')" title="Accept">✓</button>'
+                +'<button class="icon-btn" style="color:var(--red);border-color:rgba(255,95,109,.4)" onclick="window._rejectInv(\''+inv.id+'\')" title="Reject">✕</button>'
+                +'</div>')
+            :'')
+          +'</div>';
+      }
+
+      function teamCard(inv){
+        var s=inv.task_snapshot||{};
+        return '<div class="task-card" style="margin-bottom:10px">'
+          +'<div class="task-body">'
+          +'<div style="font-size:11px;color:var(--accent2);margin-bottom:5px;font-weight:500">🤝 Team Connection Request</div>'
+          +'<div class="task-title">'+(s.from_name||inv.from_email)+' wants to add you to their team</div>'
+          +'<div class="task-meta"><span style="font-size:11px;color:var(--text3)">From: '+(inv.from_email||inv.from_user_id)+'</span></div>'
+          +'</div>'
+          +'<div class="task-actions">'
+          +'<button class="icon-btn" style="color:var(--green);border-color:rgba(34,200,138,.4);font-size:15px" onclick="window._acceptTeamInv(\''+inv.id+'\')" title="Accept">✓</button>'
+          +'<button class="icon-btn" style="color:var(--red);border-color:rgba(255,95,109,.4)" onclick="window._rejectInv(\''+inv.id+'\')" title="Reject">✕</button>'
+          +'</div></div>';
+      }
+
+      var totalPending=actionPending.length+ccPending.length+teamPending.length;
+      if(!totalPending&&!accepted.length&&!rejected.length){
+        h+='<div style="color:var(--text3);font-size:13px;text-align:center;padding:60px 0;opacity:.6">No incoming tasks or connection requests yet</div>';
+      }
+      if(teamPending.length){
+        h+='<div style="font-size:11px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🤝 Team Requests · '+teamPending.length+'</div>';
+        h+=teamPending.map(function(inv){return teamCard(inv);}).join('');
+      }
+      if(actionPending.length){
+        h+='<div style="font-size:11px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin:'+(teamPending.length?'20px':'0')+' 0 10px">⏳ Action · '+actionPending.length+'</div>';
+        h+=actionPending.map(function(inv){return card(inv,true,false);}).join('');
+      }
+      if(ccPending.length){
+        h+='<div style="font-size:11px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em;margin:'+(actionPending.length||teamPending.length?'20px':'0')+' 0 10px">📋 CC · '+ccPending.length+'</div>';
+        h+=ccPending.map(function(inv){return card(inv,true,true);}).join('');
+      }
+      if(accepted.length){
+        h+='<div style="font-size:11px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin:20px 0 10px">✓ Accepted · '+accepted.length+'</div>';
+        h+=accepted.map(function(inv){return card(inv,false,(inv.task_snapshot&&inv.task_snapshot.role)==='cc');}).join('');
+      }
+      if(rejected.length){
+        h+='<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:20px 0 10px;opacity:.5">✕ Rejected · '+rejected.length+'</div>';
+        h+=rejected.map(function(inv){return card(inv,false,false);}).join('');
+      }
     }
 
-    /* Team invite card */
-    function teamCard(inv){
-      var s=inv.task_snapshot||{};
-      return '<div class="task-card" style="margin-bottom:10px">'
-        +'<div class="task-body">'
-        +'<div style="font-size:11px;color:var(--accent2);margin-bottom:5px;font-weight:500">🤝 Team Connection Request</div>'
-        +'<div class="task-title">'+(s.from_name||inv.from_email)+' wants to add you to their team</div>'
-        +'<div class="task-meta"><span style="font-size:11px;color:var(--text3)">From: '+(inv.from_email||inv.from_user_id)+'</span></div>'
-        +'</div>'
-        +'<div class="task-actions">'
-        +'<button class="icon-btn" style="color:var(--green);border-color:rgba(34,200,138,.4);font-size:15px" onclick="window._acceptTeamInv(\''+inv.id+'\')" title="Accept">✓</button>'
-        +'<button class="icon-btn" style="color:var(--red);border-color:rgba(255,95,109,.4)" onclick="window._rejectInv(\''+inv.id+'\')" title="Reject">✕</button>'
-        +'</div>'
-        +'</div>';
-    }
-
-    var totalPending=pending.length+teamPending.length;
-    var h='<div style="max-width:680px">'
-      +'<div class="panel-title" style="margin-bottom:18px">📥 Incoming</div>';
-    if(!totalPending&&!accepted.length&&!rejected.length){
-      h+='<div style="color:var(--text3);font-size:13px;text-align:center;padding:60px 0;opacity:.6">No incoming tasks or connection requests yet</div>';
-    }
-    /* Team invites first */
-    if(teamPending.length){
-      h+='<div style="font-size:11px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🤝 Team Requests · '+teamPending.length+'</div>';
-      h+=teamPending.map(function(inv){return teamCard(inv);}).join('');
-    }
-    if(pending.length){
-      h+='<div style="font-size:11px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin:'+(teamPending.length?'20px':'0')+' 0 10px">⏳ Task Requests · '+pending.length+'</div>';
-      h+=pending.map(function(inv){return card(inv,true);}).join('');
-    }
-    if(accepted.length){
-      h+='<div style="font-size:11px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin:20px 0 10px">✓ Accepted Tasks · '+accepted.length+'</div>';
-      h+=accepted.map(function(inv){return card(inv,false);}).join('');
-    }
-    if(rejected.length){
-      h+='<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:20px 0 10px;opacity:.5">✕ Rejected · '+rejected.length+'</div>';
-      h+=rejected.map(function(inv){return card(inv,false);}).join('');
-    }
     h+='</div>';
     el.innerHTML=h;
   };
@@ -5863,8 +5917,25 @@ function fbAttachDrag(card){
     await loadInv();
   };
 
-  /* Poll every 2 minutes for new invitations */
+  /* Poll every 2 minutes for new invitations (fallback) */
   setInterval(loadInv,120000);
+
+  /* Supabase Realtime — instant updates without polling */
+  (function(){
+    function _setupRT(){
+      if(!_sb()||!_uid())return;
+      try{
+        _sb().channel('inv_rt_'+_uid().slice(0,8))
+          .on('postgres_changes',{event:'INSERT',schema:'public',table:TBL},function(){loadInv();})
+          .on('postgres_changes',{event:'UPDATE',schema:'public',table:TBL},function(){loadInv();})
+          .subscribe(function(status){
+            if(status==='SUBSCRIBED')console.log('[Realtime] invitations subscribed');
+          });
+      }catch(e){console.warn('[Realtime] not available:',e);}
+    }
+    if(_uid()){_setupRT();}
+    else{var _rtT=setInterval(function(){if(_uid()){clearInterval(_rtT);_setupRT();}},2000);}
+  })();
 
   /* Export for debugging */
   window._sharingModule={loadInv:loadInv,sent:function(){return _sent;},recv:function(){return _recv;}};
