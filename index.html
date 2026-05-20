@@ -971,6 +971,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Trash
       </button>
+      <button class="nav-item" data-rpt="1" onclick="showView('reports',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 13V6l4-4h6a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1z" stroke="currentColor" stroke-width="1.5"/><path d="M6 2v4H2M5 9h6M5 11.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Reports
+      </button>
+      <button class="nav-item" onclick="openAppSettings(this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M12.6 3.4l-1.4 1.4M4.8 11.2l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Settings
+      </button>
     </div>
     <div class="nav-section">
       <div class="nav-label">Projects</div>
@@ -2536,6 +2544,14 @@ function showView(v,el){
   if(v==='meetings')renderMeetings();
   if(v==='team')renderTeam();
   if(v==='lpo'){if(typeof refreshLPOSuppliers==='function')refreshLPOSuppliers();setTimeout(function(){if(typeof window.renderLPO==='function')window.renderLPO();},50);}
+}
+
+function openAppSettings(el){
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  showView('today',null);
+  if(typeof window.dsShowSettings==='function')window.dsShowSettings();
+  else alert('Settings will be available after the app finishes loading.');
 }
 
 
