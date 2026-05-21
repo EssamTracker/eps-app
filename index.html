@@ -4546,8 +4546,20 @@ function closeMobileSidebar(){
   // Fix iOS Safari: buttons inside overflow:hidden containers need this
   if(/iPhone|iPad|iPod/.test(navigator.userAgent)){
     document.body.style.cursor='pointer';
-    // Force click on elements that might not respond on iOS
+    var _iosTsX=0,_iosTsY=0,_iosScrolled=false;
+    document.addEventListener('touchstart',function(e){
+      var t=e.touches[0];
+      _iosTsX=t?t.clientX:0;_iosTsY=t?t.clientY:0;_iosScrolled=false;
+    },{passive:true});
+    document.addEventListener('touchmove',function(e){
+      if(!_iosScrolled&&e.touches[0]){
+        var dx=Math.abs(e.touches[0].clientX-_iosTsX),dy=Math.abs(e.touches[0].clientY-_iosTsY);
+        if(dx>8||dy>8)_iosScrolled=true;
+      }
+    },{passive:true});
+    // Force click on elements that might not respond on iOS — only for taps, not scrolls
     document.addEventListener('touchend',function(e){
+      if(_iosScrolled)return;
       const el=e.target.closest('button,a,[onclick],.nav-item,.filter-btn,.task-card,.contact-card,.lpo-card,.today-task,.icon-btn');
       if(el && el.onclick){
         e.preventDefault();
