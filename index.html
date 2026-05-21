@@ -2898,7 +2898,7 @@ startApp();
 
 <!-- Help Panel -->
 <div class=”h-back” id=”hBack”></div>
-<template id=”hPanelTpl”><aside class=”h-panel” id=”hPanel” aria-hidden=”true”>
+<aside class=”h-panel” id=”hPanel” aria-hidden=”true” style=”display:none”>
   <div class=”h-hd”>
     <div class=”h-hd-icon”>📖</div>
     <div class=”h-hd-text”>
@@ -3181,20 +3181,14 @@ startApp();
     </div>
 
   </div>
-</aside></template>
+</aside>
 <script>
 (function(){
+  var panel=document.getElementById(‘hPanel’);
   var back=document.getElementById(‘hBack’);
-  var panel=null;
-  function initPanel(){
-    if(panel)return;
-    var tpl=document.getElementById(‘hPanelTpl’);
-    if(!tpl)return;
-    document.body.appendChild(tpl.content.cloneNode(true));
-    panel=document.getElementById(‘hPanel’);
-    if(!panel)return;
+  if(panel){
     var close=document.getElementById(‘hClose’);
-    if(close)close.addEventListener(‘click’,hide);
+    if(close)close.addEventListener(‘click’,closeHelp);
     var tabs=panel.querySelectorAll(‘[data-htab]’);
     var secs=panel.querySelectorAll(‘[data-hsec]’);
     tabs.forEach(function(tab){
@@ -3205,26 +3199,26 @@ startApp();
       });
     });
   }
-  function show(){
-    initPanel();
-    if(!panel)return;
-    panel.style.display=’-webkit-flex’;
-    panel.style.display=’flex’;
-    panel.classList.add(‘show’);
-    if(back){back.style.display=’block’;}
-    panel.setAttribute(‘aria-hidden’,’false’);
-  }
-  function hide(){
-    if(!panel)return;
-    panel.style.display=’none’;
-    panel.classList.remove(‘show’);
-    if(back){back.style.display=’none’;}
-    panel.setAttribute(‘aria-hidden’,’true’);
-  }
-  window.openHelp=show;
-  window.closeHelp=hide;
-  if(back)back.addEventListener(‘click’,hide);
-  document.addEventListener(‘keydown’,function(e){if(e.key===’Escape’)hide();});
+  window.openHelp=function(){
+    var p=document.getElementById(‘hPanel’);
+    var b=document.getElementById(‘hBack’);
+    if(!p)return;
+    p.style.display=’flex’;
+    p.classList.add(‘show’);
+    if(b)b.style.display=’block’;
+    p.setAttribute(‘aria-hidden’,’false’);
+  };
+  window.closeHelp=function(){
+    var p=document.getElementById(‘hPanel’);
+    var b=document.getElementById(‘hBack’);
+    if(!p)return;
+    p.style.display=’none’;
+    p.classList.remove(‘show’);
+    if(b)b.style.display=’none’;
+    p.setAttribute(‘aria-hidden’,’true’);
+  };
+  if(back)back.addEventListener(‘click’,window.closeHelp);
+  document.addEventListener(‘keydown’,function(e){if(e.key===’Escape’)window.closeHelp();});
 })();
 </script>
 
