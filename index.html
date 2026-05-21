@@ -1947,7 +1947,6 @@ function renderNotifications(){
 document.addEventListener('click',function(e){const p=document.getElementById('notif-panel');if(p&&!e.target.closest('.notif-wrap'))p.classList.remove('show');});
 function openModal(id){document.getElementById(id).classList.add('show');if(id==='specialty-modal')renderSpecialtyModal();}
 function closeModal(id){document.getElementById(id).classList.remove('show')}
-document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m){m.classList.remove('show');editContactId=null;}});});
 function selectPriority(p,el){selectedPriority=p;document.querySelectorAll('.priority-opt').forEach(b=>{b.className='priority-opt'});el.className='priority-opt sel-'+p;}
 function mColor(id){const idx=data.members.findIndex(m=>m.id===id);return idx>=0?COLORS[idx%COLORS.length]:'#888';}
 function mInit(name){return name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();}
