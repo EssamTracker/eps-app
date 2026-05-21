@@ -1701,7 +1701,11 @@ async function loginUser(event){
       authData=result.data; error=result.error;
       if(!error&&!authData.session){
         setAuthMode('login');
-        setAuthError('Account created. Login now with the same username and password.');
+        if(authData.user?.identities?.length===0){
+          setAuthError('This email is already registered. Please login instead.');
+        } else {
+          setAuthError('✅ Account created! Check your email inbox and click the confirmation link, then come back and login.');
+        }
         return;
       }
     }else{
