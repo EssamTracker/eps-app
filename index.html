@@ -2520,6 +2520,7 @@ function getFiltered(){
   });
 }
 function sortTasks(tasks){
+  if(currentSort==='manual')return tasks;
   return[...tasks].sort((a,b)=>{
     if(currentSort!=='manual'){
       const aU=a.priority==='urgent'&&a.status!=='done'?0:1;
@@ -2651,7 +2652,7 @@ function renderTasks(){
   const tasks=sortTasks(getFiltered()),el=document.getElementById('tasks-list');
   if(!tasks.length){el.innerHTML='<div class="empty-state">No tasks match the filters.</div>';return;}
   el.innerHTML=tasks.map(t=>taskCard(t)).join('');
-  if(currentSort==='manual')attachListDrag();
+  attachListDrag();
 }
 function renderTeam(){
   document.getElementById('team-badge').textContent=data.members.length;
@@ -4424,7 +4425,7 @@ window.rptPrint=function(section){
     const cardStyle=tColor?` style="background:${tColor};border-color:transparent"`:' style=""';
     const tTc=tColor?'color:#fff':'';const tSc=tColor?'color:rgba(255,255,255,.8)':'color:var(--text3)';
     const colorDotBtn=`<div class="fb-color-dot" style="background:${tColor?'rgba(255,255,255,.25)':'var(--bg4)'};border-color:${tColor?'rgba(255,255,255,.5)':'var(--border)'};width:14px;height:14px;flex-shrink:0" onclick="event.stopPropagation();fbColorPicker(${Number(t.id)},this)" title="Color"></div>`;
-    return`<div class="${cls}"${cardStyle} onclick="openDetail(${Number(t.id)})">
+    return`<div class="${cls}"${cardStyle} data-task-id="${Number(t.id)}" onclick="openDetail(${Number(t.id)})">
       <div class="task-check${t.status==='done'?' done':''}" onclick="toggleTask(${Number(t.id)},event)"></div>
       <div class="task-body">
         <div class="task-title${t.status==='done'?' done':''}" style="${tTc}">${H(t.desc)}</div>
@@ -5498,6 +5499,10 @@ function fbColorPickerFor(id,type,dotEl){
 var _dnd={active:false,id:null,overId:null,overTop:true};
 
 function dndMoveTask(fromId,toId,insertBefore){
+  if(_taskView!=='kanban'&&_taskView!=='board'&&currentSort!=='manual'){
+    currentSort='manual';
+    var ss=document.querySelector('.sort-select');if(ss)ss.value='manual';
+  }
   var container=_taskView==='kanban'?document.getElementById('kanban-board')
     :_taskView==='board'?document.getElementById('free-board-canvas')
     :document.getElementById('tasks-list');
