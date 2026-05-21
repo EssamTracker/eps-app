@@ -2236,7 +2236,6 @@ function showFollowUpPicker(taskId){
   // Set default datetime to 1h from now
   const def=new Date();def.setHours(def.getHours()+1,0,0,0);
   overlay.querySelector('#fu-custom-dt').value=def.toISOString().slice(0,16);
-  overlay.addEventListener('click',function(ev){if(ev.target===overlay)overlay.remove();});
   document.body.appendChild(overlay);
 
   // Add quick button styles if not present
@@ -2435,7 +2434,7 @@ function openConvertMeetingToTask(id){
     <div class="form-group"><label class="form-label">Outcome Details</label><textarea class="form-input form-textarea" id="conv-task-notes" style="min-height:90px">${String(m.outcome||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea></div>
     <div class="modal-actions"><button class="btn btn-ghost" onclick="document.getElementById('convert-meeting-modal').remove()">Cancel</button><button class="btn btn-primary" onclick="saveConvertedMeetingTask(${id})">Create Task</button></div>
   </div>`;
-  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});
+
   document.body.appendChild(overlay);
 }
 
@@ -3333,7 +3332,6 @@ document.body.insertAdjacentHTML('beforeend',`
 </div>
 `);
 
-document.getElementById('backup-modal').addEventListener('click',function(e){if(e.target===this)closeModal('backup-modal');});
 
 // ---- BACKUP BUTTON in topbar ----
 const topbar = document.querySelector('.topbar-actions');
@@ -5755,7 +5753,6 @@ function fbAttachDrag(card){
         overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px';
         overlay.innerHTML=inner;
         document.body.appendChild(overlay);
-        overlay.addEventListener('click',function(ev){if(ev.target===overlay)overlay.remove();});
       }
     }
 
