@@ -5606,7 +5606,6 @@ function fbAttachDrag(card){
   });
   card.addEventListener('touchstart',function(e){
     if(e.target.classList.contains('fb-color-dot')||e.target.classList.contains('fb-btn'))return;
-    lastTouchMs=Date.now();
     var touch=e.touches[0];
     var meta=fbMeta()[id]||{x:0,y:0};
     var startX=touch.clientX,startY=touch.clientY,origX=meta.x,origY=meta.y;
@@ -5626,16 +5625,19 @@ function fbAttachDrag(card){
     function onEnd(e){
       card.classList.remove('fb-dragging');
       lastTouchMs=Date.now();
+      e.stopPropagation();
       if(isDragging){
         var t=e.changedTouches[0];
         fbMeta()[id]=fbMeta()[id]||{};fbMeta()[id].x=Math.max(0,origX+(t.clientX-startX));fbMeta()[id].y=Math.max(0,origY+(t.clientY-startY));
         save();e.preventDefault();
       } else if(!anyMoved){
         openDetail(id);
+      } else {
+        e.preventDefault();
       }
       card.removeEventListener('touchmove',onMove);card.removeEventListener('touchend',onEnd);
     }
-    card.addEventListener('touchmove',onMove,{passive:false});card.addEventListener('touchend',onEnd);
+    card.addEventListener('touchmove',onMove,{passive:false});card.addEventListener('touchend',onEnd,{passive:false});
   },{passive:true});
   card.addEventListener('click',function(e){
     if(e.target.classList.contains('fb-color-dot')||e.target.classList.contains('fb-btn'))return;
