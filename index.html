@@ -5605,24 +5605,27 @@ function fbAttachDrag(card){
     var touch=e.touches[0];
     var meta=fbMeta()[id]||{x:0,y:0};
     var startX=touch.clientX,startY=touch.clientY,origX=meta.x,origY=meta.y;
-    var isDragging=false,isScrolling=false,hasMoved=false;
+    var isDragging=false,isScrolling=false,anyMoved=false;
     function onMove(e){
       var t=e.touches[0];var dx=t.clientX-startX,dy=t.clientY-startY;
+      if(Math.sqrt(dx*dx+dy*dy)>=8)anyMoved=true;
       if(!isDragging&&!isScrolling){
         if(Math.sqrt(dx*dx+dy*dy)<8)return;
         if(Math.abs(dy)>Math.abs(dx)*1.2){isScrolling=true;return;}
         isDragging=true;card.classList.add('fb-dragging');
       }
       if(isScrolling)return;
-      e.preventDefault();hasMoved=true;
+      e.preventDefault();
       card.style.left=(origX+dx)+'px';card.style.top=(origY+dy)+'px';
     }
     function onEnd(e){
       card.classList.remove('fb-dragging');
-      if(hasMoved){
+      if(isDragging){
         var t=e.changedTouches[0];
         fbMeta()[id]=fbMeta()[id]||{};fbMeta()[id].x=Math.max(0,origX+(t.clientX-startX));fbMeta()[id].y=Math.max(0,origY+(t.clientY-startY));
         save();e.preventDefault();
+      } else if(!anyMoved){
+        openDetail(id);
       }
       card.removeEventListener('touchmove',onMove);card.removeEventListener('touchend',onEnd);
     }
@@ -5630,7 +5633,7 @@ function fbAttachDrag(card){
   },{passive:true});
   card.addEventListener('click',function(e){
     if(e.target.classList.contains('fb-color-dot')||e.target.classList.contains('fb-btn'))return;
-    openDetail(id);
+    e.preventDefault();
   });
 }
 
