@@ -1213,7 +1213,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <button class="notif-btn" onclick="toggleNotifications(event)" title="Notifications">🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
         <div class="notif-panel" id="notif-panel"><div class="notif-item">No notifications yet.</div></div>
       </div>
-      <button class="btn btn-ghost btn-sm" id="hOpen" type="button" title="Application Guide" style="padding:6px 10px;font-size:15px;line-height:1">?</button>
+      <button class="btn btn-ghost btn-sm" id="hOpen" type="button" title="Application Guide" style="padding:6px 10px;font-size:15px;line-height:1" onclick="openHelp()">?</button>
       <button class="btn btn-primary" onclick="openTaskModal()">+ New Task</button>
     </div>
   </div>
@@ -3184,9 +3184,7 @@ startApp();
 </aside></template>
 <script>
 (function(){
-  var open=document.getElementById(‘hOpen’);
   var back=document.getElementById(‘hBack’);
-  if(!open)return;
   var panel=null;
   function initPanel(){
     if(panel)return;
@@ -3223,7 +3221,8 @@ startApp();
     if(back){back.style.display=’none’;}
     panel.setAttribute(‘aria-hidden’,’true’);
   }
-  open.addEventListener(‘click’,show);
+  window.openHelp=show;
+  window.closeHelp=hide;
   if(back)back.addEventListener(‘click’,hide);
   document.addEventListener(‘keydown’,function(e){if(e.key===’Escape’)hide();});
 })();
