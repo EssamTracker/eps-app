@@ -5585,23 +5585,27 @@ function attachListDrag(){
 
 function fbAttachDrag(card){
   var id=parseInt(card.dataset.id);
+  var lastTouchMs=0;
   card.addEventListener('mousedown',function(e){
     if(e.button!==0)return;
     if(e.target.classList.contains('fb-color-dot')||e.target.classList.contains('fb-btn'))return;
+    if(Date.now()-lastTouchMs<600)return;
     e.preventDefault();
     var meta=fbMeta()[id]||{x:0,y:0};
     var startX=e.clientX,startY=e.clientY,origX=meta.x,origY=meta.y;
+    var moved=false;
     card.classList.add('fb-dragging');
-    function onMove(e){card.style.left=(origX+(e.clientX-startX))+'px';card.style.top=(origY+(e.clientY-startY))+'px';}
+    function onMove(e){moved=true;card.style.left=(origX+(e.clientX-startX))+'px';card.style.top=(origY+(e.clientY-startY))+'px';}
     function onUp(e){
       card.classList.remove('fb-dragging');
-      fbMeta()[id]=fbMeta()[id]||{};fbMeta()[id].x=Math.max(0,origX+(e.clientX-startX));fbMeta()[id].y=Math.max(0,origY+(e.clientY-startY));
-      save();document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);
+      if(moved){fbMeta()[id]=fbMeta()[id]||{};fbMeta()[id].x=Math.max(0,origX+(e.clientX-startX));fbMeta()[id].y=Math.max(0,origY+(e.clientY-startY));save();}
+      document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);
     }
     document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);
   });
   card.addEventListener('touchstart',function(e){
     if(e.target.classList.contains('fb-color-dot')||e.target.classList.contains('fb-btn'))return;
+    lastTouchMs=Date.now();
     var touch=e.touches[0];
     var meta=fbMeta()[id]||{x:0,y:0};
     var startX=touch.clientX,startY=touch.clientY,origX=meta.x,origY=meta.y;
@@ -5610,7 +5614,7 @@ function fbAttachDrag(card){
       var t=e.touches[0];var dx=t.clientX-startX,dy=t.clientY-startY;
       if(Math.sqrt(dx*dx+dy*dy)>=8)anyMoved=true;
       if(!isDragging&&!isScrolling){
-        if(Math.sqrt(dx*dx+dy*dy)<8)return;
+        if(!anyMoved)return;
         if(Math.abs(dy)>Math.abs(dx)*1.2){isScrolling=true;return;}
         isDragging=true;card.classList.add('fb-dragging');
       }
@@ -5633,7 +5637,8 @@ function fbAttachDrag(card){
   },{passive:true});
   card.addEventListener('click',function(e){
     if(e.target.classList.contains('fb-color-dot')||e.target.classList.contains('fb-btn'))return;
-    e.preventDefault();
+    if(Date.now()-lastTouchMs<600){e.preventDefault();return;}
+    openDetail(id);
   });
 }
 
