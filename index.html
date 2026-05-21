@@ -2828,7 +2828,7 @@ startApp();
 <!-- Help Panel -->
 <button class=”h-launch” id=”hOpen” type=”button” title=”Application Guide”>?</button>
 <div class=”h-back” id=”hBack”></div>
-<aside class=”h-panel” id=”hPanel” aria-hidden=”true”>
+<aside class=”h-panel” id=”hPanel” aria-hidden=”true” style=”display:none”>
   <div class=”h-hd”>
     <div class=”h-hd-icon”>📖</div>
     <div class=”h-hd-text”>
@@ -3119,8 +3119,8 @@ startApp();
   var panel=document.getElementById(‘hPanel’);
   var back=document.getElementById(‘hBack’);
   if(!open||!panel)return;
-  function show(){panel.classList.add(‘show’);if(back)back.classList.add(‘show’);panel.setAttribute(‘aria-hidden’,’false’);}
-  function hide(){panel.classList.remove(‘show’);if(back)back.classList.remove(‘show’);panel.setAttribute(‘aria-hidden’,’true’);}
+  function show(){panel.style.display=’-webkit-flex’;panel.style.display=’flex’;panel.classList.add(‘show’);if(back){back.style.display=’block’;}panel.setAttribute(‘aria-hidden’,’false’);}
+  function hide(){panel.style.display=’none’;panel.classList.remove(‘show’);if(back){back.style.display=’none’;}panel.setAttribute(‘aria-hidden’,’true’);}
   open.addEventListener(‘click’,show);
   if(close)close.addEventListener(‘click’,hide);
   if(back)back.addEventListener(‘click’,hide);
