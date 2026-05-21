@@ -5586,6 +5586,7 @@ function attachListDrag(){
 function fbAttachDrag(card){
   var id=parseInt(card.dataset.id);
   card.addEventListener('mousedown',function(e){
+    if(e.button!==0)return;
     if(e.target.classList.contains('fb-color-dot')||e.target.classList.contains('fb-btn'))return;
     e.preventDefault();
     var meta=fbMeta()[id]||{x:0,y:0};
@@ -5601,13 +5602,36 @@ function fbAttachDrag(card){
   });
   card.addEventListener('touchstart',function(e){
     if(e.target.classList.contains('fb-color-dot')||e.target.classList.contains('fb-btn'))return;
-    var touch=e.touches[0];var meta=fbMeta()[id]||{x:0,y:0};
+    var touch=e.touches[0];
+    var meta=fbMeta()[id]||{x:0,y:0};
     var startX=touch.clientX,startY=touch.clientY,origX=meta.x,origY=meta.y;
-    card.classList.add('fb-dragging');
-    function onMove(e){e.preventDefault();var t=e.touches[0];card.style.left=(origX+(t.clientX-startX))+'px';card.style.top=(origY+(t.clientY-startY))+'px';}
-    function onEnd(e){card.classList.remove('fb-dragging');var t=e.changedTouches[0];fbMeta()[id]=fbMeta()[id]||{};fbMeta()[id].x=Math.max(0,origX+(t.clientX-startX));fbMeta()[id].y=Math.max(0,origY+(t.clientY-startY));save();card.removeEventListener('touchmove',onMove);card.removeEventListener('touchend',onEnd);}
+    var isDragging=false,isScrolling=false,hasMoved=false;
+    function onMove(e){
+      var t=e.touches[0];var dx=t.clientX-startX,dy=t.clientY-startY;
+      if(!isDragging&&!isScrolling){
+        if(Math.sqrt(dx*dx+dy*dy)<8)return;
+        if(Math.abs(dy)>Math.abs(dx)*1.2){isScrolling=true;return;}
+        isDragging=true;card.classList.add('fb-dragging');
+      }
+      if(isScrolling)return;
+      e.preventDefault();hasMoved=true;
+      card.style.left=(origX+dx)+'px';card.style.top=(origY+dy)+'px';
+    }
+    function onEnd(e){
+      card.classList.remove('fb-dragging');
+      if(hasMoved){
+        var t=e.changedTouches[0];
+        fbMeta()[id]=fbMeta()[id]||{};fbMeta()[id].x=Math.max(0,origX+(t.clientX-startX));fbMeta()[id].y=Math.max(0,origY+(t.clientY-startY));
+        save();e.preventDefault();
+      }
+      card.removeEventListener('touchmove',onMove);card.removeEventListener('touchend',onEnd);
+    }
     card.addEventListener('touchmove',onMove,{passive:false});card.addEventListener('touchend',onEnd);
   },{passive:true});
+  card.addEventListener('click',function(e){
+    if(e.target.classList.contains('fb-color-dot')||e.target.classList.contains('fb-btn'))return;
+    openDetail(id);
+  });
 }
 
 /* ════════ TASK COLOR: handled directly in window.taskCard (Bug Fix Pack) ════════ */
