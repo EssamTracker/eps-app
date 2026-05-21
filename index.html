@@ -1075,7 +1075,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .rpt-sec{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin:14px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
 
 /* ===== FREE BOARD ===== */
-.fb-card{position:relative;background:var(--bg2);border-radius:10px;padding:12px;box-shadow:0 4px 16px rgba(0,0,0,.4);cursor:default;user-select:none;transition:box-shadow .15s}
+.fb-card{position:absolute;width:210px;background:var(--bg2);border-radius:10px;padding:12px;box-shadow:0 4px 16px rgba(0,0,0,.4);cursor:default;user-select:none;transition:box-shadow .15s}
 .fb-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.6)}
 .fb-card.fb-dragging{box-shadow:0 12px 32px rgba(0,0,0,.7);z-index:999;opacity:.9}
 .fb-card-title{font-size:13px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:8px;word-break:break-word}
@@ -1287,7 +1287,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       </div>
       <div class="tasks-grid" id="tasks-list"><div class="empty-state">No tasks yet.</div></div>
       <div id="kanban-board" style="display:none"></div>
-      <div id="free-board" style="display:none;width:100%"><div id="free-board-canvas" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;padding:4px"></div></div>
+      <div id="free-board" style="display:none;width:100%;overflow:auto;-webkit-overflow-scrolling:touch"><div id="free-board-canvas" style="position:relative;min-height:520px;min-width:700px"></div></div>
       <div class="two-col">
         <div class="panel"><div class="panel-title">Recent Notes</div><div id="notes-preview"></div><button class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:11px" onclick="showView('notes',null)">View all</button></div>
         <div class="panel"><div class="panel-title">Today's Meetings</div><div id="meetings-preview"></div><button class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:11px" onclick="showView('meetings',null)">View all</button></div>
@@ -5306,11 +5306,14 @@ function renderFreeBoard(){
       +'</div>'
       +'</div>';
   }).join('');
+  var maxX=700,maxY=520;
   canvas.querySelectorAll('.fb-card').forEach(function(card){
     fbAttachDrag(card);
     var m=meta[parseInt(card.dataset.id)]||{x:30,y:30};
     card.style.left=m.x+'px';card.style.top=m.y+'px';
+    maxX=Math.max(maxX,m.x+230);maxY=Math.max(maxY,m.y+180);
   });
+  canvas.style.minWidth=maxX+'px';canvas.style.minHeight=maxY+'px';
 }
 
 function fbColorPicker(id,dotEl){
