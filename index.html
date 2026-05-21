@@ -5606,7 +5606,6 @@ function fbAttachDrag(card){
   });
   card.addEventListener('touchstart',function(e){
     if(e.target.classList.contains('fb-color-dot')||e.target.classList.contains('fb-btn'))return;
-    lastTouchMs=Date.now();
     var touch=e.touches[0];
     var meta=fbMeta()[id]||{x:0,y:0};
     var startX=touch.clientX,startY=touch.clientY,origX=meta.x,origY=meta.y;
