@@ -364,13 +364,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 @-webkit-keyframes hIn{from{opacity:0;-webkit-transform:translateX(40px);transform:translateX(40px)}to{opacity:1;-webkit-transform:none;transform:none}}
 @keyframes hIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
 /* --- header --- */
-.h-hd{position:relative;padding:14px 56px 14px 68px;border-bottom:1px solid var(--border);-webkit-flex-shrink:0;flex-shrink:0;min-height:64px;background:linear-gradient(135deg,rgba(108,99,255,.14),rgba(79,138,255,.05));display:block}
-.h-hd-icon{position:absolute;left:14px;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%);width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,#6c63ff,#4f8aff);display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;font-size:19px;box-shadow:0 4px 14px rgba(108,99,255,.45)}
-.h-hd-text{display:block;padding-top:4px}
-.h-hd-title{font-size:15px;font-weight:700;color:var(--text);font-family:'Space Mono',monospace;line-height:1.2;display:block}
-.h-hd-sub{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.3;display:block}
+.h-hd{position:relative;padding:12px 50px 12px 62px;border-bottom:1px solid var(--border);min-height:60px;-webkit-flex-shrink:0;flex-shrink:0;background:linear-gradient(135deg,rgba(108,99,255,.14),rgba(79,138,255,.05))}
+.h-hd-icon{position:absolute;left:12px;top:10px;width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#6c63ff,#4f8aff);font-size:18px;line-height:38px;text-align:center;box-shadow:0 4px 14px rgba(108,99,255,.45)}
+.h-hd-title{font-size:15px;font-weight:700;color:var(--text);font-family:'Space Mono',monospace;line-height:1.3;margin-top:10px}
+.h-hd-sub{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.3}
 .h-hd-beta{display:inline-block;padding:2px 7px;border-radius:999px;background:rgba(108,99,255,.2);color:var(--accent2);font-size:10px;font-weight:700;font-family:'Space Mono',monospace;vertical-align:middle;margin-left:5px}
-.h-x{position:absolute;right:14px;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%);width:32px;height:32px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:18px;line-height:32px;text-align:center;-webkit-transition:all .15s;transition:all .15s;display:block}
+.h-x{position:absolute;right:12px;top:12px;width:32px;height:32px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:20px;line-height:32px;text-align:center;-webkit-transition:all .15s;transition:all .15s}
 .h-x:hover{color:var(--text);border-color:var(--accent2)}
 /* --- tab bar --- */
 .h-tabs{display:-webkit-flex;display:flex;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding:11px 14px;gap:7px;border-bottom:1px solid var(--border);-webkit-flex-shrink:0;flex-shrink:0;scrollbar-width:none}
@@ -2897,15 +2896,13 @@ startApp();
 
 
 <!-- Help Panel -->
-<div class=”h-back” id=”hBack”></div>
+<div class=”h-back” id=”hBack” onclick=”closeHelp()”></div>
 <aside class=”h-panel” id=”hPanel” aria-hidden=”true” style=”display:none”>
   <div class=”h-hd”>
+    <button class=”h-x” id=”hClose” type=”button” onclick=”closeHelp()”>×</button>
     <div class=”h-hd-icon”>📖</div>
-    <div class=”h-hd-text”>
-      <div class=”h-hd-title”>Application Guide<span class=”h-hd-beta”>Beta 10</span></div>
-      <div class=”h-hd-sub”>Essam Tracker — complete feature guide</div>
-    </div>
-    <button class=”h-x” id=”hClose” type=”button”>×</button>
+    <div class=”h-hd-title”>Application Guide<span class=”h-hd-beta”>Beta 10</span></div>
+    <div class=”h-hd-sub”>Essam Tracker — complete feature guide</div>
   </div>
   <div class=”h-tabs”>
     <button class=”h-tab on” data-htab=”overview” type=”button”>Overview</button>
@@ -3187,8 +3184,6 @@ startApp();
   var panel=document.getElementById(‘hPanel’);
   var back=document.getElementById(‘hBack’);
   if(panel){
-    var close=document.getElementById(‘hClose’);
-    if(close)close.addEventListener(‘click’,closeHelp);
     var tabs=panel.querySelectorAll(‘[data-htab]’);
     var secs=panel.querySelectorAll(‘[data-hsec]’);
     tabs.forEach(function(tab){
