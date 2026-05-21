@@ -344,62 +344,62 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .spec-input-error{border-color:var(--red)!important}
 
 
-/* ===== EPS Help Panel - independent layer (safe add-on) ===== */
-.eps-help-launcher{position:fixed;right:22px;bottom:22px;z-index:120;width:46px;height:46px;border-radius:16px;border:1px solid rgba(108,99,255,.45);background:linear-gradient(135deg,var(--accent),var(--blue));color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 14px 35px rgba(0,0,0,.35);cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:18px;transition:transform .18s ease,box-shadow .18s ease}
-.eps-help-launcher:hover{transform:translateY(-2px);box-shadow:0 18px 42px rgba(0,0,0,.45)}
-.eps-help-backdrop{display:none;position:fixed;inset:0;z-index:130;background:rgba(0,0,0,.48);backdrop-filter:blur(2px)}
+/* ===== Help Panel ===== */
+.eps-help-launcher{position:fixed;right:22px;bottom:22px;z-index:120;width:46px;height:46px;border-radius:16px;border:none;background:linear-gradient(135deg,var(--accent),var(--blue));color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(108,99,255,.55);cursor:pointer;font-size:20px;transition:transform .18s,box-shadow .18s}
+.eps-help-launcher:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(108,99,255,.65)}
+.eps-help-backdrop{display:none;position:fixed;inset:0;z-index:130;background:rgba(0,0,0,.52);backdrop-filter:blur(3px)}
 .eps-help-backdrop.show{display:block}
-.eps-help-panel{position:fixed;top:0;right:0;bottom:0;z-index:131;width:640px;max-width:94vw;background:var(--bg2);border-left:1px solid var(--border);box-shadow:-20px 0 45px rgba(0,0,0,.35);transform:translateX(105%);transition:transform .24s ease;display:flex;flex-direction:column}
+.eps-help-panel{position:fixed;top:0;right:0;bottom:0;z-index:131;width:520px;max-width:96vw;background:var(--bg1);border-left:1px solid var(--border);box-shadow:-16px 0 48px rgba(0,0,0,.3);transform:translateX(105%);transition:transform .26s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
 .eps-help-panel.show{transform:translateX(0)}
-.eps-help-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;background:linear-gradient(180deg,rgba(108,99,255,.10),transparent)}
-.eps-help-mark{width:36px;height:36px;border-radius:12px;background:rgba(108,99,255,.16);display:flex;align-items:center;justify-content:center;color:var(--accent2);font-family:'Space Mono',monospace;font-weight:700;flex-shrink:0}
-.eps-help-title{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--text);margin-bottom:3px}
-.eps-help-sub{font-size:11px;color:var(--text2);line-height:1.45}
-.eps-help-close{margin-left:auto;width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .15s;font-size:14px}
-.eps-help-close:hover{color:var(--text);border-color:var(--text3)}
-.eps-help-tabs{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;border-bottom:1px solid var(--border);scrollbar-width:none;white-space:nowrap;padding:10px 12px}
-.eps-help-tabs::-webkit-scrollbar{display:none}
-.eps-help-tab{display:inline-block;border:1px solid var(--border);background:var(--bg3);color:var(--text2);border-radius:999px;padding:5px 11px;font-size:11px;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:all .15s;margin-right:5px;vertical-align:middle}
-.eps-help-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
-.eps-help-body{padding:14px 14px 22px;overflow-y:auto;flex:1}
-.eps-help-section{display:none;animation:epsHelpFade .18s ease}
-.eps-help-section.active{display:block}
-@keyframes epsHelpFade{from{opacity:.35;transform:translateY(4px)}to{opacity:1;transform:none}}
-.eps-help-card{background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:12px;padding:14px 14px 14px 12px;margin-bottom:10px}
-.eps-help-card h3{font-size:13px;color:var(--text);margin-bottom:8px;font-weight:700;letter-spacing:.01em}
-.eps-help-card p{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:8px}
-.eps-help-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
-.eps-help-item{display:flex;gap:8px;font-size:12px;color:var(--text2);line-height:1.5}
-.eps-help-dot{width:18px;height:18px;border-radius:6px;background:rgba(108,99,255,.15);color:var(--accent2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
-.eps-help-flow{display:grid;gap:7px;margin-top:8px}
-.eps-help-step{display:flex;gap:10px;align-items:flex-start;background:rgba(108,99,255,.04);border:1px solid var(--border);border-radius:10px;padding:10px}
-.eps-help-num{width:22px;height:22px;border-radius:8px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;flex-shrink:0}
-.eps-help-step b{display:block;color:var(--text);font-size:12px;font-weight:600;margin-bottom:2px}
-.eps-help-step span{color:var(--text2);font-size:11px;line-height:1.45}
-.eps-help-tip{border:1px solid rgba(255,209,102,.3);background:rgba(255,209,102,.07);color:var(--today);border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.55;margin-top:10px}
-
-.eps-help-mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
-.eps-help-mini{background:rgba(108,99,255,.05);border:1px solid var(--border);border-radius:10px;padding:10px}
-.eps-help-mini b{display:block;color:var(--text);font-size:12px;font-weight:600;margin-bottom:3px}
-.eps-help-mini span{display:block;color:var(--text2);font-size:11px;line-height:1.4}
-.eps-help-version{display:inline-flex;align-items:center;gap:6px;margin-top:7px;padding:4px 8px;border-radius:999px;background:rgba(108,99,255,.15);color:var(--accent2);font-family:'Space Mono',monospace;font-size:10px;font-weight:700}
-.eps-help-kbd{display:inline-block;border:1px solid var(--border);background:var(--bg4);border-radius:5px;padding:1px 6px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text)}
-
-.eps-help-contact-row{display:flex;align-items:center;gap:9px;padding:10px 12px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:12px;margin-top:8px;font-size:13px;color:var(--text2)}
-.eps-help-contact-row b{color:var(--text);min-width:58px;font-size:12px}
-.eps-help-contact-row a{color:var(--accent2);text-decoration:none;word-break:break-all}
-.eps-help-contact-row a:hover{text-decoration:underline}
-.eps-help-footer{margin-top:14px;padding:13px 12px;border-top:1px solid var(--border);text-align:center;color:var(--text3);font-size:11px;line-height:1.65}
-.eps-help-footer b{color:var(--text2);font-weight:600}
-
-@media(max-width:700px){
-  .eps-help-mini-grid{grid-template-columns:1fr}
-  .eps-help-launcher{right:14px;bottom:14px}
-  .eps-help-panel{width:100vw;max-width:100vw}
-  .eps-help-tab{font-size:10px;padding:4px 8px}
-  .eps-help-body{padding:12px 12px 20px}
-  .eps-help-card{padding:12px 12px 12px 10px}
-}
+.hlp-head{padding:18px 18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;background:linear-gradient(135deg,rgba(108,99,255,.12),rgba(79,138,255,.05))}
+.hlp-icon{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,var(--accent),var(--blue));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 4px 12px rgba(108,99,255,.4)}
+.hlp-title{font-size:15px;font-weight:700;color:var(--text);line-height:1.2;font-family:'Space Mono',monospace}
+.hlp-badge{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:999px;background:rgba(108,99,255,.18);color:var(--accent2);font-size:10px;font-weight:700;font-family:'Space Mono',monospace;letter-spacing:.04em}
+.hlp-close{margin-left:auto;width:32px;height:32px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text3);cursor:pointer;font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.hlp-close:hover{color:var(--text);border-color:var(--accent2);background:rgba(108,99,255,.1)}
+.hlp-body{flex:1;overflow-y:auto;overflow-x:hidden}
+.hlp-acc{border-bottom:1px solid var(--border)}
+.hlp-acc-hd{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;transition:background .15s}
+.hlp-acc-hd:hover,.hlp-acc-hd:active{background:rgba(108,99,255,.05)}
+.hlp-ico{width:34px;height:34px;border-radius:10px;background:rgba(108,99,255,.1);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:background .15s}
+.hlp-acc.open .hlp-ico{background:rgba(108,99,255,.22)}
+.hlp-lbl{flex:1;font-size:13px;font-weight:600;color:var(--text)}
+.hlp-arr{font-size:10px;color:var(--text3);transition:transform .22s;line-height:1}
+.hlp-acc.open .hlp-arr{transform:rotate(180deg)}
+.hlp-acc-bd{display:none;padding:4px 16px 16px}
+.hlp-acc.open .hlp-acc-bd{display:block}
+.hlp-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:13px 14px;margin-bottom:9px}
+.hlp-card h4{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px}
+.hlp-card p{font-size:12.5px;color:var(--text2);line-height:1.65;margin:0}
+.hlp-card p+p{margin-top:7px}
+.hlp-rows{display:flex;flex-direction:column;margin-top:9px}
+.hlp-row{display:flex;gap:9px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.hlp-row:last-child{border:none}
+.hlp-dot{width:20px;height:20px;border-radius:6px;background:rgba(108,99,255,.14);color:var(--accent2);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.hlp-rt{font-size:12.5px;color:var(--text2);line-height:1.55;flex:1}
+.hlp-rt b{color:var(--text)}
+.hlp-note{border:1px solid rgba(108,99,255,.25);background:rgba(108,99,255,.07);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--accent2);line-height:1.55;margin-top:9px}
+.hlp-warn{border:1px solid rgba(255,209,102,.3);background:rgba(255,209,102,.07);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--today);line-height:1.55;margin-top:9px}
+.hlp-steps{display:flex;flex-direction:column;gap:7px;margin-top:9px}
+.hlp-step{display:flex;gap:10px;background:rgba(108,99,255,.04);border:1px solid rgba(108,99,255,.12);border-radius:10px;padding:10px 12px}
+.hlp-sn{width:22px;height:22px;border-radius:7px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;font-family:'Space Mono',monospace;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.hlp-st b{display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.hlp-st span{font-size:11.5px;color:var(--text2);line-height:1.45}
+.hlp-g2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+.hlp-gc{background:rgba(108,99,255,.05);border:1px solid rgba(108,99,255,.12);border-radius:10px;padding:10px 11px}
+.hlp-gc b{display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px}
+.hlp-gc span{font-size:11.5px;color:var(--text2);line-height:1.45;display:block}
+.hlp-contact{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin-top:8px;background:var(--bg2)}
+.hlp-contact .ci{font-size:16px}
+.hlp-contact b{font-size:12px;color:var(--text);min-width:52px}
+.hlp-contact a{font-size:12px;color:var(--accent2);text-decoration:none}
+.hlp-contact a:hover{text-decoration:underline}
+.hlp-footer{text-align:center;padding:14px 12px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);line-height:1.75;margin-top:4px}
+.hlp-footer b{color:var(--text2)}
+.hlp-kbd{display:inline-block;border:1px solid var(--border);background:var(--bg3);border-radius:5px;padding:1px 6px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text);margin-right:6px}
+.hlp-new{display:inline-block;margin-left:5px;padding:1px 6px;border-radius:5px;background:rgba(108,99,255,.18);color:var(--accent2);font-size:10px;font-weight:700;vertical-align:middle}
+@media(max-width:700px){.eps-help-panel{width:100vw;max-width:100vw}.hlp-g2{grid-template-columns:1fr}}
+@media(max-width:768px){.eps-help-launcher{right:12px;bottom:70px}}
 
 
 /* ===== Clean Project Row + Three Dots Menu ===== */
@@ -913,9 +913,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   /* Member cards compact */
   .member-card{padding:12px}
   .member-avatar{width:38px;height:38px;font-size:14px}
-
-  /* Help launcher position */
-  .eps-help-launcher{right:12px;bottom:70px}
 
   /* Detail panel */
   .detail-panel{width:100%}
@@ -2822,376 +2819,379 @@ startApp();
 </script>
 
 
-<!-- EPS Help Panel - independent add-on -->
-<button class="eps-help-launcher" id="epsHelpOpen" type="button" title="Application Guide">?</button>
-<div class="eps-help-backdrop" id="epsHelpBackdrop"></div>
-<aside class="eps-help-panel" id="epsHelpPanel" aria-hidden="true">
-  <div class="eps-help-head">
-    <div class="eps-help-mark">?</div>
+<!-- Help Panel -->
+<button class=”eps-help-launcher” id=”epsHelpOpen” type=”button” title=”Application Guide”>?</button>
+<div class=”eps-help-backdrop” id=”epsHelpBackdrop”></div>
+<aside class=”eps-help-panel” id=”epsHelpPanel” aria-hidden=”true”>
+  <div class=”hlp-head”>
+    <div class=”hlp-icon”>📖</div>
     <div>
-      <div class="eps-help-title">Application Guide</div>
-      <div class="eps-help-sub">Practical guide for using Essam Tracker as a procurement follow-up system.</div>
-      <div class="eps-help-version">Beta 10</div>
+      <div class=”hlp-title”>Application Guide</div>
+      <span class=”hlp-badge”>Beta 10</span>
     </div>
-    <button class="eps-help-close" id="epsHelpClose" type="button">×</button>
+    <button class=”hlp-close” id=”epsHelpClose” type=”button”>×</button>
   </div>
-  <div class=”eps-help-tabs”>
-    <button class=”eps-help-tab active” data-eps-help-tab=”overview”  type=”button”>Overview</button>
-    <button class=”eps-help-tab” data-eps-help-tab=”tasks”     type=”button”>Tasks</button>
-    <button class=”eps-help-tab” data-eps-help-tab=”board”     type=”button”>Board</button>
-    <button class=”eps-help-tab” data-eps-help-tab=”sharing”   type=”button”>Sharing</button>
-    <button class=”eps-help-tab” data-eps-help-tab=”projects”  type=”button”>Projects</button>
-    <button class=”eps-help-tab” data-eps-help-tab=”people”    type=”button”>People</button>
-    <button class=”eps-help-tab” data-eps-help-tab=”meetings”  type=”button”>Meetings</button>
-    <button class=”eps-help-tab” data-eps-help-tab=”reports”   type=”button”>Reports</button>
-    <button class=”eps-help-tab” data-eps-help-tab=”tips”      type=”button”>Tips</button>
-    <button class=”eps-help-tab” data-eps-help-tab=”feedback”  type=”button”>Feedback</button>
-  </div>
-  <div class=”eps-help-body”>
+  <div class=”hlp-body”>
 
-    <!-- ══ OVERVIEW ══ -->
-    <section class=”eps-help-section active” data-eps-help-section=”overview”>
-      <div class=”eps-help-card”>
-        <h3>What is Essam Tracker?</h3>
-        <p>Essam Tracker is a private, cloud-synced workspace for managing tasks, projects, people, meetings, and notes — all in one place. Every user has their own isolated data protected by server-side security (Row Level Security).</p>
-        <p>It is built for professionals who need to move fast: capture work, assign it, track it, and close it without navigating between multiple tools.</p>
-        <div class=”eps-help-tip”>Everything auto-saves to the cloud the moment you make a change. No manual Save button needed.</div>
+    <!-- Overview -->
+    <div class=”hlp-acc open”>
+      <div class=”hlp-acc-hd”>
+        <div class=”hlp-ico”>🏠</div>
+        <span class=”hlp-lbl”>Overview</span>
+        <span class=”hlp-arr”>▾</span>
       </div>
-      <div class=”eps-help-card”>
-        <h3>What’s new in Beta 10</h3>
-        <div class=”eps-help-list”>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>★</span><span><b>Task Sharing</b> — send tasks to other users with Action or CC roles. Recipients accept or reject. Status syncs back to you in real time.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>★</span><span><b>Team Connections</b> — adding a team member with an email sends them a connection request. Once accepted, you can send tasks to each other.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>★</span><span><b>Real-time Notifications</b> — instant browser notifications when someone sends you a task or accepts yours. No refresh needed.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>★</span><span><b>Global Search</b> — the search bar now searches tasks, notes, contacts, and meetings simultaneously with highlighted matches.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>★</span><span><b>Incoming View</b> — dedicated page for all received tasks and team connection requests, with Incoming / Sent tabs.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>★</span><span><b>Full-color Task Cards</b> — assign a color to any task on the Free Board and the entire card gets that color with white text.</span></div>
+      <div class=”hlp-acc-bd”>
+        <div class=”hlp-card”>
+          <h4>What is Essam Tracker?</h4>
+          <p>A private, cloud-synced workspace for managing tasks, projects, team, contacts, meetings, and notes — all in one place. Your data is isolated and secured with Row-Level Security so only you can access it.</p>
+          <div class=”hlp-note”>Everything auto-saves the moment you make a change. No Save button needed.</div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>What’s new in Beta 10</h4>
+          <div class=”hlp-rows”>
+            <div class=”hlp-row”><div class=”hlp-dot”>★</div><div class=”hlp-rt”><b>Task Sharing</b> — send tasks to connected users with Action or CC roles. Status syncs back in real time. <span class=”hlp-new”>NEW</span></div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>★</div><div class=”hlp-rt”><b>Team Connections</b> — adding a team member with an email sends them a connection request. Once accepted, you can exchange tasks. <span class=”hlp-new”>NEW</span></div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>★</div><div class=”hlp-rt”><b>Browser Notifications</b> — instant OS-level notifications for incoming tasks and acceptances. <span class=”hlp-new”>NEW</span></div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>★</div><div class=”hlp-rt”><b>Global Search</b> — search tasks, notes, contacts, and meetings simultaneously with highlighted matches. <span class=”hlp-new”>NEW</span></div></div>
+          </div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>App sections</h4>
+          <div class=”hlp-g2”>
+            <div class=”hlp-gc”><b>📅 Today’s Focus</b><span>Pinned tasks, today’s due work, today’s meetings.</span></div>
+            <div class=”hlp-gc”><b>✅ All Tasks</b><span>Full list with filters, sorting, List and Kanban views.</span></div>
+            <div class=”hlp-gc”><b>🗂 Free Board</b><span>Visual card board — drag, color-code, and plan.</span></div>
+            <div class=”hlp-gc”><b>📁 Projects</b><span>Tasks, BOQ, price items, and LPO per project.</span></div>
+            <div class=”hlp-gc”><b>👥 Team</b><span>Members with roles, emails, and connection status.</span></div>
+            <div class=”hlp-gc”><b>👤 Contacts</b><span>Suppliers, contractors, consultants.</span></div>
+            <div class=”hlp-gc”><b>📝 Notes</b><span>Free-text reference documents per project.</span></div>
+            <div class=”hlp-gc”><b>📅 Meetings</b><span>Log with outcomes, recurring, and project links.</span></div>
+            <div class=”hlp-gc”><b>📥 Incoming</b><span>Tasks and team requests from other users.</span></div>
+            <div class=”hlp-gc”><b>📊 Reports</b><span>Analytics: status, workload, projects, timeline.</span></div>
+          </div>
         </div>
       </div>
-      <div class=”eps-help-card”>
-        <h3>App sections at a glance</h3>
-        <div class=”eps-help-mini-grid”>
-          <div class=”eps-help-mini”><b>📅 Today’s Focus</b><span>Your daily execution list: pinned tasks, today’s due work, today’s meetings.</span></div>
-          <div class=”eps-help-mini”><b>✅ All Tasks</b><span>Full task list with filters, sorting, List and Kanban views.</span></div>
-          <div class=”eps-help-mini”><b>🗂 Free Board</b><span>Visual sticky-note board. Drag cards, assign colors, group by status or project.</span></div>
-          <div class=”eps-help-mini”><b>📁 Projects</b><span>Each project has its own tasks, BOQ, price items, and LPO list.</span></div>
-          <div class=”eps-help-mini”><b>👥 Team</b><span>Team members with roles, emails, and connection status.</span></div>
-          <div class=”eps-help-mini”><b>👤 Contacts</b><span>Suppliers, contractors, and consultants with specialty filters.</span></div>
-          <div class=”eps-help-mini”><b>📝 Notes</b><span>Free-text notes linked to projects with optional due dates.</span></div>
-          <div class=”eps-help-mini”><b>📅 Meetings</b><span>Meeting log with outcomes, recurring support, and project links.</span></div>
-          <div class=”eps-help-mini”><b>📥 Incoming</b><span>Tasks and team requests sent to you by other users.</span></div>
-          <div class=”eps-help-mini”><b>📊 Reports</b><span>Analytics: task status, workload by member, project breakdown, timeline.</span></div>
-        </div>
-      </div>
-    </section>
+    </div>
 
-    <!-- ══ TASKS ══ -->
-    <section class=”eps-help-section” data-eps-help-section=”tasks”>
-      <div class=”eps-help-card”>
-        <h3>Creating a task</h3>
-        <p>Click <b>+ Add Task</b> in the All Tasks view. Fill in:</p>
-        <div class=”eps-help-list”>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>1</span><span><b>Description</b> — write the action clearly. Bad: “Follow supplier”. Good: “Follow Al-Faris for revised MEP quotation — Office Tower Project”.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>2</span><span><b>Priority</b> — High / Medium / Low. Drives color coding and sorting.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>3</span><span><b>Status</b> — Not Started / In Progress / Done.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>4</span><span><b>Due date</b> — the date this must be acted on. Overdue tasks appear in red.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>5</span><span><b>Project</b> — link the task to a project so it appears in that project’s view.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>6</span><span><b>Assignee</b> — select a team member responsible for this task.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>7</span><span><b>Notes</b> — additional context, conditions, or instructions.</span></div>
+    <!-- Tasks -->
+    <div class=”hlp-acc”>
+      <div class=”hlp-acc-hd”>
+        <div class=”hlp-ico”>✅</div>
+        <span class=”hlp-lbl”>Tasks</span>
+        <span class=”hlp-arr”>▾</span>
+      </div>
+      <div class=”hlp-acc-bd”>
+        <div class=”hlp-card”>
+          <h4>Creating a task</h4>
+          <p>Click <b>+ Add Task</b>. Every task should have a clear description, priority (High / Medium / Low), status, due date, project, and assignee. Tasks without these are noise.</p>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Task detail panel</h4>
+          <div class=”hlp-rows”>
+            <div class=”hlp-row”><div class=”hlp-dot”>✓</div><div class=”hlp-rt”>Change status — automatically logs the change as a comment.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>✓</div><div class=”hlp-rt”>Add <b>subtasks</b> — a checklist with a progress bar.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>✓</div><div class=”hlp-rt”>Add <b>comments</b> — updates, decisions, follow-up notes.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>✓</div><div class=”hlp-rt”>Add <b>attachments</b> — file links or email references.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>✓</div><div class=”hlp-rt”>View <b>recipient status</b> — if you sent this task, their current status and last comment appear here automatically.</div></div>
+          </div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Today’s Focus</h4>
+          <p>Shows tasks due today or pinned to today, plus today’s meetings. Pin any task using the 📌 icon on its card.</p>
+          <div class=”hlp-warn”>Keep Today’s Focus short — 3 to 7 items max. If everything is urgent, nothing is urgent.</div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Views: List and Kanban</h4>
+          <p>Switch with the ☰ ⊞ buttons at the top right of All Tasks. Kanban shows columns: Not Started / In Progress / Done.</p>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Hashtags</h4>
+          <p>Tag tasks with labels like <b>#contracts</b>, <b>#payment</b>, or <b>#rfq</b> to group work across projects. Click a tag in the sidebar to filter. Keep the list under 10 tags.</p>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Global Search</h4>
+          <p>Type in the search bar to search <b>everything at once</b> — tasks, notes, contacts, meetings — with matches highlighted. Clear the query to return to normal view.</p>
         </div>
       </div>
-      <div class=”eps-help-card”>
-        <h3>Task detail panel</h3>
-        <p>Click any task card to open the detail panel on the right. Inside you can:</p>
-        <div class=”eps-help-list”>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>✓</span><span>Change status using the dropdown (automatically logs the change as a comment).</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>✓</span><span>Add <b>subtasks</b> — a checklist with a progress bar.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>✓</span><span>Add <b>comments</b> — updates, decisions, or follow-up notes.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>✓</span><span>Add <b>attachments</b> — file links or email references.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>✓</span><span>See <b>recipient updates</b> — if you sent this task to someone, their current status and last comment appear here automatically.</span></div>
-        </div>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Today’s Focus</h3>
-        <p>Your personal execution list for today. Shows tasks that are due today or pinned to today, plus today’s meetings. Pin any task by clicking the 📌 icon on its card.</p>
-        <div class=”eps-help-tip”>Keep Today’s Focus short — 3 to 7 items max. If everything is urgent, nothing is urgent.</div>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Views: List and Kanban</h3>
-        <p>Switch between <b>List view</b> (compact rows with filters) and <b>Kanban view</b> (columns by status: Not Started / In Progress / Done) using the ☰ ⊞ buttons at the top right of All Tasks.</p>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Hashtags</h3>
-        <p>Tag tasks with labels like <b>#contracts</b>, <b>#payment</b>, or <b>#delivery</b> to group them across all projects. Click a hashtag in the sidebar to filter. Recommended tags for procurement:</p>
-        <div class=”eps-help-mini-grid”>
-          <div class=”eps-help-mini”><b>#contracts</b><span>Contract review, signature, or follow-up.</span></div>
-          <div class=”eps-help-mini”><b>#payment</b><span>Invoices, payment requests, finance follow-up.</span></div>
-          <div class=”eps-help-mini”><b>#delivery</b><span>Pending deliveries and site coordination.</span></div>
-          <div class=”eps-help-mini”><b>#rfq</b><span>Quotations pending from suppliers.</span></div>
-          <div class=”eps-help-mini”><b>#approval</b><span>Items waiting for management sign-off.</span></div>
-          <div class=”eps-help-mini”><b>#urgent</b><span>Critical issues needing immediate action.</span></div>
-        </div>
-        <div class=”eps-help-tip”>Rule: project = “which job”. Hashtag = “what kind of work”. Keep the hashtag list under 10 tags.</div>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Global Search</h3>
-        <p>Use the search bar at the top of the screen to search <b>everything at once</b> — tasks, notes, contacts, and meetings. Results appear grouped by type with matching text highlighted. Press ✕ Clear or delete the query to return to normal view.</p>
-      </div>
-    </section>
+    </div>
 
-    <!-- ══ FREE BOARD ══ -->
-    <section class=”eps-help-section” data-eps-help-section=”board”>
-      <div class=”eps-help-card”>
-        <h3>What is the Free Board?</h3>
-        <p>The Free Board is a visual card wall — like a digital whiteboard. Every task you create appears as a draggable card. Unlike the Kanban view (which organises by status columns), the Free Board lets you arrange cards freely by dragging them anywhere on the canvas.</p>
+    <!-- Free Board -->
+    <div class=”hlp-acc”>
+      <div class=”hlp-acc-hd”>
+        <div class=”hlp-ico”>🗂</div>
+        <span class=”hlp-lbl”>Free Board</span>
+        <span class=”hlp-arr”>▾</span>
       </div>
-      <div class=”eps-help-card”>
-        <h3>Card colors</h3>
-        <p>Click the small color dot (●) on any task card to assign a color. When a color is assigned, the entire card background becomes that color with white text — making it easy to visually group or highlight important tasks at a glance.</p>
-        <div class=”eps-help-tip”>Use colors consistently: red = blocked, green = delivered, purple = high value contract, etc. Agree on a color code with your team.</div>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Board vs Kanban — when to use which</h3>
-        <div class=”eps-help-mini-grid”>
-          <div class=”eps-help-mini”><b>Free Board</b><span>Visual planning, grouping by theme, creating a war-room style overview. Best for reviews and presentations.</span></div>
-          <div class=”eps-help-mini”><b>Kanban</b><span>Status-driven workflow. Cards move left to right as work progresses. Best for daily follow-up.</span></div>
+      <div class=”hlp-acc-bd”>
+        <div class=”hlp-card”>
+          <h4>What is the Free Board?</h4>
+          <p>A visual card wall — like a digital whiteboard. Every task appears as a draggable card. Unlike Kanban (which organises by status columns), the Free Board lets you arrange cards freely anywhere on the canvas.</p>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Card colors</h4>
+          <p>Click the color dot (●) on any card to assign a color. The entire card background becomes that color with white text — easy to visually group or highlight important tasks.</p>
+          <div class=”hlp-warn”>Use colors consistently: red = blocked, green = delivered, purple = high-value contract.</div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Board vs Kanban</h4>
+          <div class=”hlp-g2”>
+            <div class=”hlp-gc”><b>Free Board</b><span>Visual planning, grouping by theme. Best for reviews and presentations.</span></div>
+            <div class=”hlp-gc”><b>Kanban</b><span>Status-driven workflow. Cards move left to right. Best for daily follow-up.</span></div>
+          </div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Send from the board</h4>
+          <p>Every task card has a 📤 button. Click it to send that task to a connected team member directly from the board without leaving your visual workspace.</p>
         </div>
       </div>
-      <div class=”eps-help-card”>
-        <h3>Send a task from the board</h3>
-        <p>Every task card on the Free Board has a 📤 button. Click it to send that task to a team member directly from the board — without leaving your visual workspace. See the <b>Sharing</b> tab for the full send-task workflow.</p>
-      </div>
-    </section>
+    </div>
 
-    <!-- ══ TASK SHARING ══ -->
-    <section class=”eps-help-section” data-eps-help-section=”sharing”>
-      <div class=”eps-help-card”>
-        <h3>How task sharing works</h3>
-        <p>You can send any task to another Essam Tracker user. They receive it in their <b>Incoming</b> view and can Accept or Reject it. If they accept, the task is added to their task list and their progress syncs back to you automatically.</p>
-        <div class=”eps-help-flow”>
-          <div class=”eps-help-step”><div class=”eps-help-num”>1</div><div><b>Click 📤 on any task card</b><span>The send modal opens showing your connected team members.</span></div></div>
-          <div class=”eps-help-step”><div class=”eps-help-num”>2</div><div><b>Select recipients</b><span>Tap a team member card to add them. You can add multiple recipients.</span></div></div>
-          <div class=”eps-help-step”><div class=”eps-help-num”>3</div><div><b>Set the role</b><span>Toggle each recipient between <b>Action</b> (responsible for doing the task) and <b>CC</b> (informed only).</span></div></div>
-          <div class=”eps-help-step”><div class=”eps-help-num”>4</div><div><b>Send</b><span>Each recipient gets a notification. Action recipients accept/reject. CC recipients acknowledge.</span></div></div>
-          <div class=”eps-help-step”><div class=”eps-help-num”>5</div><div><b>Track progress</b><span>Open the task detail panel to see the recipient’s current status and their last comment — updated in real time.</span></div></div>
+    <!-- Task Sharing -->
+    <div class=”hlp-acc”>
+      <div class=”hlp-acc-hd”>
+        <div class=”hlp-ico”>📤</div>
+        <span class=”hlp-lbl”>Task Sharing</span>
+        <span class=”hlp-arr”>▾</span>
+      </div>
+      <div class=”hlp-acc-bd”>
+        <div class=”hlp-card”>
+          <h4>How it works</h4>
+          <div class=”hlp-steps”>
+            <div class=”hlp-step”><div class=”hlp-sn”>1</div><div class=”hlp-st”><b>Click 📤 on any task card</b><span>The send modal opens showing your connected team members.</span></div></div>
+            <div class=”hlp-step”><div class=”hlp-sn”>2</div><div class=”hlp-st”><b>Select recipients</b><span>Tap a team member card to add them. Multiple recipients allowed.</span></div></div>
+            <div class=”hlp-step”><div class=”hlp-sn”>3</div><div class=”hlp-st”><b>Set the role</b><span>Toggle each recipient between <b>Action</b> (responsible) and <b>CC</b> (informed only).</span></div></div>
+            <div class=”hlp-step”><div class=”hlp-sn”>4</div><div class=”hlp-st”><b>Send</b><span>Recipients get a notification. Action recipients accept or reject. CC recipients tap “Got it”.</span></div></div>
+            <div class=”hlp-step”><div class=”hlp-sn”>5</div><div class=”hlp-st”><b>Track progress</b><span>Open the task detail panel to see the recipient’s current status and last comment in real time.</span></div></div>
+          </div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Action vs CC</h4>
+          <div class=”hlp-g2”>
+            <div class=”hlp-gc”><b>Action</b><span>Recipient is responsible. They Accept ✓ or Reject ✕. Task appears in their list.</span></div>
+            <div class=”hlp-gc”><b>CC</b><span>Recipient is informed only. They tap “Got it ✓”. No execution expected.</span></div>
+          </div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Incoming view — two tabs</h4>
+          <div class=”hlp-rows”>
+            <div class=”hlp-row”><div class=”hlp-dot”>📥</div><div class=”hlp-rt”><b>Incoming</b> — team connection requests, Action tasks (Accept/Reject), CC tasks (Got it).</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>📤</div><div class=”hlp-rt”><b>Sent</b> — all tasks you sent, with each recipient’s role and status (⏳ Pending / ✓ Accepted / ✕ Rejected).</div></div>
+          </div>
+          <div class=”hlp-note”>The 📥 badge on the Incoming nav button shows the count of items waiting for your action.</div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Team connections</h4>
+          <p>To send tasks to someone, they must be in your Team with an email registered. When you add a team member with an email, they automatically receive a 🤝 Team Connection Request. Once they accept, both of you can send tasks to each other.</p>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Real-time notifications</h4>
+          <div class=”hlp-rows”>
+            <div class=”hlp-row”><div class=”hlp-dot”>🔔</div><div class=”hlp-rt”>Someone sends you a new task (Action or CC).</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>🔔</div><div class=”hlp-rt”>Someone sends you a team connection request.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>🔔</div><div class=”hlp-rt”>A recipient accepts or rejects a task you sent.</div></div>
+          </div>
         </div>
       </div>
-      <div class=”eps-help-card”>
-        <h3>Action vs CC</h3>
-        <div class=”eps-help-mini-grid”>
-          <div class=”eps-help-mini”><b>Action</b><span>The person is responsible for executing the task. They Accept ✓ or Reject ✕. The task appears in their list.</span></div>
-          <div class=”eps-help-mini”><b>CC</b><span>The person is informed only. They see it in a separate CC section and tap “Got it ✓”. No execution expected.</span></div>
-        </div>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Incoming view</h3>
-        <p>Go to <b>Incoming</b> in the sidebar to see everything sent to you. Two tabs:</p>
-        <div class=”eps-help-list”>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>📥</span><span><b>Incoming tab</b> — team connection requests, Action tasks (Accept/Reject), and CC tasks (Got it).</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>📤</span><span><b>Sent tab</b> — all tasks you’ve sent, with each recipient’s role and their current status (⏳ Pending / ✓ Accepted / ✕ Rejected).</span></div>
-        </div>
-        <div class=”eps-help-tip”>The 📥 badge on the Incoming nav button shows the count of pending items waiting for your action.</div>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Task card badges</h3>
-        <div class=”eps-help-list”>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>📤</span><span><b>Exported to: Ahmed (Action) · Sara (CC)</b> — appears on the sender’s task card showing all recipients and their statuses.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>📥</span><span><b>Imported from: email</b> — appears on an accepted task showing who assigned it to you.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>📋</span><span><b>CC from: email</b> — appears on a CC task you acknowledged.</span></div>
-        </div>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Team connections</h3>
-        <p>To send tasks to someone, they must be in your Team with their email registered. When you add a team member with an email, they automatically receive a 🤝 Team Connection Request in their Incoming view. Once they accept, you are both connected — and both can send tasks to each other.</p>
-        <div class=”eps-help-tip”>You only need to add someone once. After mutual acceptance, the connection is permanent unless removed.</div>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Real-time notifications</h3>
-        <p>Essam Tracker uses Supabase Realtime to deliver instant updates — no refresh needed. Your browser will also show an OS-level notification (if you allow it) when:</p>
-        <div class=”eps-help-list”>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>🔔</span><span>Someone sends you a new task (Action or CC).</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>🔔</span><span>Someone sends you a team connection request.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>🔔</span><span>A recipient accepts or rejects a task you sent.</span></div>
-        </div>
-      </div>
-    </section>
+    </div>
 
-    <!-- ══ PROJECTS ══ -->
-    <section class=”eps-help-section” data-eps-help-section=”projects”>
-      <div class=”eps-help-card”>
-        <h3>Projects</h3>
-        <p>Projects are the top-level containers for your work. Create a project for every job, contract, or scope of work. All tasks, meetings, and notes can be linked to a project.</p>
-        <p>Click <b>+ New Project</b> at the bottom of the sidebar to create one. Click a project name in the sidebar to filter all tasks to that project.</p>
+    <!-- Projects -->
+    <div class=”hlp-acc”>
+      <div class=”hlp-acc-hd”>
+        <div class=”hlp-ico”>📁</div>
+        <span class=”hlp-lbl”>Projects</span>
+        <span class=”hlp-arr”>▾</span>
       </div>
-      <div class=”eps-help-card”>
-        <h3>BOQ — Bill of Quantities</h3>
-        <p>Each project has a BOQ section. Add line items with description, quantity, unit, and unit price. The system calculates totals automatically. Use BOQ to track the scope and estimated value of a contract.</p>
-        <div class=”eps-help-tip”>Keep BOQ items at the package level (e.g., “MEP Package”, “Furniture Package”) unless you need detailed line-item tracking.</div>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Price Items</h3>
-        <p>Price items track supplier quotations for each BOQ item. Add multiple supplier prices per item to build a comparison. Use this to document the basis for your purchase decision.</p>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>LPO — Local Purchase Orders</h3>
-        <p>The LPO section records issued purchase orders for each project. Add LPO number, supplier, date, amount, and status. This gives you a live view of committed spend per project.</p>
-        <div class=”eps-help-mini-grid”>
-          <div class=”eps-help-mini”><b>Draft</b><span>LPO prepared but not yet issued.</span></div>
-          <div class=”eps-help-mini”><b>Issued</b><span>LPO sent to supplier and confirmed.</span></div>
-          <div class=”eps-help-mini”><b>Partial</b><span>Delivery or invoice partially received.</span></div>
-          <div class=”eps-help-mini”><b>Closed</b><span>LPO fully delivered and invoiced.</span></div>
+      <div class=”hlp-acc-bd”>
+        <div class=”hlp-card”>
+          <h4>Projects</h4>
+          <p>Top-level containers for your work. Create a project for every job, contract, or scope. Click <b>+ New Project</b> at the bottom of the sidebar. All tasks, meetings, and notes can be linked to a project.</p>
+        </div>
+        <div class=”hlp-card”>
+          <h4>BOQ — Bill of Quantities</h4>
+          <p>Add BOQ line items per project with description, quantity, unit, and unit price. Totals are calculated automatically. Use BOQ to track the estimated scope and value of a contract.</p>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Price Items</h4>
+          <p>Track supplier quotations per BOQ item. Add multiple supplier prices to build a comparison. Documents the basis for your purchase decision.</p>
+        </div>
+        <div class=”hlp-card”>
+          <h4>LPO — Local Purchase Orders</h4>
+          <p>Record issued purchase orders per project: LPO number, supplier, date, amount, and status.</p>
+          <div class=”hlp-g2”>
+            <div class=”hlp-gc”><b>Draft</b><span>Prepared but not yet issued.</span></div>
+            <div class=”hlp-gc”><b>Issued</b><span>Sent to supplier and confirmed.</span></div>
+            <div class=”hlp-gc”><b>Partial</b><span>Delivery or invoice partially received.</span></div>
+            <div class=”hlp-gc”><b>Closed</b><span>Fully delivered and invoiced.</span></div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- ══ PEOPLE ══ -->
-    <section class=”eps-help-section” data-eps-help-section=”people”>
-      <div class=”eps-help-card”>
-        <h3>Team</h3>
-        <p>Go to <b>Team</b> in the sidebar to manage your team members. Add their name, role, email, and phone. The email field is what enables task sharing — without it, you can assign tasks internally but cannot send them to that person’s Essam Tracker account.</p>
-        <div class=”eps-help-list”>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>✓</span><span>Team members with emails automatically receive a connection invitation when added.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>✓</span><span>Once connected, they appear in the team picker when you send a task.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>✓</span><span>Each member gets a unique color avatar generated automatically.</span></div>
+    <!-- Team & Contacts -->
+    <div class=”hlp-acc”>
+      <div class=”hlp-acc-hd”>
+        <div class=”hlp-ico”>👥</div>
+        <span class=”hlp-lbl”>Team &amp; Contacts</span>
+        <span class=”hlp-arr”>▾</span>
+      </div>
+      <div class=”hlp-acc-bd”>
+        <div class=”hlp-card”>
+          <h4>Team members</h4>
+          <p>Go to <b>Team</b> in the sidebar. Add name, role, email, and phone. The email field is what enables task sharing — without it, the member is internal-only (assignable but not sendable).</p>
+          <div class=”hlp-rows”>
+            <div class=”hlp-row”><div class=”hlp-dot”>✓</div><div class=”hlp-rt”>Members with emails automatically receive a connection invitation when added.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>✓</div><div class=”hlp-rt”>Once connected, they appear in the team picker when you send a task.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>✓</div><div class=”hlp-rt”>Each member gets a unique color avatar generated automatically.</div></div>
+          </div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Contacts</h4>
+          <p>For external parties: suppliers, contractors, consultants. A reference directory only — contacts can’t log in. Each contact can have: name, company, role, phone, email, website, specialty, and notes.</p>
+          <div class=”hlp-warn”>Keep specialties consistent — avoid “Furniture”, “Furnitures”, “Loose Furniture” as three different entries. Clean data = fast lookup.</div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Assign vs Send</h4>
+          <p><b>Assigning</b> a task (via Assignee field) is an internal label — visible on the card and in reports. <b>Sending</b> a task (via 📤) is a delegation to another Essam Tracker user — they get it in their own Incoming view.</p>
         </div>
       </div>
-      <div class=”eps-help-card”>
-        <h3>Contacts</h3>
-        <p>Contacts are for external parties: suppliers, contractors, consultants, and service providers. Unlike team members (who are internal users), contacts are purely a reference directory.</p>
-        <p>Each contact can have: name, company, role, phone, email, website, specialty, and notes. The specialty field links to a shared specialty list that you can search and filter.</p>
-        <div class=”eps-help-tip”>Keep contact specialties consistent — avoid “Furniture”, “Furnitures”, and “Loose Furniture” as three separate specialties. Clean data = fast lookup.</div>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Assigning tasks to team members</h3>
-        <p>When creating or editing a task, use the <b>Assignee</b> field to pick a team member. This is for internal tracking — the assignee is visible on the task card and in reports.</p>
-        <p>To send the task to another Essam Tracker user’s account, use the 📤 <b>Send Task</b> button instead. These are two different actions: assigning is a label; sending is a delegation.</p>
-      </div>
-    </section>
+    </div>
 
-    <!-- ══ MEETINGS & NOTES ══ -->
-    <section class=”eps-help-section” data-eps-help-section=”meetings”>
-      <div class=”eps-help-card”>
-        <h3>Meetings</h3>
-        <p>Use the <b>Meetings</b> section to log any formal or informal discussion: supplier meetings, site visits, internal reviews, consultant calls, or client sessions.</p>
-        <p>Each meeting has: title, date/time, attendees (with), project link, notes, and outcome. After every meeting, convert decisions into tasks — a meeting with no follow-up tasks is just a note.</p>
+    <!-- Meetings & Notes -->
+    <div class=”hlp-acc”>
+      <div class=”hlp-acc-hd”>
+        <div class=”hlp-ico”>📅</div>
+        <span class=”hlp-lbl”>Meetings &amp; Notes</span>
+        <span class=”hlp-arr”>▾</span>
       </div>
-      <div class=”eps-help-card”>
-        <h3>Recurring meetings</h3>
-        <p>Set a meeting to repeat <b>Daily</b>, <b>Weekly</b>, or <b>Monthly</b> with an optional end date. Recurring meetings appear in Today’s Focus on their scheduled day automatically.</p>
-        <div class=”eps-help-tip”>Only use recurring for meetings that genuinely repeat on a fixed schedule. Too many recurring entries will clutter Today’s Focus.</div>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Notes</h3>
-        <p>Notes are free-text documents — not actions. Use them to store reference information, decisions, scope summaries, specifications, or anything that does not need to be tracked as a task.</p>
-        <p>Notes can be linked to a project and can have an optional due date (e.g., “submit this document by…”).</p>
-        <div class=”eps-help-mini-grid”>
-          <div class=”eps-help-mini”><b>Use tasks for…</b><span>Actions someone needs to take. Things with a responsible person and a deadline.</span></div>
-          <div class=”eps-help-mini”><b>Use notes for…</b><span>Reference material, summaries, scope documents, meeting notes that do not require action.</span></div>
+      <div class=”hlp-acc-bd”>
+        <div class=”hlp-card”>
+          <h4>Meetings</h4>
+          <p>Log any discussion: supplier meetings, site visits, internal reviews, client sessions. Each meeting has: title, date/time, attendees, project link, notes, and outcome. After every meeting, convert decisions into tasks before closing the record.</p>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Recurring meetings</h4>
+          <p>Set a meeting to repeat Daily, Weekly, or Monthly with an optional end date. Recurring meetings appear in Today’s Focus on their scheduled day automatically.</p>
+          <div class=”hlp-warn”>Only use recurring for meetings that genuinely repeat on a fixed schedule — too many entries will clutter Today’s Focus.</div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Notes</h4>
+          <p>Free-text reference documents — not actions. Store scope summaries, specifications, decisions, or anything that does not need follow-up. Notes can be linked to a project and have an optional due date.</p>
+          <div class=”hlp-g2”>
+            <div class=”hlp-gc”><b>Use tasks for…</b><span>Actions with a responsible person and a deadline.</span></div>
+            <div class=”hlp-gc”><b>Use notes for…</b><span>Reference material that does not require action.</span></div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- ══ REPORTS ══ -->
-    <section class=”eps-help-section” data-eps-help-section=”reports”>
-      <div class=”eps-help-card”>
-        <h3>Reports & Analytics</h3>
-        <p>Go to <b>Reports</b> in the sidebar to view analytics across all your tasks and projects. Reports have six tabs:</p>
-        <div class=”eps-help-list”>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>📊</span><span><b>Overview</b> — key KPIs: total tasks, completion rate, overdue count, high-priority open items, and task sharing stats (tasks sent/received).</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>✅</span><span><b>Tasks</b> — full task breakdown by status, priority, and assignee with sortable tables.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>📁</span><span><b>By Project</b> — progress per project: how many tasks are done vs pending vs overdue.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>👥</span><span><b>By Member</b> — workload per team member: open tasks, completed, overdue.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>📅</span><span><b>Timeline</b> — tasks plotted by due date to spot clusters and upcoming deadlines.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>👥</span><span><b>Team</b> — team-level summary and performance overview.</span></div>
+    <!-- Reports -->
+    <div class=”hlp-acc”>
+      <div class=”hlp-acc-hd”>
+        <div class=”hlp-ico”>📊</div>
+        <span class=”hlp-lbl”>Reports</span>
+        <span class=”hlp-arr”>▾</span>
+      </div>
+      <div class=”hlp-acc-bd”>
+        <div class=”hlp-card”>
+          <h4>Six report tabs</h4>
+          <div class=”hlp-rows”>
+            <div class=”hlp-row”><div class=”hlp-dot”>📊</div><div class=”hlp-rt”><b>Overview</b> — KPIs: total tasks, completion rate, overdue count, high-priority items, and sharing stats.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>✅</div><div class=”hlp-rt”><b>Tasks</b> — full breakdown by status, priority, and assignee.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>📁</div><div class=”hlp-rt”><b>By Project</b> — progress per project: done vs pending vs overdue.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>👤</div><div class=”hlp-rt”><b>By Member</b> — workload per team member: open, completed, overdue.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>📅</div><div class=”hlp-rt”><b>Timeline</b> — tasks plotted by due date to spot clusters and deadlines.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>👥</div><div class=”hlp-rt”><b>Team</b> — team-level summary and performance overview.</div></div>
+          </div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Filters &amp; printing</h4>
+          <p>All tabs (except Team) support filters by project, member, status, priority, and date range. Click <b>🖨 Print Full Report</b> to generate a print-ready version with a professional header and footer.</p>
         </div>
       </div>
-      <div class=”eps-help-card”>
-        <h3>Filters</h3>
-        <p>All report tabs (except Team) support filters: by project, team member, status, priority, and date range. Combine filters to answer specific questions like “how many high-priority tasks are overdue in Project X?”</p>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Print reports</h3>
-        <p>Click <b>🖨 Print Full Report</b> to generate a print-ready version of the current report tab. The print view includes your company header, report title, date, and a professional footer. Use it for management reviews or client progress reports.</p>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Task Sharing stats</h3>
-        <p>The Overview tab includes a <b>Task Sharing</b> section showing how many tasks you’ve sent (with acceptance rate) and how many you’ve received. This gives you visibility into collaboration activity.</p>
-      </div>
-    </section>
+    </div>
 
-    <!-- ══ TIPS ══ -->
-    <section class=”eps-help-section” data-eps-help-section=”tips”>
-      <div class=”eps-help-card”>
-        <h3>Rules for consistent use</h3>
-        <div class=”eps-help-list”>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>1</span><span>Every task must have a project, an assignee, a priority, and a due date. Tasks without these are noise.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>2</span><span>Never leave a task “In Progress” for more than a week without adding a comment explaining the situation.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>3</span><span>Start every morning by reviewing Today’s Focus and the overdue tasks list.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>4</span><span>Use tasks for actions. Use notes for references. Do not store meeting summaries inside task comments.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>5</span><span>Send a task to someone using 📤 only when you expect them to take ownership. Use CC only to keep them informed.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>6</span><span>After a meeting, create tasks for every decision before closing the meeting record.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>7</span><span>Keep the contact specialty list clean — fewer, cleaner categories beat a long inconsistent list.</span></div>
+    <!-- Tips & Security -->
+    <div class=”hlp-acc”>
+      <div class=”hlp-acc-hd”>
+        <div class=”hlp-ico”>💡</div>
+        <span class=”hlp-lbl”>Tips &amp; Security</span>
+        <span class=”hlp-arr”>▾</span>
+      </div>
+      <div class=”hlp-acc-bd”>
+        <div class=”hlp-card”>
+          <h4>Rules for consistent use</h4>
+          <div class=”hlp-rows”>
+            <div class=”hlp-row”><div class=”hlp-dot”>1</div><div class=”hlp-rt”>Every task must have a project, assignee, priority, and due date. Tasks without these are noise.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>2</div><div class=”hlp-rt”>Never leave a task “In Progress” for more than a week without a comment explaining the situation.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>3</div><div class=”hlp-rt”>Start every morning by reviewing Today’s Focus and the overdue list.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>4</div><div class=”hlp-rt”>Use tasks for actions. Use notes for references. Do not store meeting summaries in task comments.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>5</div><div class=”hlp-rt”>Use 📤 Send only when you expect ownership. Use CC only to keep someone informed.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>6</div><div class=”hlp-rt”>After every meeting, create tasks for every decision before closing the record.</div></div>
+          </div>
+          <div class=”hlp-warn”>The biggest risk is not a missing feature — it is inconsistent updates. A tool not updated daily becomes decoration, not management.</div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Data &amp; security</h4>
+          <div class=”hlp-rows”>
+            <div class=”hlp-row”><div class=”hlp-dot”>🔒</div><div class=”hlp-rt”>All data is stored in a private cloud database (Supabase). Row-Level Security ensures only you can access your data.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>🔒</div><div class=”hlp-rt”>Task sharing uses a separate invitations table. You only see invitations you sent or received.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>💾</div><div class=”hlp-rt”>All changes auto-save instantly to the cloud. There is no manual save button.</div></div>
+            <div class=”hlp-row”><div class=”hlp-dot”>📱</div><div class=”hlp-rt”>Works as a PWA. Add to your home screen on iPhone or Android for a native app feel.</div></div>
+          </div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>Shortcuts</h4>
+          <div class=”hlp-rows”>
+            <div class=”hlp-row”><div class=”hlp-rt”><span class=”hlp-kbd”>Esc</span> Close any open modal, panel, or the help guide.</div></div>
+            <div class=”hlp-row”><div class=”hlp-rt”><span class=”hlp-kbd”>Search</span> Type to search everything. Clear to return to normal view.</div></div>
+          </div>
         </div>
       </div>
-      <div class=”eps-help-card”>
-        <h3>Data & security</h3>
-        <div class=”eps-help-list”>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>🔒</span><span>All data is stored in a private cloud database (Supabase). Row-Level Security ensures each user can only read and write their own data — even the database administrator cannot read your tasks.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>🔒</span><span>Task sharing uses a separate invitations table. You only see invitations you sent or received — never other users’ invitations.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>💾</span><span>All changes auto-save instantly to the cloud. There is no manual save button.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-dot”>📱</span><span>The app works as a PWA (Progressive Web App). Add it to your home screen on iPhone or Android for a native app experience.</span></div>
-        </div>
-      </div>
-      <div class=”eps-help-card”>
-        <h3>Keyboard shortcuts</h3>
-        <div class=”eps-help-list”>
-          <div class=”eps-help-item”><span class=”eps-help-kbd”>Esc</span><span>Close any open modal, panel, or the help guide.</span></div>
-          <div class=”eps-help-item”><span class=”eps-help-kbd”>Search bar</span><span>Type to search everything. Delete query to return to normal view.</span></div>
-        </div>
-      </div>
-      <div class=”eps-help-tip”>The biggest risk is not a missing feature — it is inconsistent updates. A tool that is not updated daily becomes decoration, not management.</div>
-    </section>
+    </div>
 
-    <!-- ══ FEEDBACK ══ -->
-    <section class=”eps-help-section” data-eps-help-section=”feedback”>
-      <div class=”eps-help-card”>
-        <h3>Feedback & Support</h3>
-        <p>If you encounter an issue, have a suggestion, or need help with any feature, contact the application owner directly. When reporting an issue, please include: the screen you were on, what you clicked, and what you expected to happen.</p>
-        <div class=”eps-help-contact-row”><span>📧</span><b>Email</b><a href=”mailto:zereseos@hotmail.com”>zereseos@hotmail.com</a></div>
-        <div class=”eps-help-contact-row”><span>📱</span><b>Mobile</b><a href=”tel:+97360021006”>0097360021006</a></div>
+    <!-- Feedback -->
+    <div class=”hlp-acc”>
+      <div class=”hlp-acc-hd”>
+        <div class=”hlp-ico”>💬</div>
+        <span class=”hlp-lbl”>Feedback &amp; Support</span>
+        <span class=”hlp-arr”>▾</span>
       </div>
-      <div class=”eps-help-card”>
-        <h3>Ownership</h3>
-        <p>Essam Tracker is designed and owned by <b>Eng. Mohamed Essam Menofy</b>. This is a private professional tool built for real procurement and project follow-up workflows.</p>
-        <div class=”eps-help-tip”>Beta 10 — active development. New features and improvements are released regularly.</div>
+      <div class=”hlp-acc-bd”>
+        <div class=”hlp-card”>
+          <h4>Contact</h4>
+          <p>If you encounter an issue or have a suggestion, contact the developer directly. When reporting a bug, include: the screen you were on, what you clicked, and what you expected to happen.</p>
+          <div class=”hlp-contact”><span class=”ci”>📧</span><b>Email</b><a href=”mailto:zereseos@hotmail.com”>zereseos@hotmail.com</a></div>
+          <div class=”hlp-contact”><span class=”ci”>📱</span><b>Mobile</b><a href=”tel:+97360021006”>0097360021006</a></div>
+        </div>
+        <div class=”hlp-card”>
+          <h4>About</h4>
+          <p>Essam Tracker is designed and owned by <b>Eng. Mohamed Essam Menofy</b>. A private professional tool built for real procurement and project follow-up workflows.</p>
+          <div class=”hlp-note”>Beta 10 — actively developed. New features are released regularly.</div>
+        </div>
+        <div class=”hlp-footer”>© All Rights Reserved · Essam Tracker Beta 10<br><b>Eng. Mohamed Essam Menofy</b></div>
       </div>
-      <div class=”eps-help-footer”>© All Rights Reserved · Essam Tracker Beta 10<br><b>Eng. Mohamed Essam Menofy</b></div>
-    </section>
+    </div>
 
   </div>
 </aside>
 <script>
 (function(){
-  var openBtn=document.getElementById('epsHelpOpen');
-  var closeBtn=document.getElementById('epsHelpClose');
-  var panel=document.getElementById('epsHelpPanel');
-  var backdrop=document.getElementById('epsHelpBackdrop');
-  if(!openBtn||!closeBtn||!panel||!backdrop)return;
-  function openHelp(){panel.classList.add('show');backdrop.classList.add('show');panel.setAttribute('aria-hidden','false');}
-  function closeHelp(){panel.classList.remove('show');backdrop.classList.remove('show');panel.setAttribute('aria-hidden','true');}
-  openBtn.addEventListener('click',openHelp);
-  closeBtn.addEventListener('click',closeHelp);
-  backdrop.addEventListener('click',closeHelp);
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeHelp();});
-  document.querySelectorAll('[data-eps-help-tab]').forEach(function(tab){
-    tab.addEventListener('click',function(){
-      var id=tab.getAttribute('data-eps-help-tab');
-      document.querySelectorAll('[data-eps-help-tab]').forEach(function(t){
-        if(t===tab){t.classList.add('active');}else{t.classList.remove('active');}
-      });
-      document.querySelectorAll('[data-eps-help-section]').forEach(function(s){
-        if(s.getAttribute('data-eps-help-section')===id){s.classList.add('active');}else{s.classList.remove('active');}
-      });
+  var openBtn=document.getElementById(‘epsHelpOpen’);
+  var closeBtn=document.getElementById(‘epsHelpClose’);
+  var panel=document.getElementById(‘epsHelpPanel’);
+  var backdrop=document.getElementById(‘epsHelpBackdrop’);
+  if(!openBtn||!panel)return;
+  function openHelp(){panel.classList.add(‘show’);backdrop.classList.add(‘show’);panel.setAttribute(‘aria-hidden’,’false’);}
+  function closeHelp(){panel.classList.remove(‘show’);backdrop.classList.remove(‘show’);panel.setAttribute(‘aria-hidden’,’true’);}
+  openBtn.addEventListener(‘click’,openHelp);
+  if(closeBtn)closeBtn.addEventListener(‘click’,closeHelp);
+  if(backdrop)backdrop.addEventListener(‘click’,closeHelp);
+  document.addEventListener(‘keydown’,function(e){if(e.key===’Escape’)closeHelp();});
+  document.querySelectorAll(‘.hlp-acc-hd’).forEach(function(hd){
+    hd.addEventListener(‘click’,function(){
+      var acc=hd.parentElement;
+      if(acc.classList.contains(‘open’)){acc.classList.remove(‘open’);}
+      else{acc.classList.add(‘open’);}
     });
   });
 })();
