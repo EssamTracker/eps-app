@@ -344,6 +344,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .spec-input-error{border-color:var(--red)!important}
 
 
+/* ===== Admin Panel ===== */
+.adm-stats{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.adm-stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;flex:1;min-width:120px;text-align:center}
+.adm-stat-num{font-size:30px;font-weight:700;color:var(--accent2);font-family:'Space Mono',monospace;line-height:1.1}
+.adm-stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:5px}
+.adm-table{width:100%;border-collapse:collapse;font-size:13px}
+.adm-table th{text-align:left;padding:10px 12px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);border-bottom:2px solid var(--border);font-weight:600;white-space:nowrap}
+.adm-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+.adm-table tr:last-child td{border-bottom:none}
+.adm-table tbody tr:hover td{background:var(--bg3)}
+.adm-table td:first-child{color:var(--text3);font-size:11px;width:32px}
+.adm-table td:nth-child(2){color:var(--text);font-weight:500}
 /* ===== Help Panel ===== */
 .h-launch{position:fixed;right:22px;bottom:22px;z-index:120;width:46px;height:46px;border-radius:16px;border:none;background:linear-gradient(135deg,#6c63ff,#4f8aff);color:#fff;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;box-shadow:0 8px 28px rgba(108,99,255,.55);cursor:pointer;font-size:20px;-webkit-transition:transform .18s,box-shadow .18s;transition:transform .18s,box-shadow .18s}
 .h-launch:hover{-webkit-transform:translateY(-2px);transform:translateY(-2px)}
@@ -1145,6 +1157,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Incoming <span id="incoming-badge" class="nav-badge" style="display:none;background:var(--accent2)">0</span>
       </button>
+      <button class="nav-item" id="admin-nav-btn" style="display:none" onclick="showView('admin',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.8 3.6L14 6.5l-3 2.9.7 4.1L8 11.4l-3.7 2.1.7-4.1L2 6.5l4.2-.9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        Admin
+      </button>
       <button class="nav-item" onclick="openAppSettings(this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M12.6 3.4l-1.4 1.4M4.8 11.2l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         Settings
@@ -1370,6 +1386,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
 
     <div id="view-incoming" style="display:none"></div>
+
+    <div id="view-admin" style="display:none">
+      <div class="panel">
+        <div class="panel-title" style="display:flex;align-items:center;gap:10px">
+          <span>👑 Admin — User Accounts</span>
+          <button class="btn btn-sm" onclick="renderAdmin()" style="margin-left:auto;font-size:11px">↻ Refresh</button>
+        </div>
+        <div id="admin-content" style="padding:20px 0">
+          <div style="color:var(--text3);font-size:13px">Click Refresh to load data.</div>
+        </div>
+      </div>
+    </div>
 
   </div>
 </div>
@@ -1644,6 +1672,8 @@ function updateUserCard(){
   if(nameEl)nameEl.textContent=currentAuthUser?name:'Essam';
   if(roleEl)roleEl.textContent=currentAuthUser?'Private workspace':'Essam Tracker · Beta 10';
   if(logout)logout.style.display=currentAuthUser?'flex':'none';
+  const adminBtn=document.getElementById('admin-nav-btn');
+  if(adminBtn)adminBtn.style.display=(currentAuthUser?.email==='zereseos@hotmail.com')?'flex':'none';
 }
 async function setCurrentUser(user){
   currentAuthUser=user||null;
@@ -2726,8 +2756,8 @@ function render(){
 }
 
 function showView(v,el){
-  ['today','dashboard','contacts','team','notes','meetings','trash','incoming'].forEach(n=>{const e=document.getElementById('view-'+n);if(e)e.style.display=n===v?'block':'none';});
-  const titles={today:"Today's Focus",dashboard:'All Tasks',contacts:'Contacts',team:'Team',notes:'My Notes',meetings:'Meetings',trash:'Trash',reports:'Reports & Analytics'};
+  ['today','dashboard','contacts','team','notes','meetings','trash','incoming','admin'].forEach(n=>{const e=document.getElementById('view-'+n);if(e)e.style.display=n===v?'block':'none';});
+  const titles={today:"Today's Focus",dashboard:'All Tasks',contacts:'Contacts',team:'Team',notes:'My Notes',meetings:'Meetings',trash:'Trash',reports:'Reports & Analytics',admin:'Admin — User Accounts'};
   document.getElementById('page-title').textContent=titles[v]||v;
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   if(el)el.classList.add('active');
@@ -2740,6 +2770,45 @@ function showView(v,el){
   if(v==='notes')renderNotes();
   if(v==='meetings')renderMeetings();
   if(v==='team')renderTeam();
+  if(v==='admin')renderAdmin();
+}
+
+async function renderAdmin(){
+  const el=document.getElementById('admin-content');
+  if(!el)return;
+  if(currentAuthUser?.email!=='zereseos@hotmail.com'){el.innerHTML='<div style="color:var(--red);font-size:13px">Access denied.</div>';return;}
+  el.innerHTML='<div style="color:var(--text3);font-size:13px">جاري التحميل...</div>';
+  try{
+    const {data,error}=await supabaseClient.rpc('get_admin_users');
+    if(error)throw error;
+    const now=Date.now();
+    const d30=data.filter(u=>new Date(u.created_at)>new Date(now-30*24*60*60*1000)).length;
+    const d7active=data.filter(u=>u.last_sign_in_at&&new Date(u.last_sign_in_at)>new Date(now-7*24*60*60*1000)).length;
+    const fmt=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
+    el.innerHTML=`
+      <div class="adm-stats">
+        <div class="adm-stat"><div class="adm-stat-num">${data.length}</div><div class="adm-stat-label">Total Accounts</div></div>
+        <div class="adm-stat"><div class="adm-stat-num">${d30}</div><div class="adm-stat-label">Last 30 Days</div></div>
+        <div class="adm-stat"><div class="adm-stat-num">${d7active}</div><div class="adm-stat-label">Active (7 days)</div></div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="adm-table">
+          <thead><tr><th>#</th><th>Email</th><th>Name</th><th>Created</th><th>Last Login</th></tr></thead>
+          <tbody>${data.map((u,i)=>`<tr>
+            <td>${i+1}</td>
+            <td>${u.email}</td>
+            <td>${u.raw_user_meta_data?.display_name||'—'}</td>
+            <td>${fmt(u.created_at)}</td>
+            <td>${fmt(u.last_sign_in_at)}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>`;
+  }catch(err){
+    el.innerHTML=`<div style="color:var(--red);font-size:13px;padding:10px 0">
+      خطأ: ${err.message}<br><br>
+      <span style="color:var(--text3);font-size:12px">تأكد من إنشاء الـ Database Function. راجع workflow setup-admin-func في GitHub Actions.</span>
+    </div>`;
+  }
 }
 
 function openAppSettings(el){
