@@ -5624,6 +5624,7 @@ function fbAttachDrag(card){
     }
     function onEnd(e){
       card.classList.remove('fb-dragging');
+      lastTouchMs=Date.now();
       if(isDragging){
         var t=e.changedTouches[0];
         fbMeta()[id]=fbMeta()[id]||{};fbMeta()[id].x=Math.max(0,origX+(t.clientX-startX));fbMeta()[id].y=Math.max(0,origY+(t.clientY-startY));
