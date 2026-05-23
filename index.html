@@ -2716,6 +2716,9 @@ function isTodayDate(d){return d&&new Date(d).toDateString()===new Date().toDate
 function renderToday(){
   const maxToday=data.maxTodayTasks||6;
   const PRIO={'urgent':0,'high':1,'medium':2,'low':3};
+  // All manually pinned tasks (for progress tracking, includes done)
+  const allPinnedManual=data.tasks.filter(t=>t.pinToday);
+  const donePinnedManual=allPinnedManual.filter(t=>t.status==='done');
   // Start with manually pinned tasks (all priorities)
   let pinned=data.tasks.filter(t=>t.pinToday&&t.status!=='done');
   // Merge in urgent non-done tasks (auto-add)
@@ -2748,7 +2751,7 @@ function renderToday(){
 
   document.getElementById('today-badge').textContent=pinned.length+todayMeetings.length+todayNotes.length+overdueNotes.length;
   const el=document.getElementById('today-tasks-list');
-  const done=pinned.filter(t=>t.todayDone||t.status==='done').length,pct=pinned.length?Math.round(done/pinned.length*100):0;
+  const pct=allPinnedManual.length?Math.round(donePinnedManual.length/allPinnedManual.length*100):0;
   document.getElementById('today-prog-fill').style.width=pct+'%';
   document.getElementById('today-prog-label').textContent=pct+'%';
 
@@ -2758,6 +2761,10 @@ function renderToday(){
   }
 
   const taskHtml=pinned.map(t=>taskCard(t)).join('');
+  const doneTaskHtml=donePinnedManual.length
+    ?'<div style="font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin:10px 0 4px;opacity:0.8">✓ Completed Today ('+donePinnedManual.length+')</div>'
+      +donePinnedManual.map(t=>taskCard(t)).join('')
+    :'';
 
   const meetingHtml=todayMeetings.length?`<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:10px 0 4px">Today's Meetings</div>`+
     todayMeetings.map(m=>`<div class="today-task" style="cursor:default"><div class="meeting-dot"></div><div class="today-task-text">${m.title}</div>${itemProjectName(m)?`<span class="tag tag-project">📁 ${itemProjectName(m)}</span>`:''}${m.time?`<span class="task-due due-soon">${displayMeetingTimeForDate(m,todayDate).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>`:''}${m.with?`<span style="font-size:11px;color:var(--text3)">with ${m.with}</span>`:''}</div>`).join(''):'';
@@ -2768,7 +2775,7 @@ function renderToday(){
   const overdueNoteHtml=overdueNotes.length?`<div style="font-size:10px;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin:10px 0 4px">Overdue Notes</div>`+
     overdueNotes.map(n=>`<div class="today-task" style="cursor:default;border-left:2px solid var(--red)"><div class="note-title" style="margin:0">📝</div><div class="today-task-text">${n.title}</div>${itemProjectName(n)?`<span class="tag tag-project">📁 ${itemProjectName(n)}</span>`:''}<span class="task-due overdue">${new Date(n.due).toLocaleDateString([],{month:'short',day:'numeric'})}</span></div>`).join(''):'';
 
-  el.innerHTML=taskHtml+meetingHtml+noteHtml+overdueNoteHtml;
+  el.innerHTML=taskHtml+doneTaskHtml+meetingHtml+noteHtml+overdueNoteHtml;
 }
 function renderOverdueTasks(){
   const el=document.getElementById('overdue-tasks-list');
@@ -3691,6 +3698,7 @@ function rptTasks(){
   const ov=tasks.filter(t=>t.due&&new Date(t.due)<new Date()&&t.status!=='done').sort((a,b)=>new Date(a.due)-new Date(b.due));
   const inP=tasks.filter(t=>t.status==='in-progress');
   const pin=tasks.filter(t=>t.pinToday&&t.status!=='done');
+  const pinDone=tasks.filter(t=>t.pinToday&&t.status==='done');
   const thead=`<thead><tr><th>Task</th><th>Priority</th><th>Assigned</th><th>Project</th><th>Due</th><th>Status</th></tr></thead>`;
   function trow(t,badge){
     const m=(data.members||[]).find(m=>m.id===t.assignee);
@@ -3703,7 +3711,9 @@ ${ov.length?`<div class="rpt-sec">⚠ Overdue (${ov.length})</div><div class="rp
 <div class="rpt-sec">⟳ In Progress (${inP.length})</div>
 ${inP.length?`<div class="rpt-card"><div class="rpt-card-body" style="padding:0"><table class="rpt-table">${thead}<tbody>${inP.map(t=>trow(t,'<span class="tag tag-medium">In Progress</span>')).join('')}</tbody></table></div></div>`:`<div style="font-size:12px;color:var(--text3);margin-bottom:13px">Nothing in progress</div>`}
 <div class="rpt-sec">☀ Today's Focus (${pin.length})</div>
-${pin.length?`<div class="rpt-card"><div class="rpt-card-body" style="padding:0"><table class="rpt-table">${thead}<tbody>${pin.map(t=>trow(t,'<span class="tag-today-badge">Today</span>')).join('')}</tbody></table></div></div>`:`<div style="font-size:12px;color:var(--text3)">Nothing pinned for today</div>`}`;
+${pin.length?`<div class="rpt-card"><div class="rpt-card-body" style="padding:0"><table class="rpt-table">${thead}<tbody>${pin.map(t=>trow(t,'<span class="tag-today-badge">Today</span>')).join('')}</tbody></table></div></div>`:`<div style="font-size:12px;color:var(--text3);margin-bottom:13px">Nothing pinned for today</div>`}
+<div class="rpt-sec">✅ Completed Today (${pinDone.length})</div>
+${pinDone.length?`<div class="rpt-card"><div class="rpt-card-body" style="padding:0"><table class="rpt-table">${thead}<tbody>${pinDone.map(t=>trow(t,'<span class="tag tag-low">Done</span>')).join('')}</tbody></table></div></div>`:`<div style="font-size:12px;color:var(--text3)">Nothing completed from today's list yet</div>`}`;
 }
 
 // ── By Project ───────────────────────────────────────────────
