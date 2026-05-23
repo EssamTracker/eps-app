@@ -4845,16 +4845,22 @@ function attachKanbanDrag(){
     }
     function moveDrag(clientY){
       if(!dragging)return;
-      var els=board.querySelectorAll('.kb-card:not(.kb-dragging)');
+      // clear all indicators first
+      board.querySelectorAll('.kb-card[data-dnd-over]').forEach(function(el){el.removeAttribute('data-dnd-over');});
+      // only consider cards in the same column
+      var col=dragging.dataset.col;
+      var els=Array.from(board.querySelectorAll('.kb-card[data-col="'+col+'"]'));
+      var closest=null,closestDist=Infinity;
       els.forEach(function(el){
+        if(el===dragging)return;
         var r=el.getBoundingClientRect();
-        var mid=r.top+r.height/2;
-        el.removeAttribute('data-dnd-over');
-        if(el!==dragging){
-          if(clientY<mid)el.setAttribute('data-dnd-over','top');
-          else el.setAttribute('data-dnd-over','bot');
-        }
+        var dist=Math.abs(clientY-(r.top+r.height/2));
+        if(dist<closestDist){closestDist=dist;closest=el;}
       });
+      if(closest){
+        var r=closest.getBoundingClientRect();
+        closest.setAttribute('data-dnd-over',clientY<r.top+r.height/2?'top':'bot');
+      }
     }
     function endDrag(clientY){
       if(!dragging)return;
