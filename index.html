@@ -1013,9 +1013,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .rpt-sec{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin:14px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
 
 /* ===== FREE BOARD ===== */
-.fb-card{position:absolute;width:210px;background:var(--bg2);border-radius:10px;padding:12px;box-shadow:0 4px 16px rgba(0,0,0,.4);cursor:default;user-select:none;transition:box-shadow .15s}
+#free-board-canvas{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;padding:12px}
+.fb-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.4);cursor:default;user-select:none;transition:box-shadow .15s;display:flex;align-items:stretch}
 .fb-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.6)}
-.fb-card.fb-dragging{box-shadow:0 12px 32px rgba(0,0,0,.7);z-index:999;opacity:.9}
+.fb-card.dnd-dragging{opacity:.5}
+.fb-card[data-dnd-over="top"]{box-shadow:0 -2px 0 0 var(--accent)!important}
+.fb-card[data-dnd-over="bot"]{box-shadow:0 2px 0 0 var(--accent)!important}
+.fb-card.is-urgent{border:1px solid rgba(255,95,109,0.4)!important;box-shadow:0 0 0 1px rgba(255,95,109,0.1)}
+.fb-card-body{flex:1;padding:12px;min-width:0}
 .fb-card-title{font-size:13px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:8px;word-break:break-word}
 .fb-card-meta{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
 .fb-card-actions{display:flex;gap:6px;align-items:center}
@@ -1023,7 +1028,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .fb-btn:hover{background:var(--bg3)}
 .fb-color-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--text3);cursor:pointer;flex-shrink:0}
 .fb-color-picker{position:fixed;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px;display:flex;flex-wrap:wrap;gap:7px;z-index:2000;width:148px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
-.fb-drag-handle{font-size:15px;color:var(--text3);cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.fb-drag-handle{width:26px;align-self:stretch;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--border);border-radius:10px 0 0 10px;font-size:15px;color:var(--text2);cursor:grab;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;opacity:0.55;flex-shrink:0}
+.fb-card.is-urgent .fb-drag-handle{cursor:default;pointer-events:none;opacity:0.3;font-size:11px}
 
 /* ===== KANBAN BOARD ===== */
 #kanban-board{display:flex;gap:14px;overflow-x:auto;padding-bottom:16px;align-items:flex-start}
@@ -1227,7 +1233,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       </div>
       <div class="tasks-grid" id="tasks-list"><div class="empty-state">No tasks yet.</div></div>
       <div id="kanban-board" style="display:none"></div>
-      <div id="free-board" style="display:none;width:100%;overflow:auto;-webkit-overflow-scrolling:touch"><div id="free-board-canvas" style="position:relative;min-height:520px;min-width:700px"></div></div>
+      <div id="free-board" style="display:none;width:100%;overflow:auto;-webkit-overflow-scrolling:touch"><div id="free-board-canvas"></div></div>
       <div class="two-col">
         <div class="panel"><div class="panel-title">Recent Notes</div><div id="notes-preview"></div><button class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:11px" onclick="showView('notes',null)">View all</button></div>
         <div class="panel"><div class="panel-title">Today's Meetings</div><div id="meetings-preview"></div><button class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:11px" onclick="showView('meetings',null)">View all</button></div>
@@ -4937,18 +4943,14 @@ function renderFreeBoard(){
   if(!canvas||_taskView!=='board')return;
   var meta=fbMeta();
   var list=(typeof getFiltered==='function'?getFiltered():data.tasks.slice()).filter(fbProjectFilter);
-  var boardW=canvas.parentElement?canvas.parentElement.clientWidth:800;
-  var cardW=210,cardH=155,gap=12,padX=12,padY=12;
-  var cols=Math.max(1,Math.floor((boardW-padX*2+gap)/(cardW+gap)));
-  var col=0,row=0;
-  list.forEach(function(t){
-    if(!meta[t.id]){
-      meta[t.id]={x:padX+col*(cardW+gap),y:padY+row*(cardH+gap),color:'none'};
-      col++;if(col>=cols){col=0;row++;}
-    }
+  // Urgent (non-done) always first
+  list=list.slice().sort(function(a,b){
+    var aU=a.priority==='urgent'&&a.status!=='done'?0:1;
+    var bU=b.priority==='urgent'&&b.status!=='done'?0:1;
+    return aU-bU;
   });
   canvas.innerHTML=list.map(function(t){
-    var m=meta[t.id]||{x:30,y:30,color:'none'};
+    var m=meta[t.id]||{color:'none'};
     var noColor=!m.color||m.color==='none';
     var cardBg=noColor?'var(--bg2)':m.color;
     var textColor=noColor?'var(--text)':'#fff';
@@ -4958,7 +4960,12 @@ function renderFreeBoard(){
     var due=t.due?'<span style="font-size:10px;color:'+subColor+'">🕒 '+new Date(t.due).toLocaleDateString([],{month:'short',day:'numeric'})+'</span>':'';
     var statusDotColor=noColor?({'not-started':'var(--text3)','in-progress':'var(--accent2)','done':'var(--green)'}[t.status||'not-started']||'var(--text3)'):'rgba(255,255,255,.9)';
     var statusLabel={'not-started':'●','in-progress':'◐','done':'✓'}[t.status||'not-started']||'●';
-    return '<div class="fb-card" id="fbc-'+t.id+'" data-id="'+t.id+'" style="background:'+cardBg+';border:1px solid '+(noColor?'var(--border)':'transparent')+'">'
+    var isUrgent=t.priority==='urgent'&&t.status!=='done';
+    var urgentCls=isUrgent?' is-urgent':'';
+    var handle='<div class="fb-drag-handle" oncontextmenu="return false">'+(isUrgent?'🔒':'⠿')+'</div>';
+    return '<div class="fb-card'+urgentCls+'" data-id="'+t.id+'" style="background:'+cardBg+';border-color:'+(noColor?'var(--border)':'transparent')+'" onclick="openDetail('+t.id+')">'
+      +handle
+      +'<div class="fb-card-body">'
       +'<div class="fb-card-title" style="color:'+textColor+'">'+t.desc+'</div>'
       +'<div class="fb-card-meta">'+av+due+'</div>'
       +'<div class="fb-card-actions">'
@@ -4966,16 +4973,10 @@ function renderFreeBoard(){
       +'<button class="fb-btn" style="background:'+(noColor?'var(--bg4)':'rgba(0,0,0,.25)')+';color:'+(noColor?'var(--text)':'#fff')+'" onclick="event.stopPropagation();openDetail('+t.id+')" title="Open">↗</button>'
       +'<div class="fb-color-dot" style="background:'+(noColor?'var(--bg3)':m.color)+';border-color:'+(noColor?'var(--text3)':'rgba(255,255,255,.6)')+'" onclick="event.stopPropagation();fbColorPicker('+t.id+',this)" title="Color"></div>'
       +'</div>'
+      +'</div>'
       +'</div>';
   }).join('');
-  var maxX=700,maxY=520;
-  canvas.querySelectorAll('.fb-card').forEach(function(card){
-    fbAttachDrag(card);
-    var m=meta[parseInt(card.dataset.id)]||{x:30,y:30};
-    card.style.left=m.x+'px';card.style.top=m.y+'px';
-    maxX=Math.max(maxX,m.x+230);maxY=Math.max(maxY,m.y+180);
-  });
-  canvas.style.minWidth=maxX+'px';canvas.style.minHeight=maxY+'px';
+  attachFreeBoardDrag();
 }
 
 function fbColorPicker(id,dotEl){
@@ -5164,7 +5165,7 @@ function dndMoveTask(fromId,toId,insertBefore){
   var _toT=data.tasks.find(function(t){return t.id===toId;});
   if(_fromT&&_fromT.priority==='urgent'&&_fromT.status!=='done')return;
   if(_toT&&_toT.priority==='urgent'&&_toT.status!=='done'&&insertBefore)return;
-  if(_taskView!=='kanban'&&_taskView!=='board'&&currentSort!=='manual'){
+  if(_taskView!=='kanban'&&currentSort!=='manual'){
     currentSort='manual';
     var ss=document.querySelector('.sort-select');if(ss)ss.value='manual';
   }
@@ -5316,6 +5317,12 @@ function fbAttachDrag(card){
     if(Date.now()-lastTouchMs<600){e.preventDefault();return;}
     openDetail(id);
   });
+}
+
+function attachFreeBoardDrag(){
+  var canvas=document.getElementById('free-board-canvas');if(!canvas)return;
+  var cards=Array.from(canvas.querySelectorAll('.fb-card[data-id]')).filter(function(c){return!c.classList.contains('is-urgent');});
+  _attachDndToCards(cards,'.fb-card[data-id]','.fb-drag-handle');
 }
 
 /* ════════ TASK COLOR: handled directly in window.taskCard (Bug Fix Pack) ════════ */
