@@ -997,6 +997,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 /* ===== DRAG HANDLE ===== */
 .drag-handle{width:26px;align-self:stretch;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--border);border-radius:8px 0 0 8px;font-size:15px;color:var(--text3);cursor:grab;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;opacity:0.55;flex-shrink:0}
+.task-card.is-urgent .drag-handle{cursor:default;opacity:0.3;pointer-events:none;font-size:11px;color:var(--red)}
 .task-card[data-dnd-over="top"]{box-shadow:0 -3px 0 0 var(--accent)!important;margin-top:52px}
 .task-card[data-dnd-over="bot"]{box-shadow:0 3px 0 0 var(--accent)!important;margin-bottom:52px}
 .dnd-dragging{opacity:.35;outline:2px dashed var(--accent2);outline-offset:3px}
@@ -2456,7 +2457,11 @@ function getFiltered(){
   });
 }
 function sortTasks(tasks){
-  if(currentSort==='manual')return tasks;
+  if(currentSort==='manual'){
+    const urgent=tasks.filter(t=>t.priority==='urgent'&&t.status!=='done');
+    const rest=tasks.filter(t=>!(t.priority==='urgent'&&t.status!=='done'));
+    return[...urgent,...rest];
+  }
   return[...tasks].sort((a,b)=>{
     if(currentSort!=='manual'){
       const aU=a.priority==='urgent'&&a.status!=='done'?0:1;
@@ -5114,6 +5119,11 @@ function fbColorPickerFor(id,type,dotEl){
 var _dnd={active:false,id:null,overId:null,overTop:true};
 
 function dndMoveTask(fromId,toId,insertBefore){
+  // Urgent tasks are locked — can't be dragged, can't be dropped before
+  var _fromT=data.tasks.find(function(t){return t.id===fromId;});
+  var _toT=data.tasks.find(function(t){return t.id===toId;});
+  if(_fromT&&_fromT.priority==='urgent'&&_fromT.status!=='done')return;
+  if(_toT&&_toT.priority==='urgent'&&_toT.status!=='done'&&insertBefore)return;
   if(_taskView!=='kanban'&&_taskView!=='board'&&currentSort!=='manual'){
     currentSort='manual';
     var ss=document.querySelector('.sort-select');if(ss)ss.value='manual';
@@ -5197,7 +5207,9 @@ function attachListDrag(){
   var list=document.getElementById('tasks-list');if(!list)return;
   Array.from(list.querySelectorAll('.task-card[data-task-id]')).forEach(function(card){
     if(!card.querySelector('.drag-handle')){
-      var h=document.createElement('div');h.className='drag-handle';h.setAttribute('oncontextmenu','return false');h.textContent='⠿';
+      var isUrgent=card.classList.contains('is-urgent');
+      var h=document.createElement('div');h.className='drag-handle';h.setAttribute('oncontextmenu','return false');
+      h.textContent=isUrgent?'🔒':'⠿';
       card.style.paddingLeft='0';card.insertBefore(h,card.firstChild);
     }
   });
