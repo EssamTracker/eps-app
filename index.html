@@ -4870,9 +4870,6 @@ function attachKanbanDrag(){
         if(target.classList.contains('is-urgent')&&pos==='top'){dragging=null;renderKanban();return;}
         var moveId=parseInt(dragging.dataset.id);
         var targetId=parseInt(target.dataset.id);
-        var col=target.dataset.col||dragging.dataset.col;
-        var t=data.tasks.find(function(x){return x.id===moveId;});
-        if(t&&col)t.status=col;
         var mi=data.tasks.findIndex(function(x){return x.id===moveId;});
         var ti=data.tasks.findIndex(function(x){return x.id===targetId;});
         if(mi!==-1&&ti!==-1){
