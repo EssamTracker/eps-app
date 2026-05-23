@@ -1013,7 +1013,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .rpt-sec{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin:14px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
 
 /* ===== HELP PAGE ===== */
-#view-help{direction:rtl;font-family:'DM Sans',sans-serif}
+#view-help{direction:ltr;font-family:'DM Sans',sans-serif}
 .help-dev-card{background:linear-gradient(135deg,var(--accent) 0%,#4da6ff 100%);border-radius:14px;padding:20px 24px;margin-bottom:24px;color:#fff;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
 .help-dev-avatar{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0}
 .help-dev-name{font-size:17px;font-weight:700;margin-bottom:4px}
@@ -1364,151 +1364,151 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
       <!-- Developer Card -->
       <div class="help-dev-card">
-        <div class="help-dev-avatar">م</div>
+        <div class="help-dev-avatar">E</div>
         <div>
-          <div class="help-dev-name">م. محمد عصام منفوي</div>
+          <div class="help-dev-name">Eng. Mohamed Essam Menfoy</div>
           <div class="help-dev-contacts">
             <div class="help-dev-contact">📧 Zereseos@hotmail.com</div>
             <div class="help-dev-contact">📱 0097460021006</div>
           </div>
         </div>
-        <div style="flex:1;min-width:180px;text-align:left;direction:ltr">
+        <div style="flex:1;min-width:180px;text-align:right;direction:ltr">
           <div style="font-size:22px;font-weight:700;letter-spacing:1px;font-family:'Space Mono',monospace">Essam Tracker</div>
-          <div style="font-size:11px;opacity:.8;margin-top:2px">دليل الاستخدام الكامل</div>
+          <div style="font-size:11px;opacity:.8;margin-top:2px">Complete User Guide</div>
         </div>
       </div>
 
-      <div class="help-grid">
+      <div class="help-grid" style="direction:ltr">
 
         <!-- Tasks -->
         <div class="help-section">
-          <div class="help-section-title">📋 المهام — All Tasks</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>ادخل المهمة في خانة <b>Quick Add</b> واضغط Enter لإضافتها بسرعة</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>اضغط على أي مهمة لفتح تفاصيلها (العنوان، الأولوية، التاريخ، المسؤول، الملاحظات، المرفقات، المهام الفرعية)</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>غيّر حالة المهمة من الديتيل: <span class="help-badge help-badge-inprog">In Progress</span> → <span class="help-badge help-badge-done">Done</span></span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>استخدم Filter لتصفية المهام حسب الأولوية أو الحالة أو المسؤول</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>Sort لترتيب المهام حسب الأولوية أو تاريخ الاستحقاق أو الحالة أو يدوي</span></div>
-          <div class="help-tip">💡 في الترتيب اليدوي (Manual) اسحب المهمة من علامة ⠿ لإعادة ترتيبها</div>
+          <div class="help-section-title">📋 All Tasks</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Type a task in the <b>Quick Add</b> box and press Enter to add it instantly</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Click any task to open its detail panel (title, priority, due date, assignee, notes, attachments, subtasks)</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Change task status from the detail panel: <span class="help-badge help-badge-inprog">In Progress</span> → <span class="help-badge help-badge-done">Done</span></span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Use <b>Filter</b> to narrow tasks by priority, status, or assignee</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Use <b>Sort</b> to order by priority, due date, status, or manual order</span></div>
+          <div class="help-tip">💡 In Manual sort mode, drag any task by its ⠿ handle to reorder it</div>
         </div>
 
         <!-- Priority -->
         <div class="help-section">
-          <div class="help-section-title">🚨 مستويات الأولوية — Priority</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span><span class="help-badge help-badge-urgent">Urgent 🔒</span> — دايمًا فوق الكل ومش ممكن تتحرك يدويًا</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span><span class="help-badge help-badge-high">High</span> — أولوية عالية</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span><span class="help-badge help-badge-medium">Medium</span> — أولوية متوسطة (الافتراضي)</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span><span class="help-badge help-badge-low">Low</span> — أولوية منخفضة</span></div>
-          <div class="help-tip">💡 المهام Urgent مقفولة 🔒 في كل العروض (List، Kanban، Free Board) ومش ممكن تتسحب</div>
+          <div class="help-section-title">🚨 Priority Levels</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span><span class="help-badge help-badge-urgent">Urgent 🔒</span> — Always pinned to the top, cannot be moved manually</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span><span class="help-badge help-badge-high">High</span> — High priority task</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span><span class="help-badge help-badge-medium">Medium</span> — Default priority level</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span><span class="help-badge help-badge-low">Low</span> — Low priority task</span></div>
+          <div class="help-tip">💡 Urgent tasks are locked 🔒 in all views (List, Kanban, Free Board) and cannot be dragged</div>
         </div>
 
         <!-- Views -->
         <div class="help-section">
-          <div class="help-section-title">👁 عروض المهام — Views</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span><b>☰ List</b> — قائمة عمودية قابلة للسحب والإعادة ترتيب</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span><b>⊞ Kanban</b> — ألواح حسب الحالة (Not Started / In Progress / Done)، اسحب الكارت بين الأعمدة لتغيير حالته</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span><b>🎨 Free Board</b> — شبكة Grid، اسحب الكروت لإعادة ترتيبها، لوّن كل كارت بلون مختلف بالضغط على الدائرة ●</span></div>
-          <div class="help-tip">💡 في Kanban اسحب الكارت من علامة ⠿ لتحريكه جوا نفس العمود أو بين الأعمدة</div>
+          <div class="help-section-title">👁 Task Views</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span><b>☰ List</b> — Vertical list with drag-to-reorder support</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span><b>⊞ Kanban</b> — Columns by status (Not Started / In Progress / Done). Drag a card between columns to change its status</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span><b>🎨 Free Board</b> — Responsive grid. Drag cards to reorder. Click the ● dot on a card to assign it a color</span></div>
+          <div class="help-tip">💡 In Kanban, drag cards by the ⠿ handle to reorder within a column or move across columns</div>
         </div>
 
         <!-- Today's Focus -->
         <div class="help-section">
-          <div class="help-section-title">⏰ التركيز اليومي — Today's Focus</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>افتح تفاصيل أي مهمة واضغط <b>Pin to Today</b> لإضافتها لقائمة اليوم</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>المهام المثبتة تظهر في Today's Focus لتقدر تتابعها بسهولة</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>اضغط على ✓ جنب المهمة لتعليمها مكتملة لهذا اليوم</span></div>
-          <div class="help-tip">💡 الـ Badge الأصفر في الـ Sidebar بيعرض عدد مهام اليوم المتبقية</div>
+          <div class="help-section-title">⏰ Today's Focus</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Open any task's detail panel and press <b>Pin to Today</b> to add it to your daily list</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Pinned tasks appear in Today's Focus so you can track them throughout the day</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Tap ✓ next to a task to mark it done for today</span></div>
+          <div class="help-tip">💡 The yellow badge in the sidebar shows how many of today's tasks are still pending</div>
         </div>
 
         <!-- Contacts -->
         <div class="help-section">
-          <div class="help-section-title">📒 جهات الاتصال — Contacts</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>أضف الموردين (Supplier)، المقاولين (Contractor)، مزودي الخدمات (Service Provider)</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>لكل جهة: الاسم، الشركة، الجوال، الإيميل، التخصص</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>ابحث عن أي جهة اتصال باسمها أو شركتها</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>اضغط 🖨 لطباعة قائمة جهات الاتصال</span></div>
+          <div class="help-section-title">📒 Contacts</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Add Suppliers, Contractors, and Service Providers to your contact book</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Each contact stores: name, company, mobile, email, and specialty</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Search contacts by name or company name</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Press 🖨 to print the full contact list</span></div>
         </div>
 
         <!-- Team -->
         <div class="help-section">
-          <div class="help-section-title">👥 الفريق — Team</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>أضف أعضاء الفريق بالاسم والمنصب والإيميل والجوال</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>عند إضافة مهمة يمكن تعيينها لأي عضو في الفريق</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>فلتر المهام حسب المسؤول من شاشة All Tasks</span></div>
+          <div class="help-section-title">👥 Team</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Add team members with their name, role, email, and phone</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Assign any task to a team member from the task detail panel</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Filter tasks by assignee from the All Tasks screen</span></div>
         </div>
 
         <!-- Notes -->
         <div class="help-section">
-          <div class="help-section-title">📝 الملاحظات — Notes</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>أضف ملاحظات مرتبطة بمشاريع محددة أو بدون مشروع</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>يمكن إضافة رابط ومدة انتهاء لكل ملاحظة</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>في Dashboard تظهر آخر الملاحظات في الـ Preview</span></div>
+          <div class="help-section-title">📝 Notes</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Create notes linked to a specific project or standalone</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Each note can have a link and a due date</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Recent notes appear as a preview on the Dashboard</span></div>
         </div>
 
         <!-- Meetings -->
         <div class="help-section">
-          <div class="help-section-title">📅 الاجتماعات — Meetings</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>أضف اجتماعاً بعنوان ووقت والمشارك ومشروع</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>يدعم التكرار: يومي، أسبوعي، شهري</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>أضف النتيجة (Outcome) بعد الاجتماع</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>اضغط <b>↗ To Task</b> لتحويل نتيجة الاجتماع لمهمة مباشرة</span></div>
+          <div class="help-section-title">📅 Meetings</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Schedule meetings with a title, time, attendee, and linked project</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Supports recurring meetings: daily, weekly, or monthly</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Add an Outcome after the meeting to record what was decided</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Press <b>↗ To Task</b> to convert a meeting outcome into a task directly</span></div>
         </div>
 
         <!-- Projects -->
         <div class="help-section">
-          <div class="help-section-title">📁 المشاريع — Projects</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>أنشئ مشاريع من <b>+ New Project</b> في الـ Sidebar</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>اضغط على اسم المشروع لعرض مهامه وملاحظاته فقط</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>المهام والملاحظات والاجتماعات ترتبط بمشروع محدد</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>اضغط ⋯ على المشروع لتعديله أو حذفه أو تصدير تقريره</span></div>
+          <div class="help-section-title">📁 Projects</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Create projects from <b>+ New Project</b> in the sidebar</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Click a project name to view only its tasks and notes</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Tasks, notes, and meetings can each be linked to a project</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Press ⋯ on a project to edit, delete, or export its report</span></div>
         </div>
 
         <!-- Hashtags -->
         <div class="help-section">
-          <div class="help-section-title"># الهاشتاق — Hashtags</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>اكتب <b>#كلمة</b> في عنوان أو ملاحظات المهمة لإضافة هاشتاق تلقائيًا</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>تظهر الهاشتاقات في الـ Sidebar، اضغط عليها لعرض المهام المرتبطة</span></div>
+          <div class="help-section-title"># Hashtags</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Type <b>#word</b> in a task title or notes to auto-create a hashtag</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Hashtags appear in the sidebar — click one to filter all related tasks</span></div>
         </div>
 
         <!-- Drag & Drop -->
         <div class="help-section">
-          <div class="help-section-title">↕ السحب والإفلات — Drag & Drop</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>استخدم علامة <b>⠿</b> على يسار الكارت للسحب وإعادة الترتيب</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>المهام <span class="help-badge help-badge-urgent">Urgent</span> مقفولة <b>🔒</b> ومش ممكن تتسحب في أي عرض</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>في Kanban اسحب الكارت لعمود ثاني لتغيير حالة المهمة</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>السحب الأول يغير الترتيب لـ Manual تلقائيًا</span></div>
+          <div class="help-section-title">↕ Drag & Drop</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Use the <b>⠿</b> grip on the left of a card to drag and reorder it</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span><span class="help-badge help-badge-urgent">Urgent</span> tasks are locked 🔒 and cannot be dragged in any view</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>In Kanban, drag a card to another column to change its status</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>The first drag automatically switches the sort mode to Manual</span></div>
         </div>
 
         <!-- Reports -->
         <div class="help-section">
-          <div class="help-section-title">📊 التقارير — Reports</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>عرض إحصائيات المهام: المكتملة، الجارية، المتأخرة</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>رسوم بيانية لتوزيع الأولويات والحالات</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>فلتر التقرير حسب المشروع أو الفترة الزمنية</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>اضغط 🖨 لطباعة التقرير أو تحميله PDF</span></div>
+          <div class="help-section-title">📊 Reports</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>View task statistics: completed, in progress, and overdue</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Charts showing priority and status distribution</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Filter the report by project or date range</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Press 🖨 to print or save the report as PDF</span></div>
         </div>
 
         <!-- Incoming -->
         <div class="help-section">
-          <div class="help-section-title">📥 الوارد — Incoming</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>إدارة أوامر الشراء (LPOs) والمستندات الواردة</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>كل وارد مرتبط بمشروع وله حالة تتبع</span></div>
+          <div class="help-section-title">📥 Incoming</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Manage incoming purchase orders (LPOs) and documents</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Each item is linked to a project and has a tracking status</span></div>
         </div>
 
         <!-- Backup -->
         <div class="help-section">
-          <div class="help-section-title">💾 النسخ الاحتياطي — Backup</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>اضغط زر 💾 في الـ Topbar لفتح نافذة النسخ الاحتياطي</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span><b>Export</b> — تحميل كل البيانات كملف JSON على جهازك</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span><b>Import</b> — استعادة البيانات من ملف JSON محفوظ</span></div>
-          <div class="help-tip">⚠️ احرص على عمل Backup بانتظام لحفظ بياناتك</div>
+          <div class="help-section-title">💾 Backup & Restore</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Press the 💾 button in the topbar to open the backup panel</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span><b>Export</b> — Download all your data as a JSON file</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span><b>Import</b> — Restore data from a previously saved JSON file</span></div>
+          <div class="help-tip">⚠️ Back up your data regularly to avoid losing it</div>
         </div>
 
-        <!-- Theme & Settings -->
+        <!-- Settings -->
         <div class="help-section">
-          <div class="help-section-title">⚙️ الإعدادات — Settings</div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>اضغط 🌙/☀️ في الـ Topbar للتبديل بين الوضع الداكن والفاتح</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>من Settings في الـ Sidebar يمكن تغيير اسم المستخدم وإعدادات التطبيق</span></div>
-          <div class="help-item"><span class="help-item-dot">●</span><span>Trash — استعد المهام المحذوفة أو احذفها نهائيًا</span></div>
+          <div class="help-section-title">⚙️ Settings</div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Press 🌙 / ☀️ in the topbar to toggle dark and light mode</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Open Settings from the sidebar to update your display name and preferences</span></div>
+          <div class="help-item"><span class="help-item-dot">●</span><span>Trash — restore deleted tasks or permanently remove them</span></div>
         </div>
 
       </div><!-- end help-grid -->
