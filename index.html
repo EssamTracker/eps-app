@@ -4791,23 +4791,18 @@ function renderKanban(){
       var kOvBadge=kOvDays?'<span style="display:inline-flex;align-items:center;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:700;font-family:monospace;'+(kColor?'background:rgba(0,0,0,.28);color:#fff':'background:'+kOvClr+'1a;color:'+kOvClr+';border:1px solid '+kOvClr+'55')+'">⚠ '+kOvDays+'d late</span>':'';
       var isUrgentCard=t.priority==='urgent'&&t.status!=='done';
       var urgentCls=isUrgentCard?' is-urgent':'';
-      if(currentSort==='manual'){
-        var handle='<div class="kb-drag-handle" oncontextmenu="return false">'+(isUrgentCard?'🔒':'⠿')+'</div>';
-        return '<div class="kb-card'+urgentCls+'" data-id="'+t.id+'" data-col="'+col.id+'" style="display:flex;align-items:stretch;padding:0;'+kBgStyle+'" onclick="openDetail('+t.id+')">'
-          +handle+'<div style="flex:1;padding:10px 12px;min-width:0">'
-          +'<div class="kb-card-title" style="'+kTc+'">'+t.desc+'</div>'
-          +'<div class="kb-card-meta" style="'+kSc+'">'+pri+kOvBadge+due+av+colorDot+'</div>'+moveBtn
-          +'</div></div>';
-      }
-      return '<div class="kb-card'+urgentCls+'" draggable="true" data-id="'+t.id+'" ondragstart="kbDragStart(event)" onclick="openDetail('+t.id+')" style="'+kBgStyle+'">'
+      var handle='<div class="kb-drag-handle" oncontextmenu="return false">'+(isUrgentCard?'🔒':'⠿')+'</div>';
+      return '<div class="kb-card'+urgentCls+'" data-id="'+t.id+'" data-col="'+col.id+'" style="display:flex;align-items:stretch;padding:0;'+kBgStyle+'" onclick="openDetail('+t.id+')">'
+        +handle+'<div style="flex:1;padding:10px 12px;min-width:0">'
         +'<div class="kb-card-title" style="'+kTc+'">'+t.desc+'</div>'
-        +'<div class="kb-card-meta" style="'+kSc+'">'+pri+kOvBadge+due+av+colorDot+'</div>'+moveBtn+'</div>';
+        +'<div class="kb-card-meta" style="'+kSc+'">'+pri+kOvBadge+due+av+colorDot+'</div>'+moveBtn
+        +'</div></div>';
     }).join('');
     return '<div class="kb-col" data-status="'+col.id+'" ondragover="kbDragOver(event)" ondrop="kbDrop(event)" ondragleave="kbDragLeave(event)">'
       +'<div class="kb-col-header"><span class="kb-col-title" style="color:'+col.color+'">'+col.label+'</span><span class="kb-col-count">'+tasks.length+'</span></div>'
       +cards+'</div>';
   }).join('');
-  if(currentSort==='manual')attachKanbanDrag();
+  attachKanbanDrag();
 }
 function kbDragStart(e){
   var card=e.currentTarget;
@@ -4841,6 +4836,10 @@ function attachKanbanDrag(){
     if(!card)return;
     if(card.classList.contains('is-urgent'))return; // urgent locked
     function startDrag(clientY){
+      if(currentSort!=='manual'){
+        currentSort='manual';
+        var ss=document.querySelector('.sort-select');if(ss)ss.value='manual';
+      }
       dragging=card;
       card.style.opacity='0.5';
     }
