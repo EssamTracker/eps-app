@@ -1036,6 +1036,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .kb-card[data-dnd-over="top"]{box-shadow:0 -2px 0 0 var(--accent)!important}
 .kb-card[data-dnd-over="bot"]{box-shadow:0 2px 0 0 var(--accent)!important}
 .kb-drag-handle{width:26px;align-self:stretch;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--border);border-radius:8px 0 0 8px;font-size:15px;color:var(--text2);cursor:grab;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;opacity:0.55;flex-shrink:0}
+.kb-card.is-urgent{border:1px solid rgba(255,95,109,0.4)!important;box-shadow:0 0 0 1px rgba(255,95,109,0.1)}
+.kb-card.is-urgent .kb-drag-handle{cursor:default;pointer-events:none;opacity:0.3;font-size:11px}
 .kb-card.dragging{opacity:.4;cursor:grabbing}
 .kb-col.drag-over{border-color:var(--accent);background:var(--bg3)}
 .kb-card-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px;line-height:1.4}
@@ -4768,6 +4770,12 @@ function renderKanban(){
   var list=(typeof getFiltered==='function'?getFiltered():data.tasks.slice()).filter(fbProjectFilter);
   el.innerHTML=cols.map(function(col){
     var tasks=list.filter(function(t){return(t.status||'not-started')===col.id;});
+    // urgent (not done) always first within each column
+    tasks=tasks.slice().sort(function(a,b){
+      var aU=a.priority==='urgent'&&a.status!=='done'?0:1;
+      var bU=b.priority==='urgent'&&b.status!=='done'?0:1;
+      return aU-bU;
+    });
     var cards=tasks.map(function(t){
       var assignee=data.members.find(function(m){return m.id===t.assignee;});
       var due=t.due?'<span class="task-due" style="font-size:10px">🕒 '+new Date(t.due).toLocaleDateString([],{month:'short',day:'numeric'})+'</span>':'';
@@ -4781,15 +4789,17 @@ function renderKanban(){
       var colorDot='<div class="fb-color-dot" style="background:'+(kColor||'var(--bg4)')+';border-color:'+(kColor?'rgba(255,255,255,.4)':'var(--border)')+';width:12px;height:12px;flex-shrink:0;margin-left:4px" onclick="event.stopPropagation();fbColorPicker('+t.id+',this)" title="Color"></div>';
       var kBgStyle=kColor?'background:'+kColor+';border-color:transparent;':'';
       var kOvBadge=kOvDays?'<span style="display:inline-flex;align-items:center;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:700;font-family:monospace;'+(kColor?'background:rgba(0,0,0,.28);color:#fff':'background:'+kOvClr+'1a;color:'+kOvClr+';border:1px solid '+kOvClr+'55')+'">⚠ '+kOvDays+'d late</span>':'';
+      var isUrgentCard=t.priority==='urgent'&&t.status!=='done';
+      var urgentCls=isUrgentCard?' is-urgent':'';
       if(currentSort==='manual'){
-        var handle='<div class="kb-drag-handle" oncontextmenu="return false">⠿</div>';
-        return '<div class="kb-card" data-id="'+t.id+'" data-col="'+col.id+'" style="display:flex;align-items:stretch;padding:0;'+kBgStyle+'" onclick="openDetail('+t.id+')">'
+        var handle='<div class="kb-drag-handle" oncontextmenu="return false">'+(isUrgentCard?'🔒':'⠿')+'</div>';
+        return '<div class="kb-card'+urgentCls+'" data-id="'+t.id+'" data-col="'+col.id+'" style="display:flex;align-items:stretch;padding:0;'+kBgStyle+'" onclick="openDetail('+t.id+')">'
           +handle+'<div style="flex:1;padding:10px 12px;min-width:0">'
           +'<div class="kb-card-title" style="'+kTc+'">'+t.desc+'</div>'
           +'<div class="kb-card-meta" style="'+kSc+'">'+pri+kOvBadge+due+av+colorDot+'</div>'+moveBtn
           +'</div></div>';
       }
-      return '<div class="kb-card" draggable="true" data-id="'+t.id+'" ondragstart="kbDragStart(event)" onclick="openDetail('+t.id+')" style="'+kBgStyle+'">'
+      return '<div class="kb-card'+urgentCls+'" draggable="true" data-id="'+t.id+'" ondragstart="kbDragStart(event)" onclick="openDetail('+t.id+')" style="'+kBgStyle+'">'
         +'<div class="kb-card-title" style="'+kTc+'">'+t.desc+'</div>'
         +'<div class="kb-card-meta" style="'+kSc+'">'+pri+kOvBadge+due+av+colorDot+'</div>'+moveBtn+'</div>';
     }).join('');
@@ -4799,7 +4809,11 @@ function renderKanban(){
   }).join('');
   if(currentSort==='manual')attachKanbanDrag();
 }
-function kbDragStart(e){_dragId=parseInt(e.currentTarget.dataset.id);e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
+function kbDragStart(e){
+  var card=e.currentTarget;
+  if(card.classList.contains('is-urgent')){e.preventDefault();return;}
+  _dragId=parseInt(card.dataset.id);card.classList.add('dragging');e.dataTransfer.effectAllowed='move';
+}
 function kbDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
 function kbDragLeave(e){e.currentTarget.classList.remove('drag-over');}
 function kbDrop(e){
@@ -4825,6 +4839,7 @@ function attachKanbanDrag(){
   board.querySelectorAll('.kb-drag-handle').forEach(function(handle){
     var card=handle.closest('.kb-card');
     if(!card)return;
+    if(card.classList.contains('is-urgent'))return; // urgent locked
     function startDrag(clientY){
       dragging=card;
       card.style.opacity='0.5';
@@ -4852,6 +4867,8 @@ function attachKanbanDrag(){
         el.removeAttribute('data-dnd-over');
       });
       if(target){
+        // block drop before/on an urgent card
+        if(target.classList.contains('is-urgent')&&pos==='top'){dragging=null;renderKanban();return;}
         var moveId=parseInt(dragging.dataset.id);
         var targetId=parseInt(target.dataset.id);
         var col=target.dataset.col||dragging.dataset.col;
