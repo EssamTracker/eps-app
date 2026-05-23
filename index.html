@@ -4843,13 +4843,17 @@ function attachKanbanDrag(){
       dragging=card;
       card.style.opacity='0.5';
     }
-    function moveDrag(clientY){
+    function moveDrag(clientX,clientY){
       if(!dragging)return;
-      // clear all indicators first
       board.querySelectorAll('.kb-card[data-dnd-over]').forEach(function(el){el.removeAttribute('data-dnd-over');});
-      // only consider cards in the same column
-      var col=dragging.dataset.col;
-      var els=Array.from(board.querySelectorAll('.kb-card[data-col="'+col+'"]'));
+      // find which column the cursor is over
+      var overCol=dragging.dataset.col;
+      board.querySelectorAll('.kb-col').forEach(function(col){
+        var r=col.getBoundingClientRect();
+        if(clientX>=r.left&&clientX<=r.right&&clientY>=r.top&&clientY<=r.bottom)overCol=col.dataset.status;
+      });
+      // find closest card in that column
+      var els=Array.from(board.querySelectorAll('.kb-card[data-col="'+overCol+'"]'));
       var closest=null,closestDist=Infinity;
       els.forEach(function(el){
         if(el===dragging)return;
@@ -4862,7 +4866,7 @@ function attachKanbanDrag(){
         closest.setAttribute('data-dnd-over',clientY<r.top+r.height/2?'top':'bot');
       }
     }
-    function endDrag(clientY){
+    function endDrag(clientX,clientY){
       if(!dragging)return;
       dragging.style.opacity='';
       var target=null,pos='bot';
@@ -4872,10 +4876,15 @@ function attachKanbanDrag(){
         el.removeAttribute('data-dnd-over');
       });
       if(target){
-        // block drop before/on an urgent card
         if(target.classList.contains('is-urgent')&&pos==='top'){dragging=null;renderKanban();return;}
         var moveId=parseInt(dragging.dataset.id);
         var targetId=parseInt(target.dataset.id);
+        // change status if dropped in a different column
+        var targetColId=target.dataset.col;
+        if(targetColId&&targetColId!==dragging.dataset.col){
+          var movedTask=data.tasks.find(function(x){return x.id===moveId;});
+          if(movedTask)movedTask.status=targetColId;
+        }
         var mi=data.tasks.findIndex(function(x){return x.id===moveId;});
         var ti=data.tasks.findIndex(function(x){return x.id===targetId;});
         if(mi!==-1&&ti!==-1){
@@ -4885,16 +4894,28 @@ function attachKanbanDrag(){
           data.tasks.splice(ni,0,task);
         }
         save();
+      } else {
+        // dropped on empty column — find which column
+        var overCol=null;
+        board.querySelectorAll('.kb-col').forEach(function(col){
+          var r=col.getBoundingClientRect();
+          if(clientX>=r.left&&clientX<=r.right&&clientY>=r.top&&clientY<=r.bottom)overCol=col.dataset.status;
+        });
+        if(overCol&&overCol!==dragging.dataset.col){
+          var moveId=parseInt(dragging.dataset.id);
+          var movedTask=data.tasks.find(function(x){return x.id===moveId;});
+          if(movedTask){movedTask.status=overCol;save();}
+        }
       }
       dragging=null;
       renderKanban();
     }
     handle.addEventListener('mousedown',function(e){e.preventDefault();startDrag(e.clientY);});
     handle.addEventListener('touchstart',function(e){e.preventDefault();startDrag(e.touches[0].clientY);},{passive:false});
-    document.addEventListener('mousemove',function(e){moveDrag(e.clientY);});
-    document.addEventListener('touchmove',function(e){if(dragging)moveDrag(e.touches[0].clientY);},{passive:true});
-    document.addEventListener('mouseup',function(e){endDrag(e.clientY);});
-    document.addEventListener('touchend',function(e){endDrag(e.changedTouches[0].clientY);});
+    document.addEventListener('mousemove',function(e){moveDrag(e.clientX,e.clientY);});
+    document.addEventListener('touchmove',function(e){if(dragging)moveDrag(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+    document.addEventListener('mouseup',function(e){endDrag(e.clientX,e.clientY);});
+    document.addEventListener('touchend',function(e){endDrag(e.changedTouches[0].clientX,e.changedTouches[0].clientY);});
   });
 }
 
