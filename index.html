@@ -3960,6 +3960,8 @@ window.rptPrint=function(section){
   const _old=window.showView;
   window.showView=function(v,el){
     if(typeof _old==='function') _old(v,el);
+    const rptEl=document.getElementById('view-reports');
+    if(rptEl) rptEl.style.display=(v==='reports')?'block':'none';
     if(v==='reports') setTimeout(function(){window.renderReports();},50);
   };
 })();
