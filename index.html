@@ -2990,9 +2990,57 @@ async function renderAdmin(){
 function openAppSettings(el){
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   if(el)el.classList.add('active');
-  showView('today',null);
-  if(typeof window.dsShowSettings==='function')window.dsShowSettings();
-  else alert('Settings will be available after the app finishes loading.');
+  // Populate and open settings modal
+  var m=document.getElementById('app-settings-modal');
+  if(!m)return;
+  // Display name
+  var dn=document.getElementById('settings-display-name');
+  if(dn)dn.value=authDisplayName(currentAuthUser)||'';
+  // Email (read-only)
+  var em=document.getElementById('settings-email');
+  if(em)em.value=currentAuthUser?.email||'—';
+  // Max tasks
+  var mx=document.getElementById('settings-max-tasks');
+  if(mx)mx.value=data.maxTodayTasks||6;
+  // Theme
+  var th=document.getElementById('settings-theme');
+  if(th)th.value=window.appTheme||'dark';
+  // Version
+  var vr=document.getElementById('settings-version');
+  if(vr)vr.textContent='Essam Tracker · Beta 10';
+  m.classList.add('show');
+}
+function closeAppSettings(){
+  var m=document.getElementById('app-settings-modal');
+  if(m)m.classList.remove('show');
+}
+async function saveAppSettings(){
+  // Display name update via Supabase auth metadata
+  var newName=document.getElementById('settings-display-name')?.value.trim();
+  if(newName&&currentAuthUser&&supabaseClient){
+    await supabaseClient.auth.updateUser({data:{display_name:newName}});
+    if(currentAuthUser.user_metadata)currentAuthUser.user_metadata.display_name=newName;
+    updateUserCard();
+  }
+  // Max tasks
+  var mx=parseInt(document.getElementById('settings-max-tasks')?.value)||6;
+  data.maxTodayTasks=Math.max(1,mx);
+  // Theme
+  var th=document.getElementById('settings-theme')?.value||'dark';
+  var isLight=th==='light';
+  document.body.classList.toggle('light-mode',isLight);
+  window.appTheme=th;
+  // Update theme toggle button label
+  var tBtn=document.getElementById('theme-toggle');
+  if(tBtn)tBtn.textContent=isLight?'🌙':'☀️';
+  save();
+  closeAppSettings();
+  // Toast
+  var _t=document.createElement('div');
+  _t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 22px;border-radius:24px;font-size:13px;font-weight:600;z-index:600;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+  _t.textContent='✓ Settings saved';
+  document.body.appendChild(_t);
+  setTimeout(function(){_t.remove();},2500);
 }
 
 
@@ -3173,6 +3221,75 @@ document.body.insertAdjacentHTML('beforeend',`
 </div>
 `);
 
+
+// ---- SETTINGS MODAL ----
+document.body.insertAdjacentHTML('beforeend',`
+<div class="modal-overlay" id="app-settings-modal" onclick="if(event.target===this)closeAppSettings()">
+  <div class="modal" style="width:460px;max-height:90vh;overflow-y:auto">
+    <div class="modal-title">⚙️ Settings</div>
+
+    <div style="display:flex;flex-direction:column;gap:20px">
+
+      <!-- Profile -->
+      <div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">👤 Profile</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Display Name</label>
+            <input id="settings-display-name" class="form-input" type="text" placeholder="Your name" style="width:100%;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Email</label>
+            <input id="settings-email" class="form-input" type="text" disabled style="width:100%;box-sizing:border-box;opacity:0.6;cursor:default">
+          </div>
+        </div>
+      </div>
+
+      <!-- Appearance -->
+      <div style="border-top:1px solid var(--border);padding-top:16px">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">🎨 Appearance</div>
+        <div>
+          <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Theme</label>
+          <select id="settings-theme" class="form-input" style="width:100%;box-sizing:border-box">
+            <option value="dark">🌙 Dark</option>
+            <option value="light">☀️ Light</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Today's Focus -->
+      <div style="border-top:1px solid var(--border);padding-top:16px">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">☀️ Today's Focus</div>
+        <div>
+          <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Max tasks per day</label>
+          <input id="settings-max-tasks" class="form-input" type="number" min="1" max="20" style="width:100px">
+          <span style="font-size:12px;color:var(--text3);margin-left:8px">tasks shown in Today's Focus</span>
+        </div>
+      </div>
+
+      <!-- Data -->
+      <div style="border-top:1px solid var(--border);padding-top:16px">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">💾 Data</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-ghost" onclick="closeAppSettings();updateLastBackupDate();openModal('backup-modal')" style="font-size:12px">💾 Backup & Restore</button>
+        </div>
+      </div>
+
+      <!-- About -->
+      <div style="border-top:1px solid var(--border);padding-top:16px">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:600">ℹ️ About</div>
+        <div id="settings-version" style="font-size:12px;color:var(--text3)">Essam Tracker · Beta 10</div>
+      </div>
+
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAppSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAppSettings()">Save Changes</button>
+    </div>
+  </div>
+</div>
+`);
 
 // ---- BACKUP BUTTON in topbar ----
 const topbar = document.querySelector('.topbar-actions');
