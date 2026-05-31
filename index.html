@@ -2751,6 +2751,9 @@ const DAILY_QUOTES=[
 function renderDailyQuote(){
   var el=document.getElementById('daily-quote');
   if(!el)return;
+  // Only show when Today's Focus view is active
+  var todayView=document.getElementById('view-today');
+  if(!todayView||todayView.style.display==='none'){el.style.display='none';return;}
   var now=new Date();
   var start=new Date(now.getFullYear(),0,0);
   var dayOfYear=Math.floor((now-start)/(1000*60*60*24));
@@ -6625,11 +6628,12 @@ window._gSearch=function(q){
   }
   h+='</div>';
 
+  hideDailyQuote();
   var ov=document.getElementById('gs-overlay');
   if(!ov){
     ov=document.createElement('div');
     ov.id='gs-overlay';
-    ov.style.cssText='position:fixed;top:55px;left:0;right:0;bottom:0;z-index:250;overflow-y:auto;padding:20px;background:var(--bg1)';
+    ov.style.cssText='position:fixed;top:55px;left:220px;right:0;bottom:0;z-index:250;overflow-y:auto;padding:24px 32px;background:var(--bg)';
     document.body.appendChild(ov);
   }
   ov.innerHTML=h;
