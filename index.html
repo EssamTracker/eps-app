@@ -1197,8 +1197,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <!-- TODAY -->
     <div id="view-today" style="display:none">
       <div style="font-size:11px;color:var(--text3);margin-bottom:4px;font-family:'Space Mono',monospace" id="today-full-date"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div style="font-size:13px;color:var(--text2)">Tasks you chose to focus on today</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:12px">
+        <div style="font-size:13px;color:var(--text2);white-space:nowrap">Tasks you chose to focus on today</div>
+        <div id="daily-quote" style="font-size:11.5px;color:var(--accent);font-style:italic;text-align:right;opacity:0.85;max-width:340px;line-height:1.4"></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <button class="btn btn-sm" onclick="smartFillToday()" style="background:linear-gradient(135deg,var(--accent),#4da6ff);color:#fff;border:none;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer" title="Auto-select the most important tasks">✨ Smart Fill</button>
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)">
@@ -2720,6 +2723,44 @@ function taskCard(t){
 
 function isTodayDate(d){return d&&new Date(d).toDateString()===new Date().toDateString();}
 
+const DAILY_QUOTES=[
+  'The secret of getting ahead is getting started.',
+  'It always seems impossible until it is done.',
+  'Don\'t watch the clock; do what it does — keep going.',
+  'Success is the sum of small efforts repeated day in and day out.',
+  'Focus on being productive instead of busy.',
+  'You don\'t have to be great to start, but you have to start to be great.',
+  'Dream big. Start small. Act now.',
+  'A year from now you may wish you had started today.',
+  'Do something today that your future self will thank you for.',
+  'The way to get started is to quit talking and begin doing.',
+  'Hard work beats talent when talent doesn\'t work hard.',
+  'Push yourself, because no one else is going to do it for you.',
+  'Great things never come from comfort zones.',
+  'Small progress is still progress.',
+  'Believe you can and you\'re halfway there.',
+  'Work hard in silence, let success make the noise.',
+  'One day or day one — you decide.',
+  'Discipline is choosing between what you want now and what you want most.',
+  'Excellence is not a destination but a continuous journey.',
+  'Make each day your masterpiece.',
+  'The harder you work, the luckier you get.',
+  'Your only limit is your mind.',
+  'Stay focused and never give up.',
+  'Big goals are achieved one small step at a time.',
+  'Today\'s preparation determines tomorrow\'s achievement.'
+];
+function renderDailyQuote(){
+  var el=document.getElementById('daily-quote');
+  if(!el)return;
+  // Pick quote based on day-of-year so it changes daily but is consistent within the day
+  var now=new Date();
+  var start=new Date(now.getFullYear(),0,0);
+  var diff=now-start;
+  var dayOfYear=Math.floor(diff/(1000*60*60*24));
+  var q=DAILY_QUOTES[dayOfYear%DAILY_QUOTES.length];
+  el.textContent='"'+q+'"';
+}
 function smartFillToday(){
   const max=data.maxTodayTasks||6;
   const PRIO={urgent:0,high:1,medium:2,low:3};
@@ -2750,6 +2791,7 @@ function smartFillToday(){
 }
 
 function renderToday(){
+  renderDailyQuote();
   const maxToday=data.maxTodayTasks||6;
   const PRIO={'urgent':0,'high':1,'medium':2,'low':3};
   // All manually pinned tasks (for progress tracking, includes done)
