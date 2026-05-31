@@ -1921,7 +1921,8 @@ function cloudSettingsPayload(){
     notifications:data.notifications||[],
     dailySettings:window.ds||null,
     appTheme:window.appTheme||'dark',
-    lastBackupAt:window.lastBackupAt||''
+    lastBackupAt:window.lastBackupAt||'',
+    colorScheme:window.colorScheme||'purple'
   };
 }
 function applyCloudSettings(settings){
@@ -1933,6 +1934,7 @@ function applyCloudSettings(settings){
     window.__pendingDailySettings=settings.dailySettings;
     if(window.ds&&typeof window.ds==='object')Object.assign(window.ds,settings.dailySettings);
   }
+  if(settings.colorScheme)applyColorScheme(settings.colorScheme);
   if(settings.appTheme){
     window.appTheme=settings.appTheme;
     document.body.classList.toggle('light-mode',settings.appTheme==='light');
@@ -2988,6 +2990,28 @@ async function renderAdmin(){
   }
 }
 
+const COLOR_SCHEMES={
+  purple: {accent:'#6c63ff',accent2:'#8b84ff',label:'Purple'},
+  blue:   {accent:'#3b82f6',accent2:'#60a5fa',label:'Blue'},
+  teal:   {accent:'#14b8a6',accent2:'#2dd4bf',label:'Teal'},
+  green:  {accent:'#22c55e',accent2:'#4ade80',label:'Green'},
+  orange: {accent:'#f97316',accent2:'#fb923c',label:'Orange'},
+  red:    {accent:'#ef4444',accent2:'#f87171',label:'Red'},
+  pink:   {accent:'#ec4899',accent2:'#f472b6',label:'Pink'},
+  gold:   {accent:'#eab308',accent2:'#facc15',label:'Gold'}
+};
+window.colorScheme='purple';
+function applyColorScheme(name){
+  var s=COLOR_SCHEMES[name]||COLOR_SCHEMES.purple;
+  window.colorScheme=name;
+  document.documentElement.style.setProperty('--accent',s.accent);
+  document.documentElement.style.setProperty('--accent2',s.accent2);
+  // update scheme selector active state if open
+  document.querySelectorAll('.color-scheme-dot').forEach(function(d){
+    d.style.outline=d.dataset.scheme===name?'2px solid #fff':'none';
+    d.style.outlineOffset='2px';
+  });
+}
 function openAppSettings(el){
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   if(el)el.classList.add('active');
@@ -3017,6 +3041,8 @@ function openAppSettings(el){
   if(dd)dd.checked=!!es.dailyDigest;
   var oa=document.getElementById('settings-overdue-alerts');
   if(oa)oa.checked=!!es.overdueAlerts;
+  // Color scheme active state
+  applyColorScheme(window.colorScheme||'purple');
   m.classList.add('show');
 }
 function closeAppSettings(){
@@ -3119,6 +3145,7 @@ async function saveAppSettings(){
   // Update theme toggle button label
   var tBtn=document.getElementById('theme-toggle');
   if(tBtn)tBtn.textContent=isLight?'🌙':'☀️';
+  // Color scheme is already applied live — just persist via save()
   // Email settings
   if(!data.emailSettings)data.emailSettings={};
   var ne=document.getElementById('settings-notif-email')?.value.trim();
@@ -3349,6 +3376,22 @@ document.body.insertAdjacentHTML('beforeend',`
             <option value="light">☀️ Light</option>
           </select>
         </div>
+      </div>
+
+      <!-- Color Scheme -->
+      <div style="border-top:1px solid var(--border);padding-top:16px">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;font-weight:600">🎨 Color Scheme</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <div class="color-scheme-dot" data-scheme="purple"  onclick="applyColorScheme('purple')"  title="Purple"  style="width:28px;height:28px;border-radius:50%;background:#6c63ff;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'"></div>
+          <div class="color-scheme-dot" data-scheme="blue"    onclick="applyColorScheme('blue')"    title="Blue"    style="width:28px;height:28px;border-radius:50%;background:#3b82f6;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'"></div>
+          <div class="color-scheme-dot" data-scheme="teal"    onclick="applyColorScheme('teal')"    title="Teal"    style="width:28px;height:28px;border-radius:50%;background:#14b8a6;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'"></div>
+          <div class="color-scheme-dot" data-scheme="green"   onclick="applyColorScheme('green')"   title="Green"   style="width:28px;height:28px;border-radius:50%;background:#22c55e;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'"></div>
+          <div class="color-scheme-dot" data-scheme="orange"  onclick="applyColorScheme('orange')"  title="Orange"  style="width:28px;height:28px;border-radius:50%;background:#f97316;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'"></div>
+          <div class="color-scheme-dot" data-scheme="red"     onclick="applyColorScheme('red')"     title="Red"     style="width:28px;height:28px;border-radius:50%;background:#ef4444;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'"></div>
+          <div class="color-scheme-dot" data-scheme="pink"    onclick="applyColorScheme('pink')"    title="Pink"    style="width:28px;height:28px;border-radius:50%;background:#ec4899;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'"></div>
+          <div class="color-scheme-dot" data-scheme="gold"    onclick="applyColorScheme('gold')"    title="Gold"    style="width:28px;height:28px;border-radius:50%;background:#eab308;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'"></div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:8px">Changes apply instantly — save to keep your choice</div>
       </div>
 
       <!-- Today's Focus -->
