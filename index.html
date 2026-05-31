@@ -1702,7 +1702,7 @@ const STATUS_ORDER={'not-started':0,'in-progress':1,done:2};
 const TYPE_CLASSES={Supplier:'type-supplier',Contractor:'type-contractor','Service Provider':'type-service',Consultant:'type-consultant'};
 const DEFAULT_SPECIALTIES=['IT Equipment','Furniture','Office Supplies','Construction','Electrical','Plumbing','HVAC','Glass & Glazing','Security Systems','Cleaning Services','Catering','Printing','Vehicles & Transport','Civil Works','Steel & Metal','Flooring','Painting','Landscaping','Medical Supplies','Stationery'];
 
-let data={tasks:[],notes:[],meetings:[],projects:[],members:[],contacts:[],specialties:[...DEFAULT_SPECIALTIES],trash:[],notifications:[],maxTodayTasks:6};
+let data={tasks:[],notes:[],meetings:[],projects:[],members:[],contacts:[],specialties:[...DEFAULT_SPECIALTIES],trash:[],notifications:[],maxTodayTasks:6,emailSettings:{notifEmail:'',dailyDigest:false,overdueAlerts:false,lastDigestDate:''}};
 let filters={status:'all',priority:null,assignee:null};
 let contactFilters={type:'all',specialty:'',rating:'all',preferred:false};
 let memberFilter=null;
@@ -2061,6 +2061,7 @@ async function load(){
   if(el)el.textContent=new Date().toLocaleDateString([],{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   render();
   addCloudImportButton();
+  setTimeout(checkDailyDigest,2000);
 }
 function save(){persistData();}
 function addNotification(text){
@@ -3008,11 +3009,96 @@ function openAppSettings(el){
   // Version
   var vr=document.getElementById('settings-version');
   if(vr)vr.textContent='Essam Tracker · Beta 10';
+  // Email settings
+  var es=data.emailSettings||{};
+  var ne=document.getElementById('settings-notif-email');
+  if(ne)ne.value=es.notifEmail||currentAuthUser?.email||'';
+  var dd=document.getElementById('settings-daily-digest');
+  if(dd)dd.checked=!!es.dailyDigest;
+  var oa=document.getElementById('settings-overdue-alerts');
+  if(oa)oa.checked=!!es.overdueAlerts;
   m.classList.add('show');
 }
 function closeAppSettings(){
   var m=document.getElementById('app-settings-modal');
   if(m)m.classList.remove('show');
+}
+function buildTodayDigestText(){
+  var PRIO={urgent:'🔴',high:'🟠',medium:'🟡',low:'🟢'};
+  var today=new Date();
+  var dateStr=today.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var pinned=data.tasks.filter(function(t){return t.pinToday&&t.status!=='done';});
+  var done=data.tasks.filter(function(t){return t.pinToday&&t.status==='done';});
+  var startOfToday=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  var overdue=data.tasks.filter(function(t){return t.due&&new Date(t.due)<startOfToday&&t.status!=='done'&&!t.pinToday;});
+  var meetings=typeof getMeetingsForDate==='function'?getMeetingsForDate(today):[];
+  var body='📋 Today\'s Focus — '+dateStr+'\n\n';
+  if(pinned.length){
+    body+='☀️ TODAY\'S TASKS ('+pinned.length+')\n';
+    pinned.forEach(function(t){body+=(PRIO[t.priority]||'●')+' '+t.title+' ['+t.status+']\n';});
+    body+='\n';
+  }
+  if(done.length){
+    body+='✅ COMPLETED ('+done.length+')\n';
+    done.forEach(function(t){body+='✓ '+t.title+'\n';});
+    body+='\n';
+  }
+  if(overdue.length){
+    body+='⚠️ OVERDUE ('+overdue.length+')\n';
+    overdue.forEach(function(t){body+='• '+t.title+' [due: '+t.due+']\n';});
+    body+='\n';
+  }
+  if(meetings.length){
+    body+='📅 MEETINGS TODAY ('+meetings.length+')\n';
+    meetings.forEach(function(m){body+='• '+m.title+(m.time?' at '+m.time:'')+'\n';});
+  }
+  body+='\n— Essam Tracker';
+  return body;
+}
+function sendDigestEmail(){
+  if(!data.emailSettings)data.emailSettings={};
+  var to=data.emailSettings.notifEmail||currentAuthUser?.email||'';
+  var subject='📋 Today\'s Focus — '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  var body=buildTodayDigestText();
+  window.open('mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body));
+  data.emailSettings.lastDigestDate=new Date().toDateString();
+  save();
+}
+function sendOverdueAlertEmail(){
+  if(!data.emailSettings)data.emailSettings={};
+  var to=data.emailSettings.notifEmail||currentAuthUser?.email||'';
+  var startOfToday=new Date();startOfToday.setHours(0,0,0,0);
+  var overdue=data.tasks.filter(function(t){return t.due&&new Date(t.due)<startOfToday&&t.status!=='done';});
+  if(!overdue.length){
+    var _t=document.createElement('div');
+    _t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 22px;border-radius:24px;font-size:13px;font-weight:600;z-index:600;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+    _t.textContent='✓ No overdue tasks!';
+    document.body.appendChild(_t);setTimeout(function(){_t.remove();},2500);
+    return;
+  }
+  var subject='⚠️ '+overdue.length+' Overdue Task'+(overdue.length>1?'s':'')+' — Essam Tracker';
+  var body='⚠️ You have '+overdue.length+' overdue task'+(overdue.length>1?'s':'')+':\n\n';
+  overdue.forEach(function(t){body+='• '+t.title+'\n  Priority: '+t.priority+' | Due: '+t.due+'\n\n';});
+  body+='— Essam Tracker';
+  window.open('mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body));
+}
+async function changeAccountEmail(){
+  var newEmail=prompt('Enter new email address:');
+  if(!newEmail||!newEmail.includes('@'))return;
+  if(!supabaseClient){alert('Not connected.');return;}
+  var res=await supabaseClient.auth.updateUser({email:newEmail});
+  if(res.error){alert('Error: '+res.error.message);}
+  else{alert('✅ Confirmation link sent to '+newEmail+'. Click it to confirm the change.');}
+}
+function checkDailyDigest(){
+  if(!data.emailSettings||!data.emailSettings.dailyDigest)return;
+  var today=new Date().toDateString();
+  if(data.emailSettings.lastDigestDate===today)return;
+  var banner=document.createElement('div');
+  banner.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:16px;font-size:13px;font-weight:500;z-index:600;box-shadow:0 4px 20px rgba(0,0,0,.3);display:flex;align-items:center;gap:12px';
+  banner.innerHTML='📧 Daily digest ready &nbsp;<button onclick="sendDigestEmail();this.closest(\'div\').remove()" style="background:var(--accent);color:#fff;border:none;padding:4px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">Send</button>&nbsp;<button onclick="this.closest(\'div\').remove()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:18px;line-height:1;padding:0 4px">✕</button>';
+  document.body.appendChild(banner);
+  setTimeout(function(){if(banner.parentElement)banner.remove();},15000);
 }
 async function saveAppSettings(){
   // Display name update via Supabase auth metadata
@@ -3033,6 +3119,14 @@ async function saveAppSettings(){
   // Update theme toggle button label
   var tBtn=document.getElementById('theme-toggle');
   if(tBtn)tBtn.textContent=isLight?'🌙':'☀️';
+  // Email settings
+  if(!data.emailSettings)data.emailSettings={};
+  var ne=document.getElementById('settings-notif-email')?.value.trim();
+  if(ne!==undefined)data.emailSettings.notifEmail=ne;
+  var dd=document.getElementById('settings-daily-digest');
+  if(dd)data.emailSettings.dailyDigest=dd.checked;
+  var oa=document.getElementById('settings-overdue-alerts');
+  if(oa)data.emailSettings.overdueAlerts=oa.checked;
   save();
   closeAppSettings();
   // Toast
@@ -3272,6 +3366,48 @@ document.body.insertAdjacentHTML('beforeend',`
         <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600">💾 Data</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn btn-ghost" onclick="closeAppSettings();updateLastBackupDate();openModal('backup-modal')" style="font-size:12px">💾 Backup & Restore</button>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div style="border-top:1px solid var(--border);padding-top:16px">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;font-weight:600">📧 Email</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+
+          <div>
+            <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Notification Email</label>
+            <input id="settings-notif-email" class="form-input" type="email" placeholder="your@email.com" style="width:100%;box-sizing:border-box">
+            <div style="font-size:11px;color:var(--text3);margin-top:3px">Reports & alerts will be sent to this address</div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);padding:10px 14px;border-radius:10px">
+            <div>
+              <div style="font-size:13px;color:var(--text);font-weight:500">Daily Digest</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px">Morning summary of today's tasks</div>
+            </div>
+            <label style="position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0">
+              <input id="settings-daily-digest" type="checkbox" style="opacity:0;width:0;height:0">
+              <span onclick="var cb=document.getElementById('settings-daily-digest');cb.checked=!cb.checked" style="position:absolute;cursor:pointer;inset:0;background:var(--border);border-radius:22px;transition:.2s"></span>
+            </label>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);padding:10px 14px;border-radius:10px">
+            <div>
+              <div style="font-size:13px;color:var(--text);font-weight:500">Overdue Alerts</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px">Get notified about late tasks</div>
+            </div>
+            <label style="position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0">
+              <input id="settings-overdue-alerts" type="checkbox" style="opacity:0;width:0;height:0">
+              <span onclick="var cb=document.getElementById('settings-overdue-alerts');cb.checked=!cb.checked" style="position:absolute;cursor:pointer;inset:0;background:var(--border);border-radius:22px;transition:.2s"></span>
+            </label>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost" onclick="sendDigestEmail()" style="font-size:12px">📧 Send Today's Digest</button>
+            <button class="btn btn-ghost" onclick="sendOverdueAlertEmail()" style="font-size:12px">⚠️ Send Overdue Alert</button>
+            <button class="btn btn-ghost" onclick="changeAccountEmail()" style="font-size:12px">✏️ Change Account Email</button>
+          </div>
+
         </div>
       </div>
 
