@@ -1179,6 +1179,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="topbar">
     <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Menu">☰</button>
     <div class="page-title" id="page-title">All Tasks</div>
+    <div id="daily-quote" style="font-size:11.5px;color:var(--accent);font-style:italic;opacity:0.85;flex:1;text-align:center;padding:0 12px;display:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
     <div class="topbar-actions">
     <button class="btn btn-ghost btn-sm" id="project-export-btn" onclick="exportCurrentProjectReport()" style="display:none">📤 Export Project</button>
       <div class="search-box">
@@ -1197,10 +1198,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <!-- TODAY -->
     <div id="view-today" style="display:none">
       <div style="font-size:11px;color:var(--text3);margin-bottom:4px;font-family:'Space Mono',monospace" id="today-full-date"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:12px">
-        <div style="font-size:13px;color:var(--text2);white-space:nowrap">Tasks you chose to focus on today</div>
-        <div id="daily-quote" style="font-size:11.5px;color:var(--accent);font-style:italic;text-align:right;opacity:0.85;max-width:340px;line-height:1.4"></div>
-      </div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">Tasks you chose to focus on today</div>
       <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <button class="btn btn-sm" onclick="smartFillToday()" style="background:linear-gradient(135deg,var(--accent),#4da6ff);color:#fff;border:none;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer" title="Auto-select the most important tasks">✨ Smart Fill</button>
@@ -2753,13 +2751,16 @@ const DAILY_QUOTES=[
 function renderDailyQuote(){
   var el=document.getElementById('daily-quote');
   if(!el)return;
-  // Pick quote based on day-of-year so it changes daily but is consistent within the day
   var now=new Date();
   var start=new Date(now.getFullYear(),0,0);
-  var diff=now-start;
-  var dayOfYear=Math.floor(diff/(1000*60*60*24));
+  var dayOfYear=Math.floor((now-start)/(1000*60*60*24));
   var q=DAILY_QUOTES[dayOfYear%DAILY_QUOTES.length];
   el.textContent='"'+q+'"';
+  el.style.display='block';
+}
+function hideDailyQuote(){
+  var el=document.getElementById('daily-quote');
+  if(el)el.style.display='none';
 }
 function smartFillToday(){
   const max=data.maxTodayTasks||6;
@@ -2987,7 +2988,7 @@ function showView(v,el){
     if(el){clearProjectFilter();document.getElementById('page-title').textContent='All Tasks';}
     renderTasks();
   }
-  if(v==='today')renderToday();
+  if(v==='today'){renderToday();}else{hideDailyQuote();}
   if(v==='notes')renderNotes();
   if(v==='meetings')renderMeetings();
   if(v==='team')renderTeam();
