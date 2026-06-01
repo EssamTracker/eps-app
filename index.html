@@ -2486,16 +2486,16 @@ function togglePin(id,e){
   var dlg=document.createElement('div');
   dlg.style.cssText='position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px)';
   dlg.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;width:min(400px,92vw);box-shadow:0 24px 64px rgba(0,0,0,0.5)">'
-    +'<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)">☀️ القائمة ممتلئة</div>'
-    +'<div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:20px">عندك <b style="color:var(--text)">'+max+'</b> تاسك في Today\'s Focus (الحد الأقصى).<br>إيه اللي عاوز تعمله؟</div>'
+    +'<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)">☀️ Today\'s List is Full</div>'
+    +'<div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:20px">You already have <b style="color:var(--text)">'+max+'</b> tasks in Today\'s Focus (max).<br>What would you like to do?</div>'
     +(weakest?'<button id="_pdSwap" style="width:100%;padding:11px 16px;margin-bottom:10px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">'
       +'<span style="font-size:16px">🔄</span>'
-      +'<span>شيل الأقل أهمية وضيف الجديد<br><span style="font-size:11px;font-weight:400;opacity:0.85">هيتشال: "'+weakName.slice(0,38)+(weakName.length>38?'…':'')+'"</span></span>'
+      +'<span>Remove least important & add new<br><span style="font-size:11px;font-weight:400;opacity:0.85">Removes: "'+weakName.slice(0,38)+(weakName.length>38?'…':'')+'"</span></span>'
       +'</button>':'')
     +'<button id="_pdForce" style="width:100%;padding:11px 16px;margin-bottom:10px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">'
-      +'<span style="font-size:16px">➕</span><span>ضيفه على أي حال (تجاوز الحد للمرة دي بس)</span>'
+      +'<span style="font-size:16px">➕</span><span>Add anyway (exceed limit this once)</span>'
     +'</button>'
-    +'<button id="_pdCancel" style="width:100%;padding:9px 16px;background:transparent;color:var(--text3);border:none;border-radius:10px;font-size:12px;cursor:pointer">إلغاء</button>'
+    +'<button id="_pdCancel" style="width:100%;padding:9px 16px;background:transparent;color:var(--text3);border:none;border-radius:10px;font-size:12px;cursor:pointer">Cancel</button>'
     +'</div>';
   document.body.appendChild(dlg);
   function _close(){dlg.remove();}
