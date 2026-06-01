@@ -6225,14 +6225,9 @@ function attachFreeBoardDrag(){
     _stmRender();
   };
 
-  window._stmMailto=function(taskId){
+  function _buildMailto(taskId,toEmail){
     var task=_tasks().find(function(t){return t.id===taskId;});
-    if(!task)return;
-    var emEl=document.getElementById('stm-em');
-    var toEmail=emEl?emEl.value.trim():'';
-    var recips=window._stmRecipients||[];
-    if(!toEmail&&recips.length)toEmail=recips.map(function(r){return r.email;}).join(',');
-
+    if(!task)return'';
     var prio=(task.priority||'normal').charAt(0).toUpperCase()+(task.priority||'normal').slice(1);
     var due=task.due?'Due: '+task.due+'\n':'';
     var proj='';
@@ -6243,9 +6238,22 @@ function attachFreeBoardDrag(){
     var notes=task.notes?'\nNotes:\n'+task.notes:'';
     var body='Task: '+task.desc+'\nPriority: '+prio+'\n'+due+proj+'Status: '+(task.status||'todo')+notes+'\n\n-- Sent from EPS App';
     var subject='Task: '+task.desc.slice(0,60)+(task.desc.length>60?'...':'');
-    var mailto='mailto:'+encodeURIComponent(toEmail)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+    return 'mailto:'+encodeURIComponent(toEmail||'')+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+  }
+  window._stmMailto=function(taskId){
+    var emEl=document.getElementById('stm-em');
+    var toEmail=emEl?emEl.value.trim():'';
+    var recips=window._stmRecipients||[];
+    if(!toEmail&&recips.length)toEmail=recips.map(function(r){return r.email;}).join(',');
+    var mailto=_buildMailto(taskId,toEmail);
+    if(!mailto)return;
     window.open(mailto,'_self');
     var stm=document.getElementById('stm');if(stm)stm.remove();
+  };
+  window._stmMailtoFallback=function(taskId,toEmail){
+    var mailto=_buildMailto(taskId,toEmail);
+    if(!mailto)return;
+    window.open(mailto,'_self');
   };
 
   window._doSendTask=async function(taskId){
@@ -6261,7 +6269,7 @@ function attachFreeBoardDrag(){
     var task=_tasks().find(function(t){return t.id===taskId;});
     if(!task)return;
     var modal=document.getElementById('stm');if(modal)modal.remove();
-    var sent=0;
+    var sent=0,failedEmails=[];
     for(var i=0;i<recips.length;i++){
       var rec=recips[i];
       var dup=_sent.find(function(s){return s.original_task_id===String(taskId)&&s.to_email===rec.email&&s.status==='pending';});
@@ -6284,12 +6292,9 @@ function attachFreeBoardDrag(){
       if(!r.error){_sent.push(inv);sent++;}
       else{
         console.warn('send failed:',r.error);
-        var errMsg=r.error.message||'Unknown error';
-        var errToast=document.createElement('div');
-        errToast.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;padding:10px 22px;border-radius:24px;font-size:13px;font-weight:600;z-index:600;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:90vw;text-align:center';
-        errToast.textContent='✗ Failed to send to '+rec.email+': '+errMsg;
-        document.body.appendChild(errToast);
-        setTimeout(function(){errToast.remove();},5000);
+        // Fallback: open mailto with task details
+        window._stmMailtoFallback(taskId,rec.email);
+        failedEmails.push(rec.email);
       }
     }
     window._stmRecipients=[];
