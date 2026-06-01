@@ -6247,14 +6247,23 @@ function attachFreeBoardDrag(){
     if(!toEmail&&recips.length)toEmail=recips.map(function(r){return r.email;}).join(',');
     var mailto=_buildMailto(taskId,toEmail);
     if(!mailto)return;
-    window.open(mailto,'_blank');
+    _openMailto(mailto);
     var stm=document.getElementById('stm');if(stm)stm.remove();
   };
   window._stmMailtoFallback=function(taskId,toEmail){
     var mailto=_buildMailto(taskId,toEmail);
     if(!mailto)return;
-    window.open(mailto,'_blank');
+    _openMailto(mailto);
   };
+  function _openMailto(href){
+    var a=document.createElement('a');
+    a.href=href;
+    a.target='_blank';
+    a.rel='noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
 
   window._doSendTask=async function(taskId){
     var recips=window._stmRecipients||[];
