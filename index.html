@@ -2502,9 +2502,7 @@ function togglePin(id,e){
   dlg.addEventListener('click',function(ev){if(ev.target===dlg)_close();});
   document.getElementById('_pdCancel').onclick=_close;
   document.getElementById('_pdForce').onclick=function(){
-    data.maxTodayTasks=(data.maxTodayTasks||6)+1;
     t.pinToday=true;t.updated=new Date().toISOString();save();
-    var inp=document.getElementById('max-today-input');if(inp)inp.value=data.maxTodayTasks;
     renderToday&&renderToday();renderTasks&&renderTasks();_close();
   };
   var swapEl=document.getElementById('_pdSwap');
@@ -2913,17 +2911,16 @@ function renderToday(){
   // All manually pinned tasks (for progress tracking, includes done)
   const allPinnedManual=data.tasks.filter(t=>t.pinToday);
   const donePinnedManual=allPinnedManual.filter(t=>t.status==='done');
-  // Start with manually pinned tasks (all priorities)
+  // Always show ALL manually pinned non-done tasks
   let pinned=data.tasks.filter(t=>t.pinToday&&t.status!=='done');
-  // Merge in urgent non-done tasks (auto-add)
-  const urgentAuto=data.tasks.filter(t=>t.priority==='urgent'&&t.status!=='done'&&!t.pinToday);
+  // Auto-add urgent tasks only in remaining slots
+  const remainingSlots=Math.max(0,maxToday-pinned.length);
+  const urgentAuto=data.tasks.filter(t=>t.priority==='urgent'&&t.status!=='done'&&!t.pinToday).slice(0,remainingSlots);
   let merged=[...pinned,...urgentAuto];
   // Remove duplicates
   merged=[...new Map(merged.map(t=>[t.id,t])).values()];
-  // Sort by priority so least important is at end
+  // Sort by priority
   merged.sort((a,b)=>(PRIO[a.priority]||2)-(PRIO[b.priority]||2));
-  // If over limit, drop lowest-priority tasks from the end
-  if(merged.length>maxToday) merged=merged.slice(0,maxToday);
   pinned=merged;
   const inp=document.getElementById('max-today-input');
   if(inp)inp.value=maxToday;
