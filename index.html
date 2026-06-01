@@ -2513,7 +2513,29 @@ function togglePin(id,e){
   };
 }
 function toggleTodayDone(id){const t=data.tasks.find(t=>t.id===id);if(t){t.todayDone=!t.todayDone;t.updated=new Date().toISOString();save();}}
-function deleteTask(id,e){e&&e.stopPropagation();const idx=data.tasks.findIndex(t=>t.id===id);if(idx>-1){data.trash.push(data.tasks.splice(idx,1)[0]);if(openTaskId===id)closeDetail();save();}}
+function deleteTask(id,e){
+  e&&e.stopPropagation();
+  const t=data.tasks.find(x=>x.id===id);
+  if(!t)return;
+  var dlg=document.createElement('div');
+  dlg.style.cssText='position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px)';
+  dlg.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;width:min(380px,92vw);box-shadow:0 24px 64px rgba(0,0,0,0.5)">'
+    +'<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)">🗑 Delete Task?</div>'
+    +'<div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:20px">Are you sure you want to delete:<br><b style="color:var(--text)">"'+t.desc.slice(0,60)+(t.desc.length>60?'…':'')+'"</b><br><span style="font-size:11px;color:var(--text3)">It will be moved to Trash and can be restored.</span></div>'
+    +'<div style="display:flex;gap:10px">'
+    +'<button id="_delConfirm" style="flex:1;padding:10px;background:var(--red);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer">Delete</button>'
+    +'<button id="_delCancel" style="flex:1;padding:10px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:13px;cursor:pointer">Cancel</button>'
+    +'</div></div>';
+  document.body.appendChild(dlg);
+  function _close(){dlg.remove();}
+  dlg.addEventListener('click',function(ev){if(ev.target===dlg)_close();});
+  document.getElementById('_delCancel').onclick=_close;
+  document.getElementById('_delConfirm').onclick=function(){
+    const idx=data.tasks.findIndex(x=>x.id===id);
+    if(idx>-1){data.trash.push(data.tasks.splice(idx,1)[0]);if(openTaskId===id)closeDetail();save();}
+    _close();
+  };
+}
 function toggleTask(id,e){e&&e.stopPropagation();const t=data.tasks.find(t=>t.id===id);if(t){t.status=t.status==='done'?'not-started':'done';if(t.status!=='done')t.todayDone=false;t.updated=new Date().toISOString();if(t.status==='done')addNotification('Task completed: '+t.desc);if(openTaskId===id)renderDetailPanel(t);save();}}
 
 function emailTask(id,e){
