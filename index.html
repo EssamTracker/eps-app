@@ -2511,7 +2511,9 @@ function togglePin(id,e){
   document.body.appendChild(dlg);
   window._pinCancel=function(){dlg.remove();};
   window._pinForce=function(){
+    data.maxTodayTasks=(data.maxTodayTasks||6)+1;
     t.pinToday=true;t.updated=new Date().toISOString();save();
+    var inp=document.getElementById('max-today-input');if(inp)inp.value=data.maxTodayTasks;
     renderToday&&renderToday();renderTasks&&renderTasks();dlg.remove();
   };
   window._pinReplace=function(){
