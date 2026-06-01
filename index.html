@@ -6247,13 +6247,13 @@ function attachFreeBoardDrag(){
     if(!toEmail&&recips.length)toEmail=recips.map(function(r){return r.email;}).join(',');
     var mailto=_buildMailto(taskId,toEmail);
     if(!mailto)return;
-    window.open(mailto,'_self');
+    window.open(mailto,'_blank');
     var stm=document.getElementById('stm');if(stm)stm.remove();
   };
   window._stmMailtoFallback=function(taskId,toEmail){
     var mailto=_buildMailto(taskId,toEmail);
     if(!mailto)return;
-    window.open(mailto,'_self');
+    window.open(mailto,'_blank');
   };
 
   window._doSendTask=async function(taskId){
