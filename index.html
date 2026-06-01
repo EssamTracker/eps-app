@@ -2472,56 +2472,24 @@ function togglePin(id,e){
   e&&e.stopPropagation();
   const t=data.tasks.find(t=>t.id===id);
   if(!t)return;
-  // Unpinning — always allowed
   if(t.pinToday){t.pinToday=false;t.updated=new Date().toISOString();save();renderToday&&renderToday();renderTasks&&renderTasks();return;}
-  // Pinning — check if full
   const max=data.maxTodayTasks||6;
   const PRIO={urgent:0,high:1,medium:2,low:3};
   const pinned=data.tasks.filter(x=>x.pinToday&&x.status!=='done');
   if(pinned.length<max){
     t.pinToday=true;t.updated=new Date().toISOString();save();renderToday&&renderToday();renderTasks&&renderTasks();return;
   }
-  // Full — find least important pinned task
+  // Auto-remove least important and pin new one
   const sorted=[...pinned].sort((a,b)=>(PRIO[b.priority]??2)-(PRIO[a.priority]??2));
   const weakest=sorted[0];
-  const weakName=weakest?weakest.desc:'';
-  // Show dialog
-  var dlg=document.createElement('div');
-  dlg.style.cssText='position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px)';
-  dlg.innerHTML=`
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;width:min(400px,92vw);box-shadow:0 24px 64px rgba(0,0,0,0.5)">
-      <div style="font-size:20px;margin-bottom:10px">☀️ Today's List is Full</div>
-      <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:20px">
-        You already have <strong style="color:var(--text)">${max} tasks</strong> pinned for today (your max).<br>
-        What would you like to do?
-      </div>
-      ${weakest?`
-      <button onclick="window._pinReplace()" style="width:100%;padding:11px 16px;margin-bottom:10px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">
-        <span style="font-size:16px">🔄</span>
-        <span>Remove least important & add this<br><span style="font-size:11px;font-weight:400;opacity:0.85">Removes: "${weakName.slice(0,40)}${weakName.length>40?'…':''}"</span></span>
-      </button>`:''}
-      <button onclick="window._pinForce()" style="width:100%;padding:11px 16px;margin-bottom:10px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">
-        <span style="font-size:16px">➕</span>
-        <span>Add anyway (exceed limit this once)</span>
-      </button>
-      <button onclick="window._pinCancel()" style="width:100%;padding:9px 16px;background:transparent;color:var(--text3);border:none;border-radius:10px;font-size:12px;cursor:pointer">
-        Cancel
-      </button>
-    </div>`;
-  document.body.appendChild(dlg);
-  window._pinCancel=function(){dlg.remove();};
-  window._pinForce=function(){
-    data.maxTodayTasks=(data.maxTodayTasks||6)+1;
-    t.pinToday=true;t.updated=new Date().toISOString();save();
-    var inp=document.getElementById('max-today-input');if(inp)inp.value=data.maxTodayTasks;
-    renderToday&&renderToday();renderTasks&&renderTasks();dlg.remove();
-  };
-  window._pinReplace=function(){
-    if(weakest){weakest.pinToday=false;weakest.updated=new Date().toISOString();}
-    t.pinToday=true;t.updated=new Date().toISOString();save();
-    renderToday&&renderToday();renderTasks&&renderTasks();dlg.remove();
-  };
-  dlg.addEventListener('click',function(ev){if(ev.target===dlg)window._pinCancel();});
+  if(weakest){weakest.pinToday=false;weakest.updated=new Date().toISOString();}
+  t.pinToday=true;t.updated=new Date().toISOString();save();
+  renderToday&&renderToday();renderTasks&&renderTasks();
+  // Toast
+  var _t=document.createElement('div');
+  _t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:10px 18px;border-radius:24px;font-size:12px;z-index:600;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap';
+  _t.textContent='☀ Replaced: "'+( weakest?weakest.desc.slice(0,35)+(weakest.desc.length>35?'…':''):''):'')+'"';
+  document.body.appendChild(_t);setTimeout(function(){_t.remove();},3000);
 }
 function toggleTodayDone(id){const t=data.tasks.find(t=>t.id===id);if(t){t.todayDone=!t.todayDone;t.updated=new Date().toISOString();save();}}
 function deleteTask(id,e){e&&e.stopPropagation();const idx=data.tasks.findIndex(t=>t.id===id);if(idx>-1){data.trash.push(data.tasks.splice(idx,1)[0]);if(openTaskId===id)closeDetail();save();}}
