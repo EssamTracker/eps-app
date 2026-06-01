@@ -2479,30 +2479,39 @@ function togglePin(id,e){
   if(pinned.length<max){
     t.pinToday=true;t.updated=new Date().toISOString();save();renderToday&&renderToday();renderTasks&&renderTasks();return;
   }
-  // List full — show non-blocking toast asking user
+  // List full — show choice dialog
   const sorted=[...pinned].sort((a,b)=>(PRIO[b.priority]??2)-(PRIO[a.priority]??2));
   const weakest=sorted[0];
-  const weakName=weakest?weakest.desc.slice(0,32)+(weakest.desc.length>32?'…':''):'';
-  var existing=document.getElementById('pin-full-toast');if(existing)existing.remove();
-  var toast=document.createElement('div');
-  toast.id='pin-full-toast';
-  toast.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:14px 18px;border-radius:16px;font-size:13px;z-index:600;box-shadow:0 8px 32px rgba(0,0,0,.4);display:flex;align-items:center;gap:12px;max-width:92vw';
-  toast.innerHTML='<span style="color:var(--amber)">⚠</span>'
-    +'<span style="color:var(--text2)">القائمة ممتلئة (<b style="color:var(--text)">'+max+'</b> تاسك)</span>'
-    +(weakest?'<button id="pin-swap-btn" style="background:var(--accent);color:#fff;border:none;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">🔄 شيل الأقل أهمية</button>':'')
-    +'<button onclick="document.getElementById(\'pin-full-toast\').remove()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:18px;line-height:1;padding:0 2px">✕</button>';
-  document.body.appendChild(toast);
-  var timer=setTimeout(function(){if(toast.parentElement)toast.remove();},6000);
-  var swapBtn=document.getElementById('pin-swap-btn');
-  if(swapBtn)swapBtn.onclick=function(){
-    clearTimeout(timer);toast.remove();
+  const weakName=weakest?weakest.desc:'';
+  var dlg=document.createElement('div');
+  dlg.style.cssText='position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px)';
+  dlg.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;width:min(400px,92vw);box-shadow:0 24px 64px rgba(0,0,0,0.5)">'
+    +'<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)">☀️ القائمة ممتلئة</div>'
+    +'<div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:20px">عندك <b style="color:var(--text)">'+max+'</b> تاسك في Today\'s Focus (الحد الأقصى).<br>إيه اللي عاوز تعمله؟</div>'
+    +(weakest?'<button id="_pdSwap" style="width:100%;padding:11px 16px;margin-bottom:10px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">'
+      +'<span style="font-size:16px">🔄</span>'
+      +'<span>شيل الأقل أهمية وضيف الجديد<br><span style="font-size:11px;font-weight:400;opacity:0.85">هيتشال: "'+weakName.slice(0,38)+(weakName.length>38?'…':'')+'"</span></span>'
+      +'</button>':'')
+    +'<button id="_pdForce" style="width:100%;padding:11px 16px;margin-bottom:10px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">'
+      +'<span style="font-size:16px">➕</span><span>ضيفه على أي حال (تجاوز الحد للمرة دي بس)</span>'
+    +'</button>'
+    +'<button id="_pdCancel" style="width:100%;padding:9px 16px;background:transparent;color:var(--text3);border:none;border-radius:10px;font-size:12px;cursor:pointer">إلغاء</button>'
+    +'</div>';
+  document.body.appendChild(dlg);
+  function _close(){dlg.remove();}
+  dlg.addEventListener('click',function(ev){if(ev.target===dlg)_close();});
+  document.getElementById('_pdCancel').onclick=_close;
+  document.getElementById('_pdForce').onclick=function(){
+    data.maxTodayTasks=(data.maxTodayTasks||6)+1;
+    t.pinToday=true;t.updated=new Date().toISOString();save();
+    var inp=document.getElementById('max-today-input');if(inp)inp.value=data.maxTodayTasks;
+    renderToday&&renderToday();renderTasks&&renderTasks();_close();
+  };
+  var swapEl=document.getElementById('_pdSwap');
+  if(swapEl)swapEl.onclick=function(){
     if(weakest){weakest.pinToday=false;weakest.updated=new Date().toISOString();}
     t.pinToday=true;t.updated=new Date().toISOString();save();
-    renderToday&&renderToday();renderTasks&&renderTasks();
-    var _c=document.createElement('div');
-    _c.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 20px;border-radius:24px;font-size:12px;font-weight:600;z-index:600;box-shadow:0 4px 20px rgba(0,0,0,.3)';
-    _c.textContent='✓ تم — شيل "'+weakName+'"';
-    document.body.appendChild(_c);setTimeout(function(){_c.remove();},2500);
+    renderToday&&renderToday();renderTasks&&renderTasks();_close();
   };
 }
 function toggleTodayDone(id){const t=data.tasks.find(t=>t.id===id);if(t){t.todayDone=!t.todayDone;t.updated=new Date().toISOString();save();}}
