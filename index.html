@@ -2141,7 +2141,15 @@ function renderNotifications(){
   panel.innerHTML=arr.length?arr.map(n=>`<div class="notif-item">${n.text}<div class="notif-time">${new Date(n.ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div></div>`).join(''):'<div class="notif-item">No notifications yet.</div>';
 }
 document.addEventListener('click',function(e){const p=document.getElementById('notif-panel');if(p&&!e.target.closest('.notif-wrap'))p.classList.remove('show');});
-function openModal(id){document.getElementById(id).classList.add('show');if(id==='specialty-modal')renderSpecialtyModal();}
+function openModal(id){
+  document.getElementById(id).classList.add('show');
+  if(id==='specialty-modal')renderSpecialtyModal();
+  if(id==='meeting-modal'||id==='task-modal'){
+    var linkProjectOptions='<option value="">No project</option>'+(data.projects||[]).map(function(p){return'<option value="'+p.id+'">'+p.name+'</option>';}).join('');
+    var mp=document.getElementById('mtg-project');if(mp)mp.innerHTML=linkProjectOptions;
+    var np=document.getElementById('note-project');if(np)np.innerHTML=linkProjectOptions;
+  }
+}
 function closeModal(id){document.getElementById(id).classList.remove('show')}
 function selectPriority(p,el){selectedPriority=p;document.querySelectorAll('.priority-opt').forEach(b=>{b.className='priority-opt'});el.className='priority-opt sel-'+p;}
 function mColor(id){const idx=data.members.findIndex(m=>m.id===id);return idx>=0?COLORS[idx%COLORS.length]:'#888';}
