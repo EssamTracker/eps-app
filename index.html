@@ -2653,7 +2653,7 @@ function saveNote(){
   closeModal('note-modal');save();
 }
 function deleteNote(id){data.notes=data.notes.filter(n=>n.id!==id);save();}
-function resetMeetingForm(){['mtg-title','mtg-time','mtg-with','mtg-notes','mtg-outcome','mtg-repeat-until','mtg-project','mtg-location'].forEach(i=>{const e=document.getElementById(i);if(e)e.value='';});const r=document.getElementById('mtg-repeat');if(r)r.value='none';}
+function resetMeetingForm(){['mtg-title','mtg-time','mtg-with','mtg-notes','mtg-outcome','mtg-repeat-until','mtg-project','mtg-location'].forEach(i=>{const e=document.getElementById(i);if(e)e.value='';});const r=document.getElementById('mtg-repeat');if(r)r.value='none';window._editMeetingId=null;}
 function meetingRepeatLabel(m){const map={daily:'Daily',weekly:'Weekly',monthly:'Monthly'};return m.repeat&&m.repeat!=='none'?map[m.repeat]||m.repeat:'';}
 function meetingOccursOnDate(m,date){
   if(!m.time)return false;
@@ -2675,10 +2675,33 @@ function saveMeeting(){
   const title=document.getElementById('mtg-title').value.trim();if(!title)return;
   const pid=document.getElementById('mtg-project')?.value||'';
   const p=data.projects.find(x=>String(x.id)===String(pid));
-  data.meetings.unshift({id:Date.now(),title,time:document.getElementById('mtg-time').value,repeat:document.getElementById('mtg-repeat')?.value||'none',repeatUntil:document.getElementById('mtg-repeat-until')?.value||'',with:document.getElementById('mtg-with').value,location:document.getElementById('mtg-location')?.value||'',notes:document.getElementById('mtg-notes').value,outcome:document.getElementById('mtg-outcome')?.value||'',projectId:pid,project:p?p.name:'',created:new Date().toISOString()});
-  addNotification('Meeting scheduled: '+title);resetMeetingForm();closeModal('meeting-modal');save();
+  const fields={title,time:document.getElementById('mtg-time').value,repeat:document.getElementById('mtg-repeat')?.value||'none',repeatUntil:document.getElementById('mtg-repeat-until')?.value||'',with:document.getElementById('mtg-with').value,location:document.getElementById('mtg-location')?.value||'',notes:document.getElementById('mtg-notes').value,outcome:document.getElementById('mtg-outcome')?.value||'',projectId:pid,project:p?p.name:''};
+  if(window._editMeetingId){
+    const idx=data.meetings.findIndex(m=>m.id===window._editMeetingId);
+    if(idx>-1)Object.assign(data.meetings[idx],fields);
+    window._editMeetingId=null;
+  } else {
+    data.meetings.unshift({id:Date.now(),...fields,created:new Date().toISOString()});
+    addNotification('Meeting scheduled: '+title);
+  }
+  resetMeetingForm();closeModal('meeting-modal');save();
 }
 function deleteMeeting(id){data.meetings=data.meetings.filter(m=>m.id!==id);save();}
+function editMeeting(id){
+  const m=data.meetings.find(x=>x.id===id);if(!m)return;
+  window._editMeetingId=id;
+  openModal('meeting-modal');
+  const linkProjectOptions='<option value="">No project</option>'+(data.projects||[]).map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  const mp=document.getElementById('mtg-project');if(mp){mp.innerHTML=linkProjectOptions;mp.value=m.projectId||'';}
+  document.getElementById('mtg-title').value=m.title||'';
+  document.getElementById('mtg-time').value=m.time||'';
+  const rep=document.getElementById('mtg-repeat');if(rep)rep.value=m.repeat||'none';
+  const ru=document.getElementById('mtg-repeat-until');if(ru)ru.value=m.repeatUntil||'';
+  const loc=document.getElementById('mtg-location');if(loc)loc.value=m.location||'';
+  document.getElementById('mtg-with').value=m.with||'';
+  document.getElementById('mtg-notes').value=m.notes||'';
+  const out=document.getElementById('mtg-outcome');if(out)out.value=m.outcome||'';
+}
 function updateMeetingOutcome(id){const m=data.meetings.find(x=>x.id===id);if(!m)return;const current=m.outcome||'';const val=prompt('Meeting outcome / minutes / action points:', current);if(val===null)return;m.outcome=val.trim();save();}
 
 function openConvertMeetingToTask(id){
@@ -3072,7 +3095,7 @@ function renderMeetings(){
     list=list.filter(m=>itemMatchesActiveProject(m));
   }
   if(!list.length){el.innerHTML='<div class="empty-state">No meetings scheduled.</div>';if(prev)prev.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:10px">No meetings today</div>';return;}
-  el.innerHTML=list.map(m=>{const rep=meetingRepeatLabel(m);const isPast=m.time&&new Date(m.time)<new Date();return `<div class="task-card" style="cursor:default"><div class="meeting-dot"></div><div class="task-body"><div class="task-title">${m.title}</div><div class="task-meta">${m.time?`<span style="font-size:11px;color:var(--accent2)">${new Date(m.time).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>`:''} ${rep?`<span class="repeat-badge">↻ ${rep}${m.repeatUntil?' until '+new Date(m.repeatUntil).toLocaleDateString([],{month:'short',day:'numeric'}):''}</span>`:''} ${itemProjectName(m)?`<span class="tag tag-project">📁 ${itemProjectName(m)}</span>`:''} ${m.with?`<span style="font-size:11px;color:var(--text3)">with ${m.with}</span>`:''} ${m.location?`<span style="font-size:11px;color:var(--text3)">📍 ${m.location}</span>`:''} ${m.outcome?`<span class="tag tag-low">Outcome saved</span>`:''}</div>${m.notes?`<div style="font-size:11px;color:var(--text3);margin-top:5px"><b>Agenda:</b> ${m.notes}</div>`:''}${m.outcome?`<div class="meeting-outcome"><b>Meeting Outcome</b>${m.outcome.replace(/\n/g,'<br>')}</div><div style="margin-top:8px">${m.convertedTaskId&&data.tasks.some(t=>t.id===m.convertedTaskId)?`<span class="tag tag-low">✓ Converted to Task</span>`:`<button class="btn btn-success btn-sm" onclick="openConvertMeetingToTask(${m.id})">Convert to Task</button>`}</div>`:(isPast?`<button class="btn btn-success btn-sm" style="margin-top:8px" onclick="updateMeetingOutcome(${m.id})">+ Add Outcome</button>`:`<button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="updateMeetingOutcome(${m.id})">Add Outcome Later</button>`)}</div><div class="task-actions"><button class="icon-btn" title="Add / Edit Outcome" onclick="updateMeetingOutcome(${m.id})">☑</button>${m.outcome&&!(m.convertedTaskId&&data.tasks.some(t=>t.id===m.convertedTaskId))?`<button class="icon-btn" title="Convert to Task" onclick="openConvertMeetingToTask(${m.id})">↗</button>`:''}<button class="icon-btn" onclick="deleteMeeting(${m.id})">✕</button></div></div>`}).join('');
+  el.innerHTML=list.map(m=>{const rep=meetingRepeatLabel(m);const isPast=m.time&&new Date(m.time)<new Date();return `<div class="task-card" style="cursor:default"><div class="meeting-dot"></div><div class="task-body"><div class="task-title">${m.title}</div><div class="task-meta">${m.time?`<span style="font-size:11px;color:var(--accent2)">${new Date(m.time).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>`:''} ${rep?`<span class="repeat-badge">↻ ${rep}${m.repeatUntil?' until '+new Date(m.repeatUntil).toLocaleDateString([],{month:'short',day:'numeric'}):''}</span>`:''} ${itemProjectName(m)?`<span class="tag tag-project">📁 ${itemProjectName(m)}</span>`:''} ${m.with?`<span style="font-size:11px;color:var(--text3)">with ${m.with}</span>`:''} ${m.location?`<span style="font-size:11px;color:var(--text3)">📍 ${m.location}</span>`:''} ${m.outcome?`<span class="tag tag-low">Outcome saved</span>`:''}</div>${m.notes?`<div style="font-size:11px;color:var(--text3);margin-top:5px"><b>Agenda:</b> ${m.notes}</div>`:''}${m.outcome?`<div class="meeting-outcome"><b>Meeting Outcome</b>${m.outcome.replace(/\n/g,'<br>')}</div><div style="margin-top:8px">${m.convertedTaskId&&data.tasks.some(t=>t.id===m.convertedTaskId)?`<span class="tag tag-low">✓ Converted to Task</span>`:`<button class="btn btn-success btn-sm" onclick="openConvertMeetingToTask(${m.id})">Convert to Task</button>`}</div>`:(isPast?`<button class="btn btn-success btn-sm" style="margin-top:8px" onclick="updateMeetingOutcome(${m.id})">+ Add Outcome</button>`:`<button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="updateMeetingOutcome(${m.id})">Add Outcome Later</button>`)}</div><div class="task-actions"><button class="icon-btn" title="Edit Meeting" onclick="editMeeting(${m.id})">✎</button><button class="icon-btn" title="Add / Edit Outcome" onclick="updateMeetingOutcome(${m.id})">☑</button>${m.outcome&&!(m.convertedTaskId&&data.tasks.some(t=>t.id===m.convertedTaskId))?`<button class="icon-btn" title="Convert to Task" onclick="openConvertMeetingToTask(${m.id})">↗</button>`:''}<button class="icon-btn" onclick="deleteMeeting(${m.id})">✕</button></div></div>`}).join('');
   const todayDate=new Date(); let tM=getMeetingsForDate(todayDate); const pid2=getActiveProjectId(); if(activeProjectFilter){ tM=tM.filter(m=> (pid2 && String(m.projectId)===pid2) || m.project===activeProjectFilter); }
   if(prev)prev.innerHTML=tM.length?tM.map(m=>`<div class="meeting-item"><span class="meeting-time">${displayMeetingTimeForDate(m,todayDate).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span><div class="meeting-info"><div class="meeting-title-t">${m.title} ${meetingRepeatLabel(m)?'<span class="repeat-badge">↻</span>':''}</div>${m.with?`<div class="meeting-with-t">with ${m.with}</div>`:''}</div><div class="meeting-dot"></div></div>`).join(''):'<div style="font-size:12px;color:var(--text3);text-align:center;padding:10px">No meetings today</div>';
 }
