@@ -4026,7 +4026,11 @@ function printTasks(){
           const subDone=t.subtasks?t.subtasks.filter(s=>s.done).length:0;
           const subTotal=t.subtasks?t.subtasks.length:0;
           const lastUpd=t.updated||t.updatedAt||t.created;
-          const updStr=lastUpd?new Date(lastUpd).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'<br><span style="font-size:9px;color:#9090a8">'+new Date(lastUpd).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+'</span>':'—';
+          const userComments=(t.comments||[]).filter(c=>!c.auto);
+          const lastComment=userComments.length?userComments[userComments.length-1]:(t.comments&&t.comments.length?t.comments[t.comments.length-1]:null);
+          const updStr=lastComment
+            ?`<span style="font-size:11px">${lastComment.text.slice(0,60)}${lastComment.text.length>60?'…':''}</span><br><span style="font-size:9px;color:#9090a8">${new Date(lastComment.ts).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}, ${new Date(lastComment.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span>`
+            :(lastUpd?`<span style="font-size:10px;color:#9090a8">${new Date(lastUpd).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</span>`:'—');
           return`<tr>
             <td style="color:#9090a8">${i+1}</td>
             <td style="font-weight:500">${t.desc}${subTotal?`<div style="font-size:10px;color:#9090a8;margin-top:2px">${subDone}/${subTotal} subtasks</div>`:''}</td>
