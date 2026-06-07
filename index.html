@@ -1984,7 +1984,8 @@ function cloudSettingsPayload(){
     dailySettings:window.ds||null,
     appTheme:window.appTheme||'dark',
     lastBackupAt:window.lastBackupAt||'',
-    colorScheme:window.colorScheme||'purple'
+    colorScheme:window.colorScheme||'purple',
+    kanbanMeta:data.kanbanMeta||{}
   };
 }
 function applyCloudSettings(settings){
@@ -2000,7 +2001,9 @@ function applyCloudSettings(settings){
   if(settings.appTheme){
     window.appTheme=settings.appTheme;
     document.body.classList.toggle('light-mode',settings.appTheme==='light');
+    try{var p=JSON.parse(localStorage.getItem('eps_ui_prefs')||'{}');p.appTheme=settings.appTheme;p.colorScheme=settings.colorScheme||window.colorScheme;localStorage.setItem('eps_ui_prefs',JSON.stringify(p));}catch(e){}
   }
+  if(settings.kanbanMeta&&typeof settings.kanbanMeta==='object')data.kanbanMeta=settings.kanbanMeta;
   if(settings.lastBackupAt)window.lastBackupAt=settings.lastBackupAt;
 }
 async function readCloudArray(key){
@@ -3210,11 +3213,26 @@ const COLOR_SCHEMES={
   gold:   {accent:'#eab308',accent2:'#facc15',label:'Gold'}
 };
 window.colorScheme='purple';
+// Restore UI prefs from localStorage immediately (COLOR_SCHEMES is already defined above)
+(function(){
+  try{
+    var prefs=JSON.parse(localStorage.getItem('eps_ui_prefs')||'{}');
+    if(prefs.appTheme==='light'){document.body.classList.add('light-mode');window.appTheme='light';}
+    if(prefs.colorScheme&&COLOR_SCHEMES[prefs.colorScheme]){
+      var s=COLOR_SCHEMES[prefs.colorScheme];
+      window.colorScheme=prefs.colorScheme;
+      document.documentElement.style.setProperty('--accent',s.accent);
+      document.documentElement.style.setProperty('--accent2',s.accent2);
+    }
+  }catch(e){}
+})();
 function applyColorScheme(name){
   var s=COLOR_SCHEMES[name]||COLOR_SCHEMES.purple;
   window.colorScheme=name;
   document.documentElement.style.setProperty('--accent',s.accent);
   document.documentElement.style.setProperty('--accent2',s.accent2);
+  // persist immediately
+  try{var p=JSON.parse(localStorage.getItem('eps_ui_prefs')||'{}');p.colorScheme=name;localStorage.setItem('eps_ui_prefs',JSON.stringify(p));}catch(e){}
   // update scheme selector active state if open
   document.querySelectorAll('.color-scheme-dot').forEach(function(d){
     d.style.outline=d.dataset.scheme===name?'2px solid #fff':'none';
@@ -3351,6 +3369,8 @@ async function saveAppSettings(){
   var isLight=th==='light';
   document.body.classList.toggle('light-mode',isLight);
   window.appTheme=th;
+  // Persist theme to localStorage immediately
+  try{var p=JSON.parse(localStorage.getItem('eps_ui_prefs')||'{}');p.appTheme=th;localStorage.setItem('eps_ui_prefs',JSON.stringify(p));}catch(e){}
   // Update theme toggle button label
   var tBtn=document.getElementById('theme-toggle');
   if(tBtn)tBtn.textContent=isLight?'🌙':'☀️';
@@ -3496,6 +3516,7 @@ function toggleTheme(){
   const isLight = document.body.classList.toggle('light-mode');
   btn.textContent = isLight ? '🌙' : '☀️';
   window.appTheme = isLight ? 'light' : 'dark';
+  try{var p=JSON.parse(localStorage.getItem('eps_ui_prefs')||'{}');p.appTheme=window.appTheme;localStorage.setItem('eps_ui_prefs',JSON.stringify(p));}catch(e){}
   saveDataOnly();
 }
 
