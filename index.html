@@ -3225,6 +3225,10 @@ window.colorScheme='purple';
       document.documentElement.style.setProperty('--accent2',s.accent2);
     }
   }catch(e){}
+  // Restore task/note/meeting colors from localStorage
+  try{var km=localStorage.getItem('eps_kanban_meta');if(km){var km2=JSON.parse(km);if(km2&&typeof km2==='object'){if(!data.kanbanMeta)data.kanbanMeta={};Object.assign(data.kanbanMeta,km2);}}}catch(e){}
+  try{var nm=localStorage.getItem('eps_notes_meta');if(nm){var nm2=JSON.parse(nm);if(nm2&&typeof nm2==='object'){if(!data.notesMeta)data.notesMeta={};Object.assign(data.notesMeta,nm2);}}}catch(e){}
+  try{var mm=localStorage.getItem('eps_meetings_meta');if(mm){var mm2=JSON.parse(mm);if(mm2&&typeof mm2==='object'){if(!data.meetingsMeta)data.meetingsMeta={};Object.assign(data.meetingsMeta,mm2);}}}catch(e){}
 })();
 function applyColorScheme(name){
   var s=COLOR_SCHEMES[name]||COLOR_SCHEMES.purple;
@@ -5763,6 +5767,7 @@ function fbColorPicker(id,dotEl){
       e.stopPropagation();
       fbMeta()[id]=fbMeta()[id]||{};
       fbMeta()[id].color=c;
+      try{localStorage.setItem('eps_kanban_meta',JSON.stringify(data.kanbanMeta));}catch(ex){}
       save();renderFreeBoard();renderTasks();renderKanban();
       picker.remove();
     };
@@ -5909,8 +5914,8 @@ function fbColorPickerFor(id,type,dotEl){
     if(isNone)sw.textContent='✕';
     sw.onclick=function(e){
       e.stopPropagation();
-      if(type==='note'){if(!data.notesMeta)data.notesMeta={};data.notesMeta[id]=data.notesMeta[id]||{};data.notesMeta[id].color=c;}
-      else{if(!data.meetingsMeta)data.meetingsMeta={};data.meetingsMeta[id]=data.meetingsMeta[id]||{};data.meetingsMeta[id].color=c;}
+      if(type==='note'){if(!data.notesMeta)data.notesMeta={};data.notesMeta[id]=data.notesMeta[id]||{};data.notesMeta[id].color=c;try{localStorage.setItem('eps_notes_meta',JSON.stringify(data.notesMeta));}catch(ex){}}
+      else{if(!data.meetingsMeta)data.meetingsMeta={};data.meetingsMeta[id]=data.meetingsMeta[id]||{};data.meetingsMeta[id].color=c;try{localStorage.setItem('eps_meetings_meta',JSON.stringify(data.meetingsMeta));}catch(ex){}}
       save();
       if(type==='note')renderNotesGrid();else renderMtgGrid();
       picker.remove();
