@@ -5705,11 +5705,6 @@ var FB_COLORS=['none','#6c63ff','#e74c8b','#f5a623','#22c88a','#3b82f6','#ef4444
 
 function fbMeta(){
   if(!data.kanbanMeta)data.kanbanMeta={};
-  if(!data.kanbanMetaV2){
-    Object.keys(data.kanbanMeta).forEach(function(k){data.kanbanMeta[k].color='none';});
-    data.kanbanMetaV2=true;
-    try{localStorage.setItem('essam_tm_v6',JSON.stringify(data));}catch(e){}
-  }
   return data.kanbanMeta;
 }
 
